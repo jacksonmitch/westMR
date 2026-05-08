@@ -1,4 +1,12 @@
+^renv$
+^renv\.lock$
 ^westMR\.Rproj$
 ^\.Rproj\.user$
 ^\.positai$
 ^\.claude$
+^LICENSE\.md$
+^README\.Rmd$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
