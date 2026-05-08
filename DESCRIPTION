@@ -1,8 +1,9 @@
 Package: westMR
-Title: What the Package Does (One Line, Title Case)
+Title: Mixture Effect and Variable Selection
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+    c(person("Tulio", "Martins", email = "tbatista@uoguelph.ca", role = c("aut", "cre")),
+      person("Jackson", "Mitchell", email = "jmitch19@uoguelph.ca", role = c("aut")))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
