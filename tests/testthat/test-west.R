@@ -1,4 +1,3 @@
-devtools::load_all()
 simulate_effect_data <- function(n=400, seed=123){
 
   set.seed(seed)

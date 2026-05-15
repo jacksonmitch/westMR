@@ -1,7 +1,6 @@
-library(R6)
-
 # Class for storing all constant variables (variables, data, settings)
-GMRModel <- R6Class(
+
+GMRModel <- R6::R6Class(
   "GMRModel",
 
   public = list(

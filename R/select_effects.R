@@ -74,7 +74,7 @@ select_effects<- function(
     homogeneous = common_predictors,
     steps = steps,
     final_formula = model$formula,
-    final_common = make_formula(predictors = common_predictors),
+    final_common = make_formula(common_predictors),
     final_fit = final_fit,
     call = match.call()
   )
