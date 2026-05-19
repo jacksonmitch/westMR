@@ -35,6 +35,7 @@ fit_gmr <- function(formula,
   predictors <- get_predictors(formula)
   heterogeneous_formula <- make_formula(setdiff(predictors, common), response)
 
+
   A <- stats::model.matrix(
     object = heterogeneous_formula,
     data = mf
@@ -72,9 +73,9 @@ fit_gmr <- function(formula,
     stop("length(y) must equal nrow(A).")
   }
 
-  #if (nrow(B) != n) {
+  # if (nrow(B) != n) {
   #  stop("nrow(B) must equal nrow(A).")
-  #}
+  # }
 
   if (anyNA(A) || anyNA(B) || anyNA(y)) {
     stop("A, B, and y cannot contain missing values.")

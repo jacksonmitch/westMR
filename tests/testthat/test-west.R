@@ -1,3 +1,24 @@
+
+rm(list = ls())
+source("R/utils.R")
+source("R/loglik.R")
+source("R/E_step.R")
+source("R/M_step_qr.R")
+source("R/M_step_sqr.R")
+source("R/initialization.R")
+source("R/model_criteria.R")
+source("R/EM_gmr.R")
+source("R/fit_gmr_fixed.R")
+source("R/fit_gmr.R")
+
+source("R/formula_functions.R")
+source("R/west_procedure.R")
+source("R/test_heterogeneous_effect.R")
+source("R/select_effects.R")
+source("R/effect_selection_table.R")
+source("R/methods.R")
+library(microbenchmark)
+
 simulate_effect_data <- function(n=400, seed=123){
 
   set.seed(seed)
@@ -18,7 +39,7 @@ simulate_effect_data <- function(n=400, seed=123){
   sigma <- c(0.5,0.5)
 
   mu <- beta0[z] + beta1[z]*x1 + beta2*x2 + beta3*x3
-  y <- mu + rnorm(n, mu, sigma[z])
+  y <- rnorm(n, mu, sigma[z])
 
   data.frame(
     y = y,
@@ -41,7 +62,7 @@ model <- GMRModel$new(
   data = data,
   method = 'sqr',
   alpha = 0.05,
-  n_init = 1,
+  n_init = 5,
   n_kmeans_init = 5,
   maxit = 150,
   #seed = seed,
@@ -52,16 +73,28 @@ forward_fit <- select_effects(
   model = model,
   direction = "forward"
 )
+
+bench <- microbenchmark(
+  forward_fit = select_effects(
+    model = model,
+    direction = "forward"
+  ),
+  backward_fit = select_effects(
+    model = model,
+    direction = "backward"
+  ),
+  times = 1
+)
+
+print(bench)
+
 print(forward_fit)
 summary(forward_fit$final_fit)
 
-backward_fit <- select_effects(
-  model = model,
-  direction = "backward"
-)
+
 print(backward_fit)
 summary(backward_fit$final_fit)
-steps_df <- effect_selection_table(backward_fit)
+steps_df <- effect_selection_table(forward_fit)
 steps_df
 
 
