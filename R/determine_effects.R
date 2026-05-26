@@ -1,12 +1,13 @@
 # Forward effect-type determination
 
-select_effects<- function(
+determine_effects<- function(
     model,
     direction = "forward"
 ){
 
   predictors <- model$predictors
-  alpha <- model$alpha
+  control <- model$control
+  alpha <- control$alpha
 
   if (direction == "forward"){
     common_predictors <- predictors
@@ -61,9 +62,12 @@ select_effects<- function(
     step_id <- step_id + 1L # L for Literal integer
   }
 
-  final_fit <- model$fit(
-    common = common_predictors,
-  )
+  # final_fit <- fit_fmr(
+  #   model,
+  #   G,
+  #   included = predictors,
+  #   common = common_predictors
+  # )
 
   out <- list(
     direction = direction,
@@ -75,7 +79,7 @@ select_effects<- function(
     steps = steps,
     final_formula = model$formula,
     final_common = make_formula(common_predictors),
-    final_fit = final_fit,
+    #final_fit = final_fit,
     call = match.call()
   )
 

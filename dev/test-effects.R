@@ -13,10 +13,8 @@ model <- WMRModel$new(
   formula = formula,
   data = data,
   G_values = 1:2,
-  m_step_var = m_step_qr,
-  m_step_eff = m_step_sqr,
-  log_lik = obs_loglik_gmr,
-  control = build_control()
+  family = "gaussian",
+  control = build_control(n_init = 5)
 )
 
 # forward_fit <- determine_effects(
@@ -24,8 +22,9 @@ model <- WMRModel$new(
 #   direction = "forward"
 # )
 # print(forward_fit)
+# summary(forward_fit)
 # summary(forward_fit$final_fit)
-#
+
 # steps_df <- effect_selection_table(forward_fit)
 # steps_df
 #

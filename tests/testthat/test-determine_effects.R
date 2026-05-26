@@ -1,6 +1,5 @@
 test_that("determine_effects", {
-  data <- simulate_effect_data(n = 400, seed = 123)
-  print(class(data))
+  sim_data <- simulate_effect_data(n = 400, seed = 123)
   true_heterogeneous <- 'x1'
   true_homogeneous <- c('x2','x3')
   selected_covariates <- c('x1','x2','x3')
@@ -8,11 +7,9 @@ test_that("determine_effects", {
 
   model <- WMRModel$new(
     formula = formula,
-    data = data,
-    G_values = 1:2,
-    m_step_var = m_step_qr,
-    m_step_eff = m_step_sqr,
-    log_lik = obs_loglik_gmr,
+    data = sim_data,
+    G_values = 2,
+    family = "gaussian",
     control = build_control()
   )
 
