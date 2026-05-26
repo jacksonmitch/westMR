@@ -1,13 +1,8 @@
 # Model selection helper functions
 
-count_params_gmr <- function(A, B, G) {
-  A <- as.matrix(A)
-  B <- as.matrix(B)
-  
-  p1 <- ncol(A)
-  q <- ncol(B)
-  k <- G * p1 + q + G + (G - 1)
-  
+count_params_gmr <- function(ncol_het, ncol_common, G) {
+  k <- G * ncol_het + ncol_common + G + (G - 1)
+
   k
 }
 

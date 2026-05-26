@@ -2,7 +2,16 @@
 
 e_step_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
   A <- as.matrix(A)
-  B <- as.matrix(B)
+  if (is.null(B)) {
+    B <- matrix(
+      numeric(0),
+      nrow = nrow(A),
+      ncol = 0
+    )
+  }
+  else{
+    B <- as.matrix(B)
+  }
   y <- as.numeric(y)
   beta_g <- as.matrix(beta_g)
   beta <- as.numeric(beta)
@@ -11,14 +20,6 @@ e_step_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
 
   n <- nrow(A)
   G <- nrow(beta_g)
-
-  if (length(y) != n) {
-    stop("length(y) must equal nrow(A).")
-  }
-
-  if (nrow(B) != n) {
-    stop("nrow(B) must equal nrow(A).")
-  }
 
   if (ncol(A) != ncol(beta_g)) {
     stop("ncol(A) must equal ncol(beta_g).")

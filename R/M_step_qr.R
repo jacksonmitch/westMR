@@ -44,18 +44,6 @@ m_step_qr <- function(A, B, y, tau, sigma_floor = NULL) {
   p1 <- ncol(A)
   q <- ncol(B)
 
-  if (length(y) != n) {
-    stop("length(y) must equal nrow(A).")
-  }
-
-  if (nrow(B) != n) {
-    stop("nrow(B) must equal nrow(A).")
-  }
-
-  if (nrow(tau) != n) {
-    stop("nrow(tau) must equal nrow(A).")
-  }
-
   # Update mixing proportions
   pi_g <- colMeans(tau)
 
@@ -99,10 +87,6 @@ m_step_qr <- function(A, B, y, tau, sigma_floor = NULL) {
 
   res2 <- (y - mu)^2
   den <- pmax(1e-8, colSums(tau))
-
-  if (is.null(sigma_floor)) {
-    sigma_floor <- 0.05 * stats::sd(y)
-  }
 
   sigma_g <- pmax(
     sigma_floor,
