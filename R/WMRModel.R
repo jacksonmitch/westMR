@@ -1,5 +1,4 @@
-# Class for storing all constant variables (variables, data, control)
-
+#' @importFrom R6 R6Class
 WMRModel <- R6::R6Class(
   "WMRModel",
 
