@@ -16,12 +16,18 @@ west_procedure <- function(
   for(i in seq_along(G_values)){
     G <- G_values[[i]]
 
-    fit_null <- model$fit(included = null_predictors,
-                          common = null_common,
-                          G = G)
-    fit_alt <- model$fit(included = alt_predictors,
-                         common = alt_common,
-                         G = G)
+    if (model$control$verbose) {
+      message("Fitting candidate model with G = ", G)
+    }
+
+    fit_null <- fit_fmr(model = model,
+                        G = G,
+                        included = null_predictors,
+                        common = null_common)
+    fit_alt <- fit_fmr(model = model,
+                       G = G,
+                       included = alt_predictors,
+                       common = alt_common)
 
     # Add error checking that fit_null and fit_alt are correct
 
@@ -29,6 +35,7 @@ west_procedure <- function(
 
     df <- fit_alt$k - fit_null$k
 
+    if (model$control$verbose) cat("lrt :", lrt, " df: ", df, "\n")
     if (is.finite(lrt) && is.finite(df) && df > 0) {
       p_value <- stats::pchisq(lrt, df = df, lower.tail = FALSE)
     }
