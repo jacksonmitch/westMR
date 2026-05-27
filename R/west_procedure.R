@@ -13,6 +13,11 @@ west_procedure <- function(
   null_fits <- vector("list", length(G_values))
   alt_fits <- vector("list", length(G_values))
 
+  null_data <- prepare_data(model, null_predictors, null_common)
+  alt_data <- prepare_data(model, alt_predictors, alt_common)
+
+  n <- null_data$n
+
   for(i in seq_along(G_values)){
     G <- G_values[[i]]
 
@@ -20,20 +25,32 @@ west_procedure <- function(
       message("Fitting candidate model with G = ", G)
     }
 
+    start_list <- make_tau_list(
+      y = null_data$y,
+      G = G,
+      control = model$control
+    )
+
     fit_null <- fit_fmr(model = model,
                         G = G,
-                        included = null_predictors,
-                        common = null_common)
+                        init = start_list,
+                        prepared_data = null_data)
     fit_alt <- fit_fmr(model = model,
                        G = G,
-                       included = alt_predictors,
-                       common = alt_common)
+                       init = start_list,
+                       prepared_data = alt_data)
 
     # Add error checking that fit_null and fit_alt are correct
 
     lrt <- -2*(fit_null$loglik - fit_alt$loglik)
 
-    df <- fit_alt$k - fit_null$k
+    null_param <- count_params_gmr(ncol_het = null_data$p_het,
+                                   ncol_common = null_data$p_com,
+                                   G = G)
+    alt_param <- count_params_gmr(ncol_het = alt_data$p_het,
+                                  ncol_common = alt_data$p_com,
+                                  G = G)
+    df <- alt_param - null_param
 
     if (model$control$verbose) cat("lrt :", lrt, " df: ", df, "\n")
     if (is.finite(lrt) && is.finite(df) && df > 0) {
@@ -50,10 +67,8 @@ west_procedure <- function(
       G = G,
       loglik_null = fit_null$loglik,
       loglik_alt = fit_alt$loglik,
-      bic_null = fit_null$bic,
-      bic_alt = fit_alt$bic,
-      k_null = fit_null$k,
-      k_alt = fit_alt$k,
+      bic_null = compute_bic(fit_null$loglik, n, null_param),
+      bic_alt = compute_bic(fit_alt$loglik, n, alt_param),
       lrt = lrt,
       df = df,
       p_value = p_value,

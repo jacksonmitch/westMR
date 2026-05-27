@@ -2,16 +2,7 @@
 
 m_step_sqr <- function(A, B, y, tau, sigma_floor = NULL, return_qr_parts = FALSE) {
   A <- as.matrix(A)
-  if (is.null(B)) {
-    B <- matrix(
-      numeric(0),
-      nrow = nrow(A),
-      ncol = 0
-    )
-  }
-  else{
-    B <- as.matrix(B)
-  }
+
 
   y <- as.numeric(y)
   tau <- as.matrix(tau)
@@ -21,10 +12,6 @@ m_step_sqr <- function(A, B, y, tau, sigma_floor = NULL, return_qr_parts = FALSE
   p1 <- ncol(A)
   q <- ncol(B)
   nG <- n * G
-
-  if (n <= p1) {
-    stop("Need n > ncol(A) so each weighted A matrix can have full column rank.")
-  }
 
   # Update mixing proportions
   pi_g <- colMeans(tau)

@@ -1,8 +1,6 @@
 # EM algorithm for Gaussian mixture regression
 
-em_fmr <- function(het,
-                   common,
-                   response,
+em_fmr <- function(prepared_data,
                    G,
                    tau,
                    family,
@@ -10,6 +8,9 @@ em_fmr <- function(het,
 
   # Normalize mixing proportions just in case
   # pi_g <- pi_g / sum(pi_g)
+  het <- prepared_data$X_het
+  common <- prepared_data$X_com
+  response <- prepared_data$y
 
   loglik_trace <- numeric(control$max_iter)
   converged <- FALSE
@@ -18,6 +19,7 @@ em_fmr <- function(het,
   # Initial log-likelihood before any EM updates
   loglik_old <- 0
 
+  # TODO: pass prepared_data into the steps once they're updated
   for (iter in seq_len(control$max_iter)) {
     # M-step: update parameters using selected method
     m_fit <- m_step_sqr(
@@ -56,14 +58,6 @@ em_fmr <- function(het,
       sigma_g = sigma_g,
       pi_g = pi_g
     )
-
-    # if (control$verbose) {
-    #   message(
-    #     "iter = ", iter,
-    #     ", loglik = ", round(loglik_new, 6),
-    #     ", diff = ", round(abs(loglik_new - loglik_old), 8)
-    #   )
-    # }
 
     # Convergence check
     if (abs(loglik_new - loglik_old) < control$tol) {

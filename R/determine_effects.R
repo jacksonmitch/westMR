@@ -26,11 +26,18 @@ determine_effects<- function(
   step_id <- 1
 
   while(length(predictors) > 0) {
-    tests <- lapply(predictors, function(v){
-      test_heterogeneous_effect(model = model,
-                                predictor_tested = v,
-                                common = common_predictors,
-                                direction = direction)
+    tests <- lapply(predictors, function(predictor_tested){
+      if (direction == "forward"){
+        null_common <- common_predictors
+        alt_common <- setdiff(common_predictors,predictor_tested)
+      }
+      else{    # backward
+        null_common <- c(common_predictors, predictor_tested)
+        alt_common <- common_predictors
+      }
+      test <- west_procedure(model = model,
+                             null_common = null_common,
+                             alt_common = alt_common)
     })
 
     names(tests) <- predictors
