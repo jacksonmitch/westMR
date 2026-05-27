@@ -1,64 +1,55 @@
 # Initialization helpers
 
-make_init_clustering <- function(y, G_length,
-                                 cluster_method = c("kmeans", "random", "random_balanced"),
-                                 kmeans_start) {
-  cluster_method <- match.arg(cluster_method)
+make_init_clustering <- function(y, G,
+                                 method = c("kmeans", "random", "random_balanced"),
+                                 kmeans_starts) {
+  method <- match.arg(method)
   n <- length(y)
 
-  if (G_length == 1) {
-    return(rep(1L, n))
+  if (G == 1) return(rep(1L, n))
+
+  if (method == "kmeans") {
+    return(stats::kmeans(y, centers = G, nstart = kmeans_starts)$cluster)
   }
 
-  if (cluster_method == "kmeans") {
-    return(stats::kmeans(y, centers = G_length, nstart = kmeans_start)$cluster)
-  }
-
-  if (cluster_method == "random") {
+  if (method == "random") {
     repeat {
-      cl <- sample.int(G_length, n, replace = TRUE)
-
-      if (length(unique(cl)) == G_length) {
-        return(cl)
-      }
+      cl <- sample.int(G, n, replace = TRUE)
+      if (length(unique(cl)) == G) return(cl)
     }
   }
 
-  if (cluster_method == "random_balanced") {
-    cl <- rep(seq_len(G_length), length.out = n)
+  if (method == "random_balanced") {
+    cl <- rep(seq_len(G), length.out = n)
     cl <- sample(cl, size = n, replace = FALSE)
 
     return(cl)
   }
 }
 
-make_start_list <- function(y,
-                            G_length,
-                            control) {
-  n_init <- control$n_init
+# Converts a cluster assignment vector to a 0/1 tau matrix (n x G)
+
+clustering_to_tau <- function(cl, G) {
+  n <- length(cl)
+  Z <- matrix(0, nrow = n, ncol = G)
+  Z[cbind(seq_len(n), cl)] <- 1
+  Z
+}
+
+
+# Returns a list of n_init tau matrices ready to pass to fit_fmr.
+# The first n_kmeans_init are kmeans-seeded; the rest are random_balanced.
+
+make_tau_list <- function(y, G, control) {
+  n_init        <- control$n_init
   n_kmeans_init <- control$n_kmeans_init
-  kmeans_start <- control$kmeans_start
+  kmeans_starts <- control$kmeans_starts
 
-  starts <- vector("list", n_init)
-
-  for (s in seq_len(n_init)) {
-    starts[[s]] <- if (s <= n_kmeans_init) {
-      make_init_clustering(
-        y = y,
-        G_length = G_length,
-        cluster_method = "kmeans",
-        kmeans_start = kmeans_start
-      )
-    } else {
-      make_init_clustering(
-        y = y,
-        G_length = G_length,
-        cluster_method = "random_balanced",
-        kmeans_start = kmeans_start
-      )
-    }
-  }
-  starts
+  lapply(seq_len(n_init), function(i) {
+    method <- if (i <= n_kmeans_init) "kmeans" else "random_balanced"
+    cl <- make_init_clustering(y = y, G = G, method = method, kmeans_starts = kmeans_starts)
+    clustering_to_tau(cl, G)
+  })
 }
 
 
