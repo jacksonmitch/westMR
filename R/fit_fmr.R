@@ -7,11 +7,9 @@ fit_fmr <- function(model,
                     G,
                     init,
                     prepared_data) {
-
   control <- model$control
   # Build response and component-specific design matrix A
 
-  n <- prepared_data$n
   n_init <- length(init)
   fits <- vector("list", n_init)
   logliks <- rep(-Inf, n_init)
@@ -22,7 +20,6 @@ fit_fmr <- function(model,
   n_valid_init <- 0L
 
   for (i in seq_len(n_init)) {
-
     fit <- em_fmr(
       prepared_data = prepared_data,
       G = G,
@@ -59,16 +56,12 @@ fit_fmr <- function(model,
     sigma_g = best_fit$sigma_g,
     pi_g = best_fit$pi_g,
     tau = best_fit$tau,
-
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
-
     iterations = best_fit$iterations,
     converged = best_fit$converged,
-
     best_init = best_fit$best_init,
     n_valid_init = best_fit$n_valid_init,
-
     call = match.call()
   )
 

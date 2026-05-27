@@ -6,7 +6,9 @@ make_init_clustering <- function(y, G,
   method <- match.arg(method)
   n <- length(y)
 
-  if (G == 1) return(rep(1L, n))
+  if (G == 1) {
+    return(rep(1L, n))
+  }
 
   if (method == "kmeans") {
     return(stats::kmeans(y, centers = G, nstart = kmeans_starts)$cluster)
@@ -15,7 +17,9 @@ make_init_clustering <- function(y, G,
   if (method == "random") {
     repeat {
       cl <- sample.int(G, n, replace = TRUE)
-      if (length(unique(cl)) == G) return(cl)
+      if (length(unique(cl)) == G) {
+        return(cl)
+      }
     }
   }
 
@@ -41,7 +45,7 @@ clustering_to_tau <- function(cl, G) {
 # The first n_kmeans_init are kmeans-seeded; the rest are random_balanced.
 
 make_tau_list <- function(y, G, control) {
-  n_init        <- control$n_init
+  n_init <- control$n_init
   n_kmeans_init <- control$n_kmeans_init
   kmeans_starts <- control$kmeans_starts
 

@@ -22,8 +22,8 @@
 #'   estimates to prevent numerical instabilities. Must be greater than or equal to 0.
 #'   Defaults to \code{NULL} (no floor).
 #'
-#' @return A structured list of class \code{"WMRControl"} containing all validated
-#'   control arguments.
+#' @return A structured list of class \code{"WMRControl"} containing all
+#'   validated control arguments.
 #'
 #' @export
 #'
@@ -34,16 +34,15 @@
 #' # Customize specific hyper-parameters
 #' custom_ctrl <- build_control(max_iter = 500, verbose = TRUE)
 build_control <- function(
-    alpha = 0.05,
-    max_iter = 300,
-    n_init = 10,
-    verbose = FALSE,
-    tol = 1e-6,
-    n_kmeans_init = 2,
-    kmeans_starts = 20,
-    sigma_floor = NULL
+  alpha = 0.05,
+  max_iter = 300,
+  n_init = 10,
+  verbose = FALSE,
+  tol = 1e-6,
+  n_kmeans_init = 2,
+  kmeans_starts = 20,
+  sigma_floor = NULL
 ) {
-
   # User Input checks
 
   collection <- checkmate::makeAssertCollection()
@@ -56,10 +55,15 @@ build_control <- function(
   checkmate::assert_int(n_kmeans_init, lower = 0, add = collection)
   if (n_kmeans_init > n_init) {
     collection$push(sprintf(
-      "n_kmeans_init (subset of inits using kmeans) cannot be larger than n_init. (received %s and %s)", n_kmeans_init, n_init))
+      "n_kmeans_init (subset of inits using kmeans) cannot be larger than
+      n_init. (received %s and %s)", n_kmeans_init, n_init
+    ))
   }
   checkmate::assert_int(kmeans_starts, lower = 1, add = collection)
-  checkmate::assert_number(sigma_floor, lower = 0, add = collection, null.ok = TRUE)
+  checkmate::assert_number(sigma_floor,
+    lower = 0,
+    add = collection, null.ok = TRUE
+  )
 
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)

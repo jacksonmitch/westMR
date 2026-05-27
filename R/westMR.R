@@ -19,18 +19,16 @@
 #' @export
 #'
 #' @examples
-#'   westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)
-#' }
-
+#' westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)
+#'
 westMR <- function(
-    formula,
-    data,
-    G_max = 4,
-    family = c("gaussian", "poisson"),
-    task = c("variables", "effects"),
-    control = build_control()
+  formula,
+  data,
+  G_max = 4,
+  family = c("gaussian", "poisson"),
+  task = c("variables", "effects"),
+  control = build_control()
 ) {
-
   family <- match.arg(family) # defaults to gaussian
 
   collection <- checkmate::makeAssertCollection()
@@ -62,17 +60,18 @@ westMR <- function(
   model <- WMRModel$new(
     formula = formula,
     data = data,
-    G_values = 1:G_max,  # seq_len(as.integer(G_max)) ??
+    G_values = 1:G_max, # seq_len(as.integer(G_max)) ??
     family = family,
     control = control
   )
 
   # Run Variable Selection
-  if ("variables" %in% task){
+  if ("variables" %in% task) {
     cat("testing variables")
   }
   # Run Effect Type Determination
-  if ("effects" %in% task){
+  if ("effects" %in% task) {
     effect_selection <- determine_effects(model, direction = control$direction)
+    print(effect_selection)
   }
 }

@@ -8,8 +8,7 @@ obs_loglik_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
       nrow = nrow(A),
       ncol = 0
     )
-  }
-  else{
+  } else {
     B <- as.matrix(B)
   }
   y <- as.numeric(y)
@@ -18,8 +17,7 @@ obs_loglik_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
   sigma_g <- as.numeric(sigma_g)
   pi_g <- as.numeric(pi_g)
 
-  mu <- sweep(A %*% t(beta_g), 1, common_eta(B, beta),"+"
-    )
+  mu <- sweep(A %*% t(beta_g), 1, common_eta(B, beta), "+")
 
   res2 <- (y - mu)^2
 

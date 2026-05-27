@@ -5,7 +5,6 @@ em_fmr <- function(prepared_data,
                    tau,
                    family,
                    control) {
-
   # Normalize mixing proportions just in case
   # pi_g <- pi_g / sum(pi_g)
   het <- prepared_data$X_het

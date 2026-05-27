@@ -35,7 +35,6 @@ print.gmr_fit <- function(x, ...) {
 # Summarize GMR fit
 
 summary.gmr_fit <- function(object, ...) {
-
   component_coefficients <- object$beta_g
   common_coefficients <- object$beta
 
@@ -52,22 +51,18 @@ summary.gmr_fit <- function(object, ...) {
     call = object$call,
     formula = object$formula,
     common = object$common,
-
     method = object$method,
     criterion = object$criterion,
     best_G = object$best_G,
-
     loglik = object$loglik,
     bic = object$bic,
     k = object$k,
     iterations = object$iterations,
     converged = object$converged,
-
     pi_g = object$pi_g,
     sigma_g = object$sigma_g,
     beta_g = component_coefficients,
     beta = common_coefficients,
-
     results = object$results,
     n_init = object$n_init,
     best_init = object$best_init,
@@ -173,8 +168,8 @@ print.effect_selection <- function(x, ...) {
 
     cat("BIC:        ")
     if (is.numeric(x$final_fit$bic) &&
-        length(x$final_fit$bic) == 1 &&
-        is.finite(x$final_fit$bic)) {
+      length(x$final_fit$bic) == 1 &&
+      is.finite(x$final_fit$bic)) {
       cat(round(x$final_fit$bic, 4), "\n", sep = "")
     } else {
       cat("NA\n")

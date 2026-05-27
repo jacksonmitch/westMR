@@ -1,11 +1,10 @@
 west_procedure <- function(
-    model,
-    null_predictors = model$predictors,
-    null_common = NULL,
-    alt_predictors = model$predictors,
-    alt_common = NULL
-){
-
+  model,
+  null_predictors = model$predictors,
+  null_common = NULL,
+  alt_predictors = model$predictors,
+  alt_common = NULL
+) {
   G_values <- model$G_values
   alpha <- model$alpha
 
@@ -18,7 +17,7 @@ west_procedure <- function(
 
   n <- null_data$n
 
-  for(i in seq_along(G_values)){
+  for (i in seq_along(G_values)) {
     G <- G_values[[i]]
 
     if (model$control$verbose) {
@@ -31,32 +30,39 @@ west_procedure <- function(
       control = model$control
     )
 
-    fit_null <- fit_fmr(model = model,
-                        G = G,
-                        init = start_list,
-                        prepared_data = null_data)
-    fit_alt <- fit_fmr(model = model,
-                       G = G,
-                       init = start_list,
-                       prepared_data = alt_data)
+    fit_null <- fit_fmr(
+      model = model,
+      G = G,
+      init = start_list,
+      prepared_data = null_data
+    )
+    fit_alt <- fit_fmr(
+      model = model,
+      G = G,
+      init = start_list,
+      prepared_data = alt_data
+    )
 
     # Add error checking that fit_null and fit_alt are correct
 
-    lrt <- -2*(fit_null$loglik - fit_alt$loglik)
+    lrt <- -2 * (fit_null$loglik - fit_alt$loglik)
 
-    null_param <- count_params_gmr(ncol_het = null_data$p_het,
-                                   ncol_common = null_data$p_com,
-                                   G = G)
-    alt_param <- count_params_gmr(ncol_het = alt_data$p_het,
-                                  ncol_common = alt_data$p_com,
-                                  G = G)
+    null_param <- count_params_gmr(
+      ncol_het = null_data$p_het,
+      ncol_common = null_data$p_com,
+      G = G
+    )
+    alt_param <- count_params_gmr(
+      ncol_het = alt_data$p_het,
+      ncol_common = alt_data$p_com,
+      G = G
+    )
     df <- alt_param - null_param
 
     if (model$control$verbose) cat("lrt :", lrt, " df: ", df, "\n")
     if (is.finite(lrt) && is.finite(df) && df > 0) {
       p_value <- stats::pchisq(lrt, df = df, lower.tail = FALSE)
-    }
-    else {
+    } else {
       p_value <- NA_real_
     }
 
@@ -74,7 +80,8 @@ west_procedure <- function(
       p_value = p_value,
       null_converged = fit_null$converged,
       alt_converged = fit_alt$converged,
-      stringsAsFactors = FALSE)
+      stringsAsFactors = FALSE
+    )
   }
 
   tab <- do.call(rbind, rows)
@@ -113,5 +120,4 @@ west_procedure <- function(
 
   class(out) <- "west_procedure"
   out
-
 }

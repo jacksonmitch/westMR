@@ -8,8 +8,7 @@ e_step_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
       nrow = nrow(A),
       ncol = 0
     )
-  }
-  else{
+  } else {
     B <- as.matrix(B)
   }
   y <- as.numeric(y)

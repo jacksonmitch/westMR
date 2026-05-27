@@ -1,21 +1,19 @@
 # Forward effect-type determination
 
-determine_effects<- function(
-    model,
-    direction = "forward"
-){
-
+determine_effects <- function(
+  model,
+  direction = "forward"
+) {
   predictors <- model$predictors
   control <- model$control
   alpha <- control$alpha
 
-  if (direction == "forward"){
+  if (direction == "forward") {
     common_predictors <- predictors
     is_eligible <- function(p) is.finite(p) & p < alpha
     find_best <- which.min
     update_common <- setdiff # removes predictor from list
-  }
-  else{ #backward
+  } else { # backward
     common_predictors <- NULL
     is_eligible <- function(p) is.finite(p) & p >= alpha
     find_best <- which.max
@@ -25,19 +23,21 @@ determine_effects<- function(
   steps <- list()
   step_id <- 1
 
-  while(length(predictors) > 0) {
-    tests <- lapply(predictors, function(predictor_tested){
-      if (direction == "forward"){
+  while (length(predictors) > 0) {
+    tests <- lapply(predictors, function(predictor_tested) {
+      if (direction == "forward") {
         null_common <- common_predictors
-        alt_common <- setdiff(common_predictors,predictor_tested)
-      }
-      else{    # backward
+        alt_common <- setdiff(common_predictors, predictor_tested)
+      } else { # backward
         null_common <- c(common_predictors, predictor_tested)
         alt_common <- common_predictors
       }
-      test <- west_procedure(model = model,
-                             null_common = null_common,
-                             alt_common = alt_common)
+      test <- west_procedure(
+        model = model,
+        null_common = null_common,
+        alt_common = alt_common
+      )
+      test
     })
 
     names(tests) <- predictors
@@ -86,7 +86,7 @@ determine_effects<- function(
     steps = steps,
     final_formula = model$formula,
     final_common = make_formula(common_predictors),
-    #final_fit = final_fit,
+    # final_fit = final_fit,
     call = match.call()
   )
 

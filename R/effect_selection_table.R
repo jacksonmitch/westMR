@@ -2,11 +2,11 @@ effect_selection_table <- function(object) {
   if (!inherits(object, "effect_selection")) {
     stop("object must be an effect_selection object.")
   }
-  
+
   if (length(object$steps) == 0) {
     return(data.frame())
   }
-  
+
   rows <- lapply(object$steps, function(s) {
     data.frame(
       step = s$step,
@@ -19,6 +19,6 @@ effect_selection_table <- function(object) {
       stringsAsFactors = FALSE
     )
   })
-  
+
   do.call(rbind, rows)
 }

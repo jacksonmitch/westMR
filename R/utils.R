@@ -13,11 +13,11 @@ row_softmax <- function(log_mat) {
 common_eta <- function(B, beta = numeric(0)) {
   B <- as.matrix(B)
   beta <- as.numeric(beta)
-  
+
   if (ncol(B) == 0) {
     return(rep(0, nrow(B)))
   }
-  
+
   if (length(beta) != ncol(B)) {
     stop(
       "Length of beta must equal ncol(B). Got length(beta) = ",
@@ -27,6 +27,6 @@ common_eta <- function(B, beta = numeric(0)) {
       "."
     )
   }
-  
+
   drop(B %*% beta)
 }
