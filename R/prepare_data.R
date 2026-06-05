@@ -59,10 +59,16 @@ WMRData <- R6::R6Class(
       n <- length(y)
 
       if (nrow(X_het) != n) {
-        stop(sprintf("nrow(X_het) (%d) must equal length(y) (%d).", nrow(X_het), n))
+        stop(sprintf(
+          "nrow(X_het) (%d) must equal length(y) (%d).",
+          nrow(X_het), n
+        ))
       }
       if (nrow(X_com) != n) {
-        stop(sprintf("nrow(X_com) (%d) must equal length(y) (%d).", nrow(X_com), n))
+        stop(sprintf(
+          "nrow(X_com) (%d) must equal length(y) (%d).",
+          nrow(X_com), n
+        ))
       }
 
       if (n <= ncol(X_het)) {
@@ -82,7 +88,11 @@ WMRData <- R6::R6Class(
       private$.X_com <- X_com
     },
     print = function(...) {
-      cat("<WMRData>  n =", self$n, " p_het =", self$p_het, " p_com =", self$p_com, "\n")
+      cat(
+        "<WMRData>  n =", self$n,
+        " p_het =", self$p_het,
+        " p_com =", self$p_com, "\n"
+      )
       invisible(self)
     }
   )
