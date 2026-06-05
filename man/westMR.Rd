@@ -36,3 +36,7 @@ Not yet implemented
 westMR implements the west procedure framework for finite mixtures of regression models.
 Parameter estimation is performed using the EM algorithm.
 }
+\examples{
+westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)
+
+}

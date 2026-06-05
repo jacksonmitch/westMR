@@ -1,6 +1,6 @@
 effect_selection_table <- function(object) {
-  if (!inherits(object, "effect_selection")) {
-    stop("object must be an effect_selection object.")
+  if (!inherits(object, "determine_effects")) {
+    stop("object must be an determine_effects object.")
   }
 
   if (length(object$steps) == 0) {

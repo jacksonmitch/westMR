@@ -8,6 +8,7 @@ build_control(
   alpha = 0.05,
   max_iter = 300,
   n_init = 10,
+  direction = "forward",
   verbose = FALSE,
   tol = 1e-06,
   n_kmeans_init = 2,
@@ -16,39 +17,43 @@ build_control(
 )
 }
 \arguments{
-\item{alpha}{A numeric value between 0 and 1 specifying the significance level.
-Default is 0.05.}
+\item{alpha}{A numeric value between 0 and 1 specifying the significance
+level. Default is 0.05.}
 
-\item{max_iter}{An integer specifying the maximum number of iterations allowed
-for the algorithm. Must be at least 1. Default is 300.}
+\item{max_iter}{An integer specifying the maximum number of iterations
+allowed for the algorithm. Must be at least 1. Default is 300.}
 
-\item{n_init}{An integer specifying the total number of random initializations
-to attempt. Must be at least 1. Default is 10.}
+\item{n_init}{An integer specifying the total number of random
+initializations to use Must be at least 1. Default is 10.}
 
-\item{verbose}{A logical flag. If \code{TRUE}, detailed execution logs are printed
-to the console during optimization. Default is \code{FALSE}.}
+\item{direction}{A character string specifying the testing direction.
+Defaults to 'forward'.}
 
-\item{tol}{A numeric value specifying the convergence tolerance threshold.
+\item{verbose}{A logical flag. If \code{TRUE}, detailed execution logs are
+printed to the console during execution Default is \code{FALSE}.}
+
+\item{tol}{A numeric value specifying the iteration tolerance threshold.
 Must be greater than or equal to 0. Default is 1e-6.}
 
-\item{n_kmeans_init}{An integer specifying how many of the total initializations
-(\code{n_init}) should be seeded using K-means clustering. Cannot exceed
-\code{n_init}. Default is 2.}
+\item{n_kmeans_init}{An integer specifying how many of the total
+initializations (\code{n_init}) should be seeded using K-means clustering.
+Cannot exceed \code{n_init}. Default is 2.}
 
 \item{kmeans_starts}{An integer specifying the number of random starts to use
 within the K-means algorithm itself. Must be at least 1. Default is 20.}
 
-\item{sigma_floor}{An optional numeric value establishing a lower bound for variance
-estimates to prevent numerical instabilities. Must be greater than or equal to 0.
-Defaults to \code{NULL} (no floor).}
+\item{sigma_floor}{An optional numeric value establishing a lower bound for
+variance estimates to prevent numerical instabilities. Must be greater than
+or equal to 0. If \code{NULL}, defaults to a percentage of the response's
+variance.}
 }
 \value{
-A structured list of class \code{"WMRControl"} containing all validated
-control arguments.
+A structured list of class \code{"WMRControl"} containing all
+validated control arguments.
 }
 \description{
-This helper function structures and validates tuning parameters,
-initialization settings, and convergence criteria for the estimation algorithm.
+This function structures and validates tuning parameters, initialization
+settings, and convergence criteria for the estimation algorithm.
 }
 \examples{
 # Generate default control options

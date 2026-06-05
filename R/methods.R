@@ -1,141 +1,45 @@
-# S3 functions
+# S3 print methods
 
-# Print GMR fit
-
-print.gmr_fit <- function(x, ...) {
-  cat("Gaussian mixture regression fit\n")
-  cat("--------------------------------\n")
-
-  cat("Formula:        ")
-  print(x$formula)
-
-  if (!is.null(x$common)) {
-    cat("Common effects: ")
-    print(x$common)
-  }
-
-  cat("\n")
-  cat("Method:         ", x$method, "\n", sep = "")
-  cat("Selection:      ", x$criterion, "\n", sep = "")
-  cat("Best G:         ", x$best_G, "\n", sep = "")
+#' @export
+print.fit_fmr <- function(x, ...) {
+  cat("Finite mixture regression fit\n")
+  cat("------------------------------\n")
+  cat("G:              ", x$best_fit$G, "\n", sep = "")
   cat("Log-likelihood: ", round(x$loglik, 4), "\n", sep = "")
-  cat("BIC:            ", round(x$bic, 4), "\n", sep = "")
-  cat("Parameters:     ", x$k, "\n", sep = "")
-  cat("Iterations:     ", x$iterations, "\n", sep = "")
   cat("Converged:      ", x$converged, "\n", sep = "")
-  cat("Best init:      ", x$best_init, " of ", x$n_init, "\n", sep = "")
+  cat("Iterations:     ", x$iterations, "\n", sep = "")
+  cat("Best init:      ", x$best_init, "\n", sep = "")
+  cat("Valid inits:    ", x$n_valid_init, "\n", sep = "")
   cat("\n")
 
-  cat("Candidate models:\n")
-  print(x$results, row.names = FALSE)
-
-  invisible(x)
-}
-
-# Summarize GMR fit
-
-summary.gmr_fit <- function(object, ...) {
-  component_coefficients <- object$beta_g
-  common_coefficients <- object$beta
-
-  if (!is.null(component_coefficients)) {
-    colnames(component_coefficients) <- object$A_colnames
-    rownames(component_coefficients) <- paste0("g", seq_len(nrow(component_coefficients)))
-  }
-
-  if (!is.null(common_coefficients)) {
-    names(common_coefficients) <- object$B_colnames
-  }
-
-  out <- list(
-    call = object$call,
-    formula = object$formula,
-    common = object$common,
-    method = object$method,
-    criterion = object$criterion,
-    best_G = object$best_G,
-    loglik = object$loglik,
-    bic = object$bic,
-    k = object$k,
-    iterations = object$iterations,
-    converged = object$converged,
-    pi_g = object$pi_g,
-    sigma_g = object$sigma_g,
-    beta_g = component_coefficients,
-    beta = common_coefficients,
-    results = object$results,
-    n_init = object$n_init,
-    best_init = object$best_init,
-    n_valid_init = object$n_valid_init
-  )
-
-  class(out) <- "summary.gmr_fit"
-
-  out
-}
-
-# Print GMR fit summary
-
-print.summary.gmr_fit <- function(x, ...) {
-  cat("Summary of Gaussian mixture regression fit\n")
-  cat("------------------------------------------\n")
-
-  cat("Call:\n")
-  print(x$call)
-  cat("\n")
-
-  cat("Model:\n")
-  cat("  Formula:        ")
-  print(x$formula)
-
-  cat("  Common effects: ")
-  print(x$common)
-
-  cat("\n")
-  cat("Fitting information:\n")
-  cat("  Method:         ", x$method, "\n", sep = "")
-  cat("  Criterion:      ", x$criterion, "\n", sep = "")
-  cat("  Selected G:     ", x$best_G, "\n", sep = "")
-  cat("  Log-likelihood: ", round(x$loglik, 4), "\n", sep = "")
-  cat("  BIC:            ", round(x$bic, 4), "\n", sep = "")
-  cat("  Parameters:     ", x$k, "\n", sep = "")
-  cat("  Iterations:     ", x$iterations, "\n", sep = "")
-  cat("  Converged:      ", x$converged, "\n", sep = "")
-  cat("  Best init:      ", x$best_init, " of ", x$n_init, "\n", sep = "")
-  cat("  Valid init:     ", x$n_valid_init, " of ", x$n_init, "\n", sep = "")
-
-  cat("\n")
   cat("Mixing proportions:\n")
-  print(round(x$pi_g, 4))
+  pi_named <- x$pi_g
+  names(pi_named) <- paste0("g", seq_along(pi_named))
+  print(round(pi_named, 4))
 
-  cat("\n")
-  cat("Component standard deviations:\n")
-  print(round(x$sigma_g, 4))
+  cat("\nComponent standard deviations:\n")
+  sigma_named <- x$sigma_g
+  names(sigma_named) <- paste0("g", seq_along(sigma_named))
+  print(round(sigma_named, 4))
 
-  cat("\n")
-  cat("Component-specific coefficients:\n")
-  print(round(x$beta_g, 4))
+  cat("\nComponent-specific coefficients:\n")
+  beta_g <- x$beta_g
+  rownames(beta_g) <- paste0("g", seq_len(nrow(beta_g)))
+  print(round(beta_g, 4))
 
-  if (!is.null(x$beta) && length(x$beta) > 0) {
-    cat("\n")
-    cat("Common-effect coefficients:\n")
+  if (length(x$beta) > 0) {
+    cat("\nCommon-effect coefficients:\n")
     print(round(x$beta, 4))
   }
 
-  cat("\n")
-  cat("Model selection table:\n")
-  print(x$results, row.names = FALSE)
-
   invisible(x)
 }
 
-# Print effect selection
-
-print.effect_selection <- function(x, ...) {
-  cat("GMR effect-type selection\n")
-  cat("-------------------------\n")
+#' @export
+print.determine_effects <- function(x, ...) {
+  cat("GMR effect-type determination\n")
+  cat("------------------------------\n")
   cat("Direction: ", x$direction, "\n", sep = "")
-  cat("Method:    ", x$method, "\n", sep = "")
   cat("Alpha:     ", x$alpha, "\n", sep = "")
   cat("G values:  ", paste(x$G_values, collapse = ", "), "\n", sep = "")
   cat("\n")
@@ -158,54 +62,48 @@ print.effect_selection <- function(x, ...) {
   cat("  Formula: ", format(x$final_formula), "\n", sep = "")
   cat("  Common:  ", format(x$final_common), "\n", sep = "")
 
-  if (!is.null(x$final_fit)) {
-    cat("\nSelected G: ")
-    if (!is.null(x$final_fit$best_G)) {
-      cat(x$final_fit$best_G, "\n", sep = "")
-    } else {
-      cat("NA\n")
-    }
-
-    cat("BIC:        ")
-    if (is.numeric(x$final_fit$bic) &&
-      length(x$final_fit$bic) == 1 &&
-      is.finite(x$final_fit$bic)) {
-      cat(round(x$final_fit$bic, 4), "\n", sep = "")
-    } else {
-      cat("NA\n")
-    }
-  }
+  cat("\nStep summary:\n")
+  step_df <- do.call(rbind, lapply(x$steps, function(s) {
+    data.frame(
+      step    = s$step,
+      chosen  = if (is.na(s$chosen)) "-" else s$chosen,
+      min_p0  = round(min(s$p0, na.rm = TRUE), 4),
+      stringsAsFactors = FALSE
+    )
+  }))
+  print(step_df, row.names = FALSE)
 
   invisible(x)
 }
 
-# Print heterogeneous effect test
-
-print.heterogeneous_test <- function(x, ...) {
-  cat("GMR heterogeneous-effect test\n")
-  cat("-----------------------------\n")
-  cat("Covariate: ", x$covariate, "\n", sep = "")
+#' @export
+print.variable_selection <- function(x, ...) {
+  cat("GMR variable selection\n")
+  cat("----------------------\n")
+  cat("Direction: ", x$direction, "\n", sep = "")
   cat("Alpha:     ", x$alpha, "\n", sep = "")
-  cat("p0:        ")
+  cat("G values:  ", paste(x$G_values, collapse = ", "), "\n", sep = "")
+  cat("\n")
 
-  if (is.numeric(x$p0) && length(x$p0) == 1 && is.finite(x$p0)) {
-    cat(signif(x$p0, 4), "\n", sep = "")
+  cat("Selected variables:\n")
+  if (length(x$selected) == 0) {
+    cat("  None\n")
   } else {
-    cat("NA\n")
+    cat("  ", paste(x$selected, collapse = ", "), "\n", sep = "")
   }
 
-  cat("Reject H0: ", x$reject, "\n", sep = "")
-  cat("\nNull model:\n")
-  cat("  Formula: ")
-  print(x$null_formula)
-  cat("  Common:  ")
-  print(x$null_common)
+  cat("\nFinal model formula: ", format(x$final_formula), "\n", sep = "")
 
-  cat("\nAlternative model:\n")
-  cat("  Formula: ")
-  print(x$alt_formula)
-  cat("  Common:  ")
-  print(x$alt_common)
+  cat("\nStep summary:\n")
+  step_df <- do.call(rbind, lapply(x$steps, function(s) {
+    data.frame(
+      step    = s$step,
+      chosen  = if (is.na(s$chosen)) "-" else s$chosen,
+      min_p0  = round(min(s$p0, na.rm = TRUE), 4),
+      stringsAsFactors = FALSE
+    )
+  }))
+  print(step_df, row.names = FALSE)
 
   invisible(x)
 }

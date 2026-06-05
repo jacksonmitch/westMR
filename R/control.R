@@ -1,26 +1,29 @@
 #' Create a Control Object for westMR Models
 #'
-#' This helper function structures and validates tuning parameters,
-#' initialization settings, and convergence criteria for the estimation algorithm.
+#' This function structures and validates tuning parameters, initialization
+#' settings, and convergence criteria for the estimation algorithm.
 #'
-#' @param alpha A numeric value between 0 and 1 specifying the significance level.
-#'   Default is 0.05.
-#' @param max_iter An integer specifying the maximum number of iterations allowed
-#'   for the algorithm. Must be at least 1. Default is 300.
-#' @param n_init An integer specifying the total number of random initializations
-#'   to attempt. Must be at least 1. Default is 10.
-#' @param verbose A logical flag. If \code{TRUE}, detailed execution logs are printed
-#'   to the console during optimization. Default is \code{FALSE}.
-#' @param tol A numeric value specifying the convergence tolerance threshold.
-#'   Must be greater than or equal to 0. Default is 1e-6.
-#' @param n_kmeans_init An integer specifying how many of the total initializations
-#'   (\code{n_init}) should be seeded using K-means clustering. Cannot exceed
-#'   \code{n_init}. Default is 2.
+#' @param alpha A numeric value between 0 and 1 specifying the significance
+#'  level. Default is 0.05.
+#' @param max_iter An integer specifying the maximum number of iterations
+#'  allowed for the algorithm. Must be at least 1. Default is 300.
+#' @param n_init An integer specifying the total number of random
+#'  initializations to use Must be at least 1. Default is 10.
+#' @param direction A character string specifying the testing direction.
+#'   Defaults to 'forward'.
+#' @param verbose A logical flag. If \code{TRUE}, detailed execution logs are
+#'  printed to the console during execution Default is \code{FALSE}.
+#' @param tol A numeric value specifying the iteration tolerance threshold.
+#'  Must be greater than or equal to 0. Default is 1e-6.
+#' @param n_kmeans_init An integer specifying how many of the total
+#'  initializations (\code{n_init}) should be seeded using K-means clustering.
+#'  Cannot exceed \code{n_init}. Default is 2.
 #' @param kmeans_starts An integer specifying the number of random starts to use
-#'   within the K-means algorithm itself. Must be at least 1. Default is 20.
-#' @param sigma_floor An optional numeric value establishing a lower bound for variance
-#'   estimates to prevent numerical instabilities. Must be greater than or equal to 0.
-#'   Defaults to \code{NULL} (no floor).
+#'  within the K-means algorithm itself. Must be at least 1. Default is 20.
+#' @param sigma_floor An optional numeric value establishing a lower bound for
+#'  variance estimates to prevent numerical instabilities. Must be greater than
+#'  or equal to 0. If \code{NULL}, defaults to a percentage of the response's
+#'  variance.
 #'
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
@@ -37,6 +40,7 @@ build_control <- function(
   alpha = 0.05,
   max_iter = 300,
   n_init = 10,
+  direction = "forward",
   verbose = FALSE,
   tol = 1e-6,
   n_kmeans_init = 2,
@@ -50,6 +54,7 @@ build_control <- function(
   checkmate::assert_number(alpha, lower = 0, upper = 1, add = collection)
   checkmate::assert_int(max_iter, lower = 1, add = collection)
   checkmate::assert_int(n_init, lower = 1, add = collection)
+  checkmate::assert_choice(direction, choices = c("forward", "backward"))
   checkmate::assert_flag(verbose, add = collection)
   checkmate::assert_number(tol, lower = 0, add = collection) # TODO: allows 0
   checkmate::assert_int(n_kmeans_init, lower = 0, add = collection)
