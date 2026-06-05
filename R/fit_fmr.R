@@ -1,3 +1,26 @@
+# Fit a single model specification across all G values.
+# Returns a list of fit_fmr objects, one per G.
+fit_across_G <- function(model, prepared_data) {
+  G_values <- model$G_values
+
+  lapply(G_values, function(G) {
+
+    init_list <- make_tau_list(
+      y = prepared_data$y,
+      G = G,
+      control = model$control
+    )
+
+    fit_fmr(
+      model = model,
+      G = G,
+      init_list = init_list,
+      prepared_data = prepared_data
+    )
+  })
+}
+
+
 # Fit Gaussian mixture regression and select number of components by BIC
 # Controller of the numeric functions, sets methods to be used and G's used
 
@@ -5,12 +28,12 @@
 # @G_values = all candidate orders fitted
 fit_fmr <- function(model,
                     G,
-                    init,
+                    init_list,
                     prepared_data) {
   control <- model$control
   # Build response and component-specific design matrix A
 
-  n_init <- length(init)
+  n_init <- length(init_list)
   fits <- vector("list", n_init)
   logliks <- rep(-Inf, n_init)
 
@@ -23,7 +46,7 @@ fit_fmr <- function(model,
     fit <- em_fmr(
       prepared_data = prepared_data,
       G = G,
-      tau = init[[i]],
+      tau = init_list[[i]],
       family = model$family,
       control = control
     )
@@ -50,7 +73,6 @@ fit_fmr <- function(model,
     best_fit = best_fit,
     fits = fits,
 
-    # Direct access to selected model estimates
     beta_g = best_fit$beta_g,
     beta = best_fit$beta,
     sigma_g = best_fit$sigma_g,
@@ -60,7 +82,7 @@ fit_fmr <- function(model,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
-    best_init = best_fit$best_init,
+    best_init = best_init,
     n_valid_init = best_fit$n_valid_init,
     call = match.call()
   )
