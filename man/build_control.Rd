@@ -13,7 +13,10 @@ build_control(
   tol = 1e-06,
   n_kmeans_init = 2,
   kmeans_starts = 20,
-  sigma_floor = NULL
+  sigma_floor = NULL,
+  irwls_max_iter = 50,
+  irwls_tol = 1e-08,
+  weight_floor = 1e-10
 )
 }
 \arguments{
@@ -46,6 +49,12 @@ within the K-means algorithm itself. Must be at least 1. Default is 20.}
 variance estimates to prevent numerical instabilities. Must be greater than
 or equal to 0. If \code{NULL}, defaults to a percentage of the response's
 variance.}
+
+\item{irwls_max_iter}{description}
+
+\item{irwls_tol}{description}
+
+\item{weight_floor}{description}
 }
 \value{
 A structured list of class \code{"WMRControl"} containing all

@@ -8,7 +8,7 @@ westMR(
   formula,
   data,
   G_max = 4,
-  family = c("gaussian", "poisson"),
+  family = c("gaussian", "poisson", "binomial"),
   task = c("variables", "effects"),
   control = build_control()
 )
@@ -18,7 +18,8 @@ westMR(
 
 \item{data}{A data.frame containing the variables in the formula.}
 
-\item{G_max}{An integer (>= 2) specifying the maximum number of groups/components.}
+\item{G_max}{An integer (>= 2) specifying the maximum number of
+groups/components.}
 
 \item{family}{A character string specifying the error distribution.
 Defaults to 'gaussian' if not provided.}
@@ -30,11 +31,11 @@ Can include "variables", "effects", or both.}
 \code{\link{build_control}}.}
 }
 \value{
-Not yet implemented
+TODO
 }
 \description{
-westMR implements the west procedure framework for finite mixtures of regression models.
-Parameter estimation is performed using the EM algorithm.
+westMR implements the west procedure framework for finite mixtures of
+regression models. Parameter estimation is performed using the EM algorithm.
 }
 \examples{
 westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)

@@ -24,6 +24,9 @@
 #'  variance estimates to prevent numerical instabilities. Must be greater than
 #'  or equal to 0. If \code{NULL}, defaults to a percentage of the response's
 #'  variance.
+#' @param irwls_max_iter description
+#' @param irwls_tol description
+#' @param weight_floor description
 #'
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
