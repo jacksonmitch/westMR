@@ -2,51 +2,42 @@ rm(list = ls())
 devtools::load_all()
 
 
-data <- simulate_effect_data(n = 400, seed = 123)
-print(class(data))
-true_heterogeneous <- 'x1'
-true_homogeneous <- c('x2','x3')
-selected_covariates <- c('x1','x2','x3')
-formula <- make_formula(predictors = selected_covariates, response = 'y')
+test_data <- do.call(simulate_fmr,
+                     c(scenarios$two_group_effects,
+                       list(n = 400, seed = 123)))
 
 model <- WMRModel$new(
-  formula = formula,
-  data = data,
-  G_values = 1:2,
+  formula = formula(test_data),
+  data = test_data,
+  G_values = 1:3,
   family = "gaussian",
   control = build_control(n_init = 5)
 )
 
-# forward_fit <- determine_effects(
-#   model = model,
-#   direction = "forward"
-# )
-# print(forward_fit)
-# summary(forward_fit)
-# summary(forward_fit$final_fit)
-
-# steps_df <- effect_selection_table(forward_fit)
-# steps_df
-#
-bench <- microbenchmark::microbenchmark(
-  forward_fit = determine_effects(
-    model = model,
-    direction = "forward"
-  ),
-  backward_fit = determine_effects(
-    model = model,
-    direction = "backward"
-  ),
-  times = 1
+forward_fit <- determine_effects(
+  model = model,
+  direction = "forward"
 )
-print(bench)
-#
-# backward_fit <- determine_effects(
-#   model = model,
-#   direction = "backward"
+print(forward_fit)
+
+backward_fit <- determine_effects(
+  model = model,
+  direction = "backward"
+)
+print(backward_fit)
+
+# bench <- microbenchmark::microbenchmark(
+#   forward_fit = determine_effects(
+#     model = model,
+#     direction = "forward"
+#   ),
+#   backward_fit = determine_effects(
+#     model = model,
+#     direction = "backward"
+#   ),
+#   times = 10
 # )
-# print(backward_fit)
-# summary(backward_fit$final_fit)
+# print(bench)
 
 # profvis::profvis({
 #   forward_fit = determine_effects(
@@ -54,13 +45,3 @@ print(bench)
 #     direction = "forward"
 #   )
 # })
-
-# test_bench <- microbenchmark::microbenchmark(
-#   model = model$fit(),
-#   raw_call = fit_fmr(formula, data = data, G_values = model$G_values),
-#   times = 100
-# )
-# print(test_bench)
-
-
-
