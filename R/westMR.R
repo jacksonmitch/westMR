@@ -20,7 +20,8 @@
 #' @export
 #'
 #' @examples
-#' westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)
+#' westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2,
+#' control = build_control(seed = 1))
 #'
 westMR <- function(
   formula,
@@ -76,11 +77,18 @@ westMR <- function(
 
   # Run Variable Selection
   if ("variables" %in% task) {
-    cat("testing variables")
+    variable_selection <- select_variables(model,
+      direction = control$direction
+    )
+    if (control$verbose) print(variable_selection)
   }
   # Run Effect Type Determination
   if ("effects" %in% task) {
-    effect_selection <- determine_effects(model, direction = control$direction)
-    print(effect_selection)
+    effect_determination <- determine_effects(model,
+      direction = control$direction
+    )
+    if (control$verbose) print(effect_determination)
   }
+
+  # result <- both? TODO, maybe find best G and fit
 }
