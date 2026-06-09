@@ -1,7 +1,13 @@
 # E-step for Gaussian mixture regression
 
-e_step_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
+e_step_gmr <- function(A, B, y, beta_g, beta, pi_g,
+                       sigma_g = NULL, 
+                       family = c("gaussian", "poisson", "binomial"),
+                       trials = NULL) {
+
+  family <- match.arg(family)
   A <- as.matrix(A)
+  
   if (is.null(B)) {
     B <- matrix(
       numeric(0),
@@ -11,49 +17,77 @@ e_step_gmr <- function(A, B, y, beta_g, beta, sigma_g, pi_g) {
   } else {
     B <- as.matrix(B)
   }
+  
   y <- as.numeric(y)
   beta_g <- as.matrix(beta_g)
   beta <- as.numeric(beta)
-  sigma_g <- as.numeric(sigma_g)
   pi_g <- as.numeric(pi_g)
-
+  
   n <- nrow(A)
   G <- nrow(beta_g)
-
-  if (ncol(A) != ncol(beta_g)) {
-    stop("ncol(A) must equal ncol(beta_g).")
+  
+  # Calculate linear predictor and log likelihood values
+  eta <- linear_predictor_matrix(A, B, beta_g, beta)
+  
+  log_pi <- log(pmax(pi_g, 1e-16))
+  log_w <- matrix(NA_real_, nrow = n, ncol = G)
+  
+  # Family specific E-step quantities
+  
+  if (family == "gaussian") {
+    sigma_g <- as.numeric(sigma_g)
+    
+    if (length(sigma_g) != G) {
+      stop("length(sigma_g) must equal nrow(beta_g).")
+    }
+    
+    for (g in seq_len(G)) {
+      log_w[, g] <- log_pi[g] + stats::dnorm(
+        x = y,
+        mean = eta[, g],
+        sd = pmax(sigma_g[g], 1e-16),
+        log = TRUE
+      )
+    }
   }
-
-  if (length(beta) != ncol(B)) {
-    stop("length(beta) must equal ncol(B).")
+  
+  if (family == "poisson") {
+    mu <- exp(eta)
+    
+    for (g in seq_len(G)) {
+      log_w[, g] <- log_pi[g] + stats::dpois(
+        x = y,
+        lambda = mu[, g],
+        log = TRUE
+      )
+    }
   }
-
-  if (length(sigma_g) != G) {
-    stop("length(sigma_g) must equal nrow(beta_g).")
+  
+  if (family == "binomial") {
+    if (is.null(trials)) {
+      trials <- rep(1, n)
+    }
+    
+    trials <- as.numeric(trials)
+    
+    if (length(trials) != n) {
+      stop("length(trials) must equal length(y).")
+    }
+    
+    mu <- stats::plogis(eta)
+    mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
+    
+    for (g in seq_len(G)) {
+      log_w[, g] <- log_pi[g] + stats::dbinom(
+        x = y,
+        size = trials,
+        prob = mu[, g],
+        log = TRUE
+      )
+    }
   }
-
-  if (length(pi_g) != G) {
-    stop("length(pi_g) must equal nrow(beta_g).")
-  }
-
-  mu <- sweep(
-    A %*% t(beta_g), 1, common_eta(B, beta), "+"
-  )
-
-  res2 <- (y - mu)^2
-
-  # log pi_g + log normal density
-  log_w <- sweep(-0.5 * res2, 2, sigma_g^2, "/")
-
-  log_w <- sweep(
-    log_w,
-    2,
-    log(pi_g + 1e-16) - log(sigma_g + 1e-16),
-    "+"
-  ) - 0.5 * log(2 * pi)
 
   tau <- row_softmax(log_w)
-
   colnames(tau) <- paste0("g", seq_len(G))
 
   return(tau)

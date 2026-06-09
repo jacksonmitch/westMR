@@ -37,12 +37,14 @@ west_procedure <- function(
     k_null <- count_params_gmr(
       ncol_het = ncol(fit_null$beta_g),
       ncol_common = length(fit_null$beta),
-      G = G
+      G = G,
+      family = model$family
     )
     k_alt <- count_params_gmr(
       ncol_het = ncol(fit_alt$beta_g),
       ncol_common = length(fit_alt$beta),
-      G = G
+      G = G,
+      family = model$family
     )
 
     bic_null <- compute_bic(fit_null$loglik, n, k_null)

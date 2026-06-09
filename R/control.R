@@ -45,7 +45,10 @@ build_control <- function(
   tol = 1e-6,
   n_kmeans_init = 2,
   kmeans_starts = 20,
-  sigma_floor = NULL
+  sigma_floor = NULL,
+  irwls_max_iter = 50,
+  irwls_tol = 1e-8,
+  weight_floor = 1e-10
 ) {
   # User Input checks
 
@@ -54,7 +57,7 @@ build_control <- function(
   checkmate::assert_number(alpha, lower = 0, upper = 1, add = collection)
   checkmate::assert_int(max_iter, lower = 1, add = collection)
   checkmate::assert_int(n_init, lower = 1, add = collection)
-  checkmate::assert_choice(direction, choices = c("forward", "backward"))
+  checkmate::assert_choice(direction, choices = c("forward", "backward"), add = collection)
   checkmate::assert_flag(verbose, add = collection)
   checkmate::assert_number(tol, lower = 0, add = collection) # TODO: allows 0
   checkmate::assert_int(n_kmeans_init, lower = 0, add = collection)
@@ -69,11 +72,15 @@ build_control <- function(
     lower = 0,
     add = collection, null.ok = TRUE
   )
+  checkmate::assert_int(irwls_max_iter, lower = 1, add = collection)
+  checkmate::assert_number(irwls_tol, lower = 0, add = collection)
+  checkmate::assert_number(weight_floor, lower = 0, add = collection)
 
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)
   n_kmeans_init <- as.integer(n_kmeans_init)
   kmeans_starts <- as.integer(kmeans_starts)
+  irwls_max_iter <- as.integer(irwls_max_iter)
 
   control <- as.list(environment())
   class(control) <- "WMRControl"

@@ -1,5 +1,6 @@
 # Fit a single model specification across all G values.
 # Returns a list of fit_fmr objects, one per G.
+
 fit_across_G <- function(model, prepared_data) {
   G_values <- model$G_values
 
@@ -21,16 +22,18 @@ fit_across_G <- function(model, prepared_data) {
 }
 
 
-# Fit Gaussian mixture regression and select number of components by BIC
+# Fit finite mixture regression and select number of components by BIC
 # Controller of the numeric functions, sets methods to be used and G's used
 
-# @common = predictors that will be fir under an homogeneous effect
+# @common = predictors that will be fit under an homogeneous effect
 # @G_values = all candidate orders fitted
 fit_fmr <- function(model,
                     G,
                     init_list,
                     prepared_data) {
+  
   control <- model$control
+  family <- model$family
   # Build response and component-specific design matrix A
 
   n_init <- length(init_list)
@@ -68,6 +71,19 @@ fit_fmr <- function(model,
   if (is.null(best_fit)) {
     stop("All fits failed for G = ", G)
   }
+  
+  k <- count_params_gmr(
+    ncol_het = prepared_data$p_het,
+    ncol_common = prepared_data$p_com,
+    G = G,
+    family = family
+  )
+  
+  bic <- compute_bic(
+    loglik = best_fit$loglik,
+    n = prepared_data$n,
+    k = k
+  )
 
   out <- list(
     best_fit = best_fit,
@@ -83,7 +99,19 @@ fit_fmr <- function(model,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
     best_init = best_init,
-    n_valid_init = best_fit$n_valid_init,
+    n_valid_init = n_valid_init,
+    
+    bic = bic,
+    k = k,
+    family = family,
+    G = G,
+    n_init = n_init,
+    n_valid_init = n_valid_init,
+    logliks = logliks,
+    
+    irwls_iterations = best_fit$irwls_iterations,
+    irwls_converged = best_fit$irwls_converged,
+    
     call = match.call()
   )
 

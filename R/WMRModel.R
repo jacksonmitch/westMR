@@ -25,8 +25,8 @@ WMRModel <- R6::R6Class(
     print = function(...) {
       cat(
         "<WMRModel>  formula =", format(self$formula),
-        " predictors =", self$predictos,
-        " G_values =", self$G_values,
+        " predictors =", paste(self$predictors, collapse = ", "),
+        " G_values =", paste(self$G_values, collapse = ", "),
         " family =", self$family, "\n"
       )
       invisible(self)

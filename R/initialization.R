@@ -1,32 +1,46 @@
 # Initialization helpers
 
-make_init_clustering <- function(y, G,
+make_init_clustering <- function(y,
+                                 G,
                                  method = c("kmeans", "random", "random_balanced"),
-                                 kmeans_starts) {
+                                 kmeans_starts = 20) {
   method <- match.arg(method)
+  y <- as.numeric(y)
   n <- length(y)
-
+  
   if (G == 1) {
     return(rep(1L, n))
   }
-
+  
   if (method == "kmeans") {
-    return(stats::kmeans(y, centers = G, nstart = kmeans_starts)$cluster)
+    
+    # kmeans cannot use more centers than distinct response values.
+    # This is especially important for Bernoulli/binomial responses.
+    if (length(unique(y)) < G) {
+      method <- "random_balanced"
+    } else {
+      return(stats::kmeans(
+        x = y,
+        centers = G,
+        nstart = kmeans_starts
+      )$cluster)
+    }
   }
-
+  
   if (method == "random") {
     repeat {
       cl <- sample.int(G, n, replace = TRUE)
+      
       if (length(unique(cl)) == G) {
         return(cl)
       }
     }
   }
-
+  
   if (method == "random_balanced") {
     cl <- rep(seq_len(G), length.out = n)
     cl <- sample(cl, size = n, replace = FALSE)
-
+    
     return(cl)
   }
 }
@@ -44,18 +58,29 @@ clustering_to_tau <- function(cl, G) {
 # Returns a list of n_init tau matrices ready to pass to fit_fmr.
 # The first n_kmeans_init are kmeans-seeded; the rest are random_balanced.
 
+
 make_tau_list <- function(y, G, control) {
   n_init <- control$n_init
   n_kmeans_init <- control$n_kmeans_init
   kmeans_starts <- control$kmeans_starts
-
+  
   lapply(seq_len(n_init), function(i) {
-    method <- if (i <= n_kmeans_init) "kmeans" else "random_balanced"
-    cl <- make_init_clustering(y = y, G = G, method = method, kmeans_starts = kmeans_starts)
+    method <- if (i <= n_kmeans_init) {
+      "kmeans"
+    } else {
+      "random_balanced"
+    }
+    
+    cl <- make_init_clustering(
+      y = y,
+      G = G,
+      method = method,
+      kmeans_starts = kmeans_starts
+    )
+    
     clustering_to_tau(cl, G)
   })
 }
-
 
 # Create initial EM parameter values from an initial clustering
 

@@ -30,3 +30,30 @@ common_eta <- function(B, beta = numeric(0)) {
 
   drop(B %*% beta)
 }
+
+linear_predictor_matrix <- function(A, B, beta_g, beta) {
+  A <- as.matrix(A)
+  
+  if (is.null(B)) {
+    B <- matrix(numeric(0), nrow = nrow(A), ncol = 0)
+  } else {
+    B <- as.matrix(B)
+  }
+  
+  beta_g <- as.matrix(beta_g)
+  beta <- as.numeric(beta)
+  
+  if (nrow(B) != nrow(A)) {
+    stop("nrow(B) must equal nrow(A).")
+  }
+  
+  if (ncol(A) != ncol(beta_g)) {
+    stop("ncol(A) must equal ncol(beta_g).")
+  }
+  
+  if (length(beta) != ncol(B)) {
+    stop("length(beta) must equal ncol(B).")
+  }
+  
+  sweep(A %*% t(beta_g), 1, common_eta(B, beta), "+")
+}
