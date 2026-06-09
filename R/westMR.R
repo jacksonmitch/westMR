@@ -20,8 +20,7 @@
 #' @export
 #'
 #' @examples
-#' westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2,
-#' control = build_control(seed = 1))
+#' westMR(formula = mpg ~ cyl, data = mtcars, G_max = 2)
 #'
 westMR <- function(
   formula,
