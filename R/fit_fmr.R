@@ -5,7 +5,6 @@ fit_across_G <- function(model, prepared_data) {
   G_values <- model$G_values
 
   lapply(G_values, function(G) {
-
     init_list <- make_tau_list(
       y = prepared_data$y,
       G = G,
@@ -23,11 +22,7 @@ fit_across_G <- function(model, prepared_data) {
 }
 
 
-# Fit finite mixture regression and select number of components by BIC
-# Controller of the numeric functions, sets methods to be used and G's used
-
-# @common = predictors that will be fit under an homogeneous effect
-# @G_values = all candidate orders fitted
+# F
 fit_fmr <- function(model,
                     G,
                     init_list,
@@ -86,10 +81,10 @@ fit_fmr <- function(model,
     k = k
   )
 
+
   out <- list(
     best_fit = best_fit,
     fits = fits,
-
     beta_g = best_fit$beta_g,
     beta = best_fit$beta,
     sigma_g = best_fit$sigma_g,
@@ -104,6 +99,7 @@ fit_fmr <- function(model,
 
     bic = bic,
     k = k,
+
     family = family,
     G = G,
     n_init = n_init,

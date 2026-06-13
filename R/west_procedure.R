@@ -17,7 +17,6 @@ west_procedure <- function(
   n <- candidate_data$n
 
   stopifnot(length(shared_fits) == length(G_values))
-  stopifnot(direction %in% c("forward", "backward"))
 
   candidate_fits <- fit_across_G(model, candidate_data)
 
