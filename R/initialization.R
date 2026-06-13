@@ -7,13 +7,13 @@ make_init_clustering <- function(y,
   method <- match.arg(method)
   y <- as.numeric(y)
   n <- length(y)
-  
+
   if (G == 1) {
     return(rep(1L, n))
   }
-  
+
   if (method == "kmeans") {
-    
+
     # kmeans cannot use more centers than distinct response values.
     # This is especially important for Bernoulli/binomial responses.
     if (length(unique(y)) < G) {
@@ -26,21 +26,21 @@ make_init_clustering <- function(y,
       )$cluster)
     }
   }
-  
+
   if (method == "random") {
     repeat {
       cl <- sample.int(G, n, replace = TRUE)
-      
+
       if (length(unique(cl)) == G) {
         return(cl)
       }
     }
   }
-  
+
   if (method == "random_balanced") {
     cl <- rep(seq_len(G), length.out = n)
     cl <- sample(cl, size = n, replace = FALSE)
-    
+
     return(cl)
   }
 }
@@ -59,27 +59,52 @@ clustering_to_tau <- function(cl, G) {
 # The first n_kmeans_init are kmeans-seeded; the rest are random_balanced.
 
 
-make_tau_list <- function(y, G, control) {
+make_tau_list <- function(y, G, control, family = c("gaussian", "poisson", "binomial")) {
+  family <- match.arg(family)
+
   n_init <- control$n_init
   n_kmeans_init <- control$n_kmeans_init
   kmeans_starts <- control$kmeans_starts
-  
+  n <- length(y)
+
   lapply(seq_len(n_init), function(i) {
+
+    if (G == 1) {
+      return(matrix(1, nrow = n, ncol = 1))
+    }
+
+    if (family == "binomial") {
+      return(make_random_hard_tau(n = n, G = G))
+    }
+
     method <- if (i <= n_kmeans_init) {
       "kmeans"
     } else {
       "random_balanced"
     }
-    
+
     cl <- make_init_clustering(
       y = y,
       G = G,
       method = method,
       kmeans_starts = kmeans_starts
     )
-    
+
     clustering_to_tau(cl, G)
   })
+}
+
+make_random_hard_tau <- function(n, G) {
+  assignments <- sample.int(G, size = n, replace = TRUE)
+
+  # Ensure every component is represented
+  while (length(unique(assignments)) < G) {
+    assignments <- sample.int(G, size = n, replace = TRUE)
+  }
+
+  tau <- matrix(0, nrow = n, ncol = G)
+  tau[cbind(seq_len(n), assignments)] <- 1
+  tau
 }
 
 # Create initial EM parameter values from an initial clustering

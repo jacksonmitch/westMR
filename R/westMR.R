@@ -48,7 +48,7 @@ westMR <- function(
       data = data,
       na.action = stats::na.fail
     )
-    
+
     response <- as.numeric(stats::model.response(mf))
     control$sigma_floor <- 0.05 * stats::sd(response)
   }

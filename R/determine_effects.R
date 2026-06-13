@@ -11,17 +11,19 @@ determine_effects <- function(
   alpha <- control$alpha
 
   if (direction == "forward") {
-    # Start: everything common, work toward heterogeneous
     common_predictors <- predictors
     is_eligible <- function(p) is.finite(p) & p < alpha
     find_best <- which.min
-    update_common <- setdiff
+    update_common <- function(common, predictor) {
+      setdiff(common, predictor)
+    }
   } else {
-    # Start: everything heterogeneous, work toward common
     common_predictors <- character(0)
     is_eligible <- function(p) is.finite(p) & p >= alpha
     find_best <- which.max
-    update_common <- c
+    update_common <- function(common, predictor) {
+      unique(c(common, predictor))
+    }
   }
 
   # Fit the initial shared side once before the loop

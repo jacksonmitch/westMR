@@ -141,12 +141,12 @@ G_values <- 2:3
 x1 <- rnorm(n)
 x2 <- rnorm(n)
 
-true_g <- sample(1:2, n, replace = TRUE, prob = c(0.45, 0.55))
+true_g <- sample(1:2, n, replace = TRUE, prob = c(0.4, 0.6))
 
 eta <- ifelse(
   true_g == 1,
-  -0.3 + 0.7 * x1,
-  0.3 - 0.7 * x1
+  -1.5 + 2.0 * x1,
+  1.5 - 2.0 * x1
 ) + 0.2 * x2
 
 p <- stats::plogis(eta)
@@ -155,9 +155,9 @@ y <- stats::rbinom(n, size = 1, prob = p)
 dat_bin <- data.frame(y = y, x1 = x1, x2 = x2)
 
 control_bin <- build_control(
-  n_init = 5,
-  n_kmeans_init = 2,
-  max_iter = 150,
+  n_init = 10,
+  n_kmeans_init = 0,
+  max_iter = 200,
   irwls_max_iter = 50,
   irwls_tol = 1e-8,
   weight_floor = 1e-10,

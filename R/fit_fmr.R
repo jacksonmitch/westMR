@@ -9,7 +9,8 @@ fit_across_G <- function(model, prepared_data) {
     init_list <- make_tau_list(
       y = prepared_data$y,
       G = G,
-      control = model$control
+      control = model$control,
+      family = model$family
     )
 
     fit_fmr(
@@ -31,7 +32,7 @@ fit_fmr <- function(model,
                     G,
                     init_list,
                     prepared_data) {
-  
+
   control <- model$control
   family <- model$family
   # Build response and component-specific design matrix A
@@ -71,14 +72,14 @@ fit_fmr <- function(model,
   if (is.null(best_fit)) {
     stop("All fits failed for G = ", G)
   }
-  
+
   k <- count_params_gmr(
     ncol_het = prepared_data$p_het,
     ncol_common = prepared_data$p_com,
     G = G,
     family = family
   )
-  
+
   bic <- compute_bic(
     loglik = best_fit$loglik,
     n = prepared_data$n,
@@ -100,7 +101,7 @@ fit_fmr <- function(model,
     converged = best_fit$converged,
     best_init = best_init,
     n_valid_init = n_valid_init,
-    
+
     bic = bic,
     k = k,
     family = family,
@@ -108,10 +109,10 @@ fit_fmr <- function(model,
     n_init = n_init,
     n_valid_init = n_valid_init,
     logliks = logliks,
-    
+
     irwls_iterations = best_fit$irwls_iterations,
     irwls_converged = best_fit$irwls_converged,
-    
+
     call = match.call()
   )
 
