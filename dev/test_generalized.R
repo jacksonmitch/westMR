@@ -3,7 +3,7 @@
 
 set.seed(10)
 
-n <- 300
+n <- 500
 G_values <- 2:3
 
 x1 <- rnorm(n)
@@ -141,12 +141,12 @@ G_values <- 2:3
 x1 <- rnorm(n)
 x2 <- rnorm(n)
 
-true_g <- sample(1:2, n, replace = TRUE, prob = c(0.4, 0.6))
+true_g <- sample(1:2, n, replace = TRUE, prob = c(0.45, 0.55))
 
 eta <- ifelse(
   true_g == 1,
-  -1.5 + 2.0 * x1,
-  1.5 - 2.0 * x1
+  -1.25 + 0.75 * x1,
+  1.25 + 0.75 * x1
 ) + 0.2 * x2
 
 p <- stats::plogis(eta)
@@ -154,11 +154,18 @@ y <- stats::rbinom(n, size = 1, prob = p)
 
 dat_bin <- data.frame(y = y, x1 = x1, x2 = x2)
 
+p <- stats::plogis(eta)
+y <- stats::rbinom(n, size = 1, prob = p)
+
+dat_bin <- data.frame(y = y, x1 = x1, x2 = x2)
+
 control_bin <- build_control(
-  n_init = 10,
-  n_kmeans_init = 0,
-  max_iter = 200,
-  irwls_max_iter = 50,
+  n_init = 50,
+  n_kmeans_init = 10,
+  kmeans_starts = 25,
+  max_iter = 500,
+  init_burnin = 30,
+  irwls_max_iter = 100,
   irwls_tol = 1e-8,
   weight_floor = 1e-10,
   verbose = FALSE
@@ -198,3 +205,46 @@ print(lapply(fits_bin, function(fit) {
     irwls_converged = fit$irwls_converged
   )
 }))
+
+tau_oracle <- make_tau_from_partition(
+  partition = true_g,
+  G = 2,
+  eps = 1e-6
+)
+
+fit_bin_oracle <- em_fmr(
+  prepared_data = prepared_bin,
+  G = 2,
+  tau = tau_oracle,
+  family = "binomial",
+  control = control_bin,
+  max_iter = 500,
+  tol = 1e-8
+)
+
+fit_bin_oracle$converged
+fit_bin_oracle$iterations
+fit_bin_oracle$loglik
+fit_bin_oracle$pi_g
+fit_bin_oracle$beta_g
+fit_bin_oracle$beta
+
+fit_bin_oracle_1 <- em_fmr(
+  prepared_data = prepared_bin,
+  G = 2,
+  tau = tau_oracle,
+  family = "binomial",
+  control = control_bin,
+  max_iter = 1,
+  tol = 0
+)
+
+fit_bin_oracle_1$pi_g
+fit_bin_oracle_1$beta_g
+fit_bin_oracle_1$beta
+
+diff_ll <- diff(fit_bin_oracle$loglik_trace)
+
+tail(fit_bin_oracle$loglik_trace, 20)
+tail(diff_ll, 20)
+min(diff_ll)

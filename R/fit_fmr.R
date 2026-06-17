@@ -1,16 +1,30 @@
 # Fit a single model specification across all G values.
 # Returns a list of fit_fmr objects, one per G.
 
-fit_across_G <- function(model, prepared_data) {
+fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
   G_values <- model$G_values
 
-  lapply(G_values, function(G) {
+  fits <- lapply(seq_along(G_values), function(i) {
+    G <- G_values[[i]]
+
     init_list <- make_tau_list(
-      y = prepared_data$y,
+      prepared_data = prepared_data,
       G = G,
       control = model$control,
       family = model$family
     )
+
+    if (!is.null(extra_tau_starts)) {
+      extra_tau <- extra_tau_starts[[i]]
+
+      init_list <- add_extra_tau_start(
+        init_list = init_list,
+        tau = extra_tau,
+        n = prepared_data$n,
+        G = G,
+        name = "from_shared_fit"
+      )
+    }
 
     fit_fmr(
       model = model,
@@ -19,10 +33,48 @@ fit_across_G <- function(model, prepared_data) {
       prepared_data = prepared_data
     )
   })
+
+  names(fits) <- paste0("G", G_values)
+
+  fits
+}
+
+# allows shared fit to be passed as initialization
+
+add_extra_tau_start <- function(init_list,
+                                tau,
+                                n,
+                                G,
+                                name = "extra_tau") {
+  if (is.null(tau)) {
+    return(init_list)
+  }
+
+  tau <- as.matrix(tau)
+
+  if (!identical(dim(tau), c(n, G))) {
+    return(init_list)
+  }
+
+  if (any(!is.finite(tau)) || any(tau < 0)) {
+    return(init_list)
+  }
+
+  rs <- rowSums(tau)
+
+  if (any(!is.finite(rs)) || any(rs <= 0)) {
+    return(init_list)
+  }
+
+  tau <- tau / rs
+  colnames(tau) <- paste0("g", seq_len(G))
+
+  init_list[[name]] <- tau
+
+  init_list
 }
 
 
-# F
 fit_fmr <- function(model,
                     G,
                     init_list,
@@ -30,43 +82,33 @@ fit_fmr <- function(model,
 
   control <- model$control
   family <- model$family
-  # Build response and component-specific design matrix A
 
-  n_init <- length(init_list)
-  fits <- vector("list", n_init)
-  logliks <- rep(-Inf, n_init)
+  # Short burn-in stage
+  # run a small number of EM iterations from each tau start,
+  # then choose the start with the largest burn-in log-likelihood
+  init_fit <- select_best_initialization(
+    tau_list = init_list,
+    prepared_data = prepared_data,
+    G = G,
+    family = family,
+    control = control
+  )
 
-  best_fit <- NULL
-  best_loglik <- -Inf
-  best_init <- NA_integer_
-  n_valid_init <- 0L
-
-  for (i in seq_len(n_init)) {
-    fit <- em_fmr(
-      prepared_data = prepared_data,
-      G = G,
-      tau = init_list[[i]],
-      family = model$family,
-      control = control
-    )
-
-    fits[[i]] <- fit
-    logliks[i] <- fit$loglik
-
-    if (!is.finite(fit$loglik)) next
-
-    n_valid_init <- n_valid_init + 1L
-
-    if (fit$loglik > best_loglik) {
-      best_fit <- fit
-      best_loglik <- fit$loglik
-      best_init <- i
-    }
-  }
-
-  if (is.null(best_fit)) {
-    stop("All fits failed for G = ", G)
-  }
+  # Final EM stage
+  # continue from the best burn-in start
+  best_fit <- em_fmr(
+    prepared_data = prepared_data,
+    G = G,
+    tau = init_fit$best_fit$tau,
+    family = family,
+    control = control,
+    max_iter = control$max_iter,
+    tol = control$tol,
+    beta_g_start = init_fit$best_fit$beta_g,
+    beta_start = init_fit$best_fit$beta,
+    sigma_g_start = init_fit$best_fit$sigma_g,
+    pi_g_start = init_fit$best_fit$pi_g
+  )
 
   k <- count_params_gmr(
     ncol_het = prepared_data$p_het,
@@ -81,33 +123,43 @@ fit_fmr <- function(model,
     k = k
   )
 
-
   out <- list(
     best_fit = best_fit,
-    fits = fits,
+
     beta_g = best_fit$beta_g,
     beta = best_fit$beta,
     sigma_g = best_fit$sigma_g,
     pi_g = best_fit$pi_g,
     tau = best_fit$tau,
+
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
-    best_init = best_init,
-    n_valid_init = n_valid_init,
+
+    best_init_name = init_fit$best_name,
+    best_init_loglik = init_fit$best_loglik,
+    n_valid_init = sum(is.finite(init_fit$logliks)),
 
     bic = bic,
     k = k,
 
     family = family,
     G = G,
-    n_init = n_init,
-    n_valid_init = n_valid_init,
-    logliks = logliks,
+    n_init = length(init_list),
+    logliks = init_fit$logliks,
 
     irwls_iterations = best_fit$irwls_iterations,
     irwls_converged = best_fit$irwls_converged,
+
+    init = list(
+      strategy = "multistart_tau_burnin",
+      burnin = control$init_burnin,
+      n_starts = length(init_list),
+      best_start = init_fit$best_name,
+      burnin_logliks = init_fit$logliks,
+      failed_starts = init_fit$failures
+    ),
 
     call = match.call()
   )

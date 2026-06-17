@@ -11,18 +11,25 @@ test_predictors <- function(
   direction <- match.arg(direction)
   alpha <- model$control$alpha
 
+  included <- as.character(included)
+  heterogeneous <- as.character(heterogeneous)
+  predictors <- as.character(predictors)
+
+  heterogeneous <- intersect(heterogeneous, included)
+
   # These three always co-vary with direction — not task-specific
   if (direction == "forward") {
     is_eligible <- function(p) is.finite(p) & p < alpha
     find_best <- which.min
-    update_heterogeneous <- c
+    update_heterogeneous <- union
+    remaining_predictors <- setdiff(predictors, heterogeneous)
   } else {
     is_eligible <- function(p) is.finite(p) & p >= alpha
     find_best <- which.max
     update_heterogeneous <- setdiff
+    remaining_predictors <- intersect(predictors, heterogeneous)
   }
 
-  remaining_predictors <- predictors
   steps <- list()
   step_id <- 1L
 
@@ -77,6 +84,7 @@ test_predictors <- function(
   list(
     included = included,
     heterogeneous = heterogeneous,
+    common = setdiff(included, heterogeneous),
     steps = steps,
     final_fits = shared_fits
   )

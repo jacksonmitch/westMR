@@ -46,12 +46,16 @@ build_control <- function(
   direction = "forward",
   verbose = FALSE,
   tol = 1e-6,
-  n_kmeans_init = 2,
+  n_kmeans_init = 3,
   kmeans_starts = 20,
   sigma_floor = NULL,
   irwls_max_iter = 50,
   irwls_tol = 1e-8,
-  weight_floor = 1e-10
+  weight_floor = 1e-10,
+  init_burnin = 10,
+  init_eps = 1e-6,
+  init_min_size = NULL,
+  use_mclust = TRUE
 ) {
   # User Input checks
 
@@ -78,12 +82,17 @@ build_control <- function(
   checkmate::assert_int(irwls_max_iter, lower = 1, add = collection)
   checkmate::assert_number(irwls_tol, lower = 0, add = collection)
   checkmate::assert_number(weight_floor, lower = 0, add = collection)
+  checkmate::assert_int(init_burnin, lower = 1, add = collection)
+  checkmate::assert_number(init_eps, lower = 0, upper = 0.5, add = collection)
+  checkmate::assert_int(init_min_size, lower = 1, add = collection, null.ok = TRUE)
+  checkmate::assert_flag(use_mclust, add = collection)
 
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)
   n_kmeans_init <- as.integer(n_kmeans_init)
   kmeans_starts <- as.integer(kmeans_starts)
   irwls_max_iter <- as.integer(irwls_max_iter)
+  init_burnin <- as.integer(init_burnin)
 
   control <- as.list(environment())
   class(control) <- "WMRControl"

@@ -81,7 +81,7 @@ irwls_gmr <- function(A, B, y, tau,
       y_bar_mat <- matrix(y_bar, nrow = n, ncol = G)
       trials_mat <- matrix(trials, nrow = n, ncol = G)
 
-      z <- eta + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
+      z <- eta_safe + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
       w <- tau * trials_mat * mu * (1 - mu)
     }
 

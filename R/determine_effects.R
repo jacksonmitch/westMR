@@ -6,16 +6,22 @@ determine_effects <- function(
   predictors = model$predictors
 ) {
   stopifnot(direction %in% c("forward", "backward"))
+  alpha <- model$control$alpha
 
   if (direction == "forward") {
     common_predictors <- predictors
+    heterogeneous <- character(0)
+
     is_eligible <- function(p) is.finite(p) & p < alpha
     find_best <- which.min
     update_common <- function(common, predictor) {
       setdiff(common, predictor)
     }
+
   } else {
     common_predictors <- character(0)
+    heterogeneous <- predictors
+
     is_eligible <- function(p) is.finite(p) & p >= alpha
     find_best <- which.max
     update_common <- function(common, predictor) {

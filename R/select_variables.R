@@ -9,7 +9,7 @@ select_variables <- function(
 
   if (direction == "forward") {
     included <- character(0)
-    update_included <- c
+    update_included <- union
   } else {
     included <- predictors
     update_included <- setdiff

@@ -1,182 +1,288 @@
-# Initialization helpers
+make_tau_from_partition <- function(partition, G, eps = 1e-6){
 
-make_init_clustering <- function(y,
-                                 G,
-                                 method = c("kmeans", "random", "random_balanced"),
-                                 kmeans_starts = 20) {
-  method <- match.arg(method)
-  y <- as.numeric(y)
-  n <- length(y)
+  partition <- as.integer(partition)
+  n <- length(partition)
 
-  if (G == 1) {
-    return(rep(1L, n))
+  if (G == 1L) {
+    return(matrix(1, nrow = n, ncol = 1L))
   }
 
-  if (method == "kmeans") {
+  if (length(unique(partition)) != G) {
+    stop("partition must contain exactly G groups.")
+  }
 
-    # kmeans cannot use more centers than distinct response values.
-    # This is especially important for Bernoulli/binomial responses.
-    if (length(unique(y)) < G) {
-      method <- "random_balanced"
-    } else {
-      return(stats::kmeans(
-        x = y,
+  partition <- match(partition, sort(unique(partition)))
+
+  tau <- matrix(eps / (G - 1L), nrow = n, ncol = G)
+  tau[cbind(seq_len(n), partition)] <- 1 - eps
+
+  colnames(tau) <- paste0("g", seq_len(G))
+
+  tau
+}
+
+random_partition_balanced <- function(n, G) {
+  partition <- rep(seq_len(G), length.out = n)
+  sample(partition, size = n, replace = FALSE)
+}
+
+rank_partition <- function(score, G){
+  score <- as.numeric(score)
+  n <- length(score)
+
+  ord <- order(score)
+  partition <- integer(n)
+
+  group_sizes <- rep(floor(n/G), G)
+  remainder <- n %% G
+
+  if (remainder > 0L) {
+    group_sizes[seq_len(remainder)] <- group_sizes[seq_len(remainder)] + 1L
+  }
+
+  start <- 1L
+
+  for (g in seq_len(G)) {
+    end <- start + group_sizes[g] - 1L
+    partition[ord[start:end]] <- g
+    start <- end + 1L
+  }
+
+  partition
+}
+
+make_initialization_features <- function(prepared_data,
+                                         family = c("gaussian","poisson","binomial")){
+
+  family <- match.arg(family)
+
+  A <- as.matrix(prepared_data$X_het)
+  B <- as.matrix(prepared_data$X_com)
+  y <- as.numeric(prepared_data$y)
+
+  X <- cbind(A, B)
+  n <- length(y)
+
+  if(family == "gaussian"){
+    fit0 <- stats::lm.fit(x=X, y=y)
+    fitted0 <- as.numeric(fit0$fitted.values)
+    resid0 <- as.numeric(fit0$residuals)
+
+    return(cbind(
+      response = y,
+      fitted = fitted0,
+      residual = resid0
+    ))
+  }
+
+  if(family == "poisson"){
+    fit0 <- stats::glm.fit(x=X, y=y, family = stats::poisson())
+
+    eta0 <- as.numeric(fit0$linear.predictors)
+    mu0 <- as.numeric(fit0$fitted.values)
+
+    resid0 <- (y - mu0) / sqrt(pmax(mu0, 1e-8))
+
+    return(cbind(
+      response = log(y + 0.5),
+      eta = eta0,
+      residual = resid0
+    ))
+  }
+
+  if (family == "binomial") {
+    y_bin <- pmin(pmax(y, 0), 1)
+
+    fit0 <- stats::glm.fit(
+      x = X,
+      y = y_bin,
+      family = stats::binomial()
+    )
+
+    eta0 <- as.numeric(X %*% fit0$coefficients)
+    mu0 <- as.numeric(fit0$fitted.values)
+
+    p0 <- pmin(pmax((y_bin + 0.5) / 2, 1e-8), 1 - 1e-8)
+    logit <- stats::qlogis(p0)
+
+    resid0 <- (y_bin - mu0) / sqrt(pmax(mu0 * (1 - mu0), 1e-8))
+
+    return(cbind(
+      response = logit,
+      eta = eta0,
+      residual = resid0
+    ))
+  }
+}
+
+make_tau_list <- function(prepared_data,
+                          G,
+                          control,
+                          family = c("gaussian", "poisson", "binomial")) {
+  family <- match.arg(family)
+
+  n <- prepared_data$n
+
+  if (G == 1L) {
+    tau <- matrix(1, nrow = n, ncol = 1L)
+    colnames(tau) <- "g1"
+    return(list(single = tau))
+  }
+
+  features <- make_initialization_features(
+    prepared_data = prepared_data,
+    family = family
+  )
+
+  features_scaled <- scale(features)
+  features_scaled[!is.finite(features_scaled)] <- 0
+
+  min_size <- max(2L, prepared_data$p_het + prepared_data$p_com + 1L)
+  min_size <- min(min_size, floor(n / G))
+
+  tau_list <- list()
+
+  part_response <- rank_partition(features[, "response"], G)
+
+  if (min(table(part_response)) >= min_size) {
+    tau_list$quantile_response <- make_tau_from_partition(
+      partition = part_response,
+      G = G,
+      eps = control$init_eps
+    )
+  }
+
+  part_resid <- rank_partition(features[, "residual"], G)
+
+  if (min(table(part_resid)) >= min_size) {
+    tau_list$quantile_residual <- make_tau_from_partition(
+      partition = part_resid,
+      G = G,
+      eps = control$init_eps
+    )
+  }
+
+  for (s in seq_len(control$n_kmeans_init)) {
+    km <- try(
+      stats::kmeans(
+        x = features_scaled,
         centers = G,
-        nstart = kmeans_starts
-      )$cluster)
+        nstart = control$kmeans_starts
+      ),
+      silent = TRUE
+    )
+
+    if (!inherits(km, "try-error") &&
+        length(unique(km$cluster)) == G &&
+        min(table(km$cluster)) >= min_size) {
+
+      tau_list[[paste0("kmeans_", s)]] <- make_tau_from_partition(
+        partition = km$cluster,
+        G = G,
+        eps = control$init_eps
+      )
     }
   }
 
-  if (method == "random") {
-    repeat {
-      cl <- sample.int(G, n, replace = TRUE)
+  n_random <- max(0L, control$n_init - control$n_kmeans_init)
 
-      if (length(unique(cl)) == G) {
-        return(cl)
+  for (s in seq_len(n_random)) {
+    part_random <- random_partition_balanced(n, G)
+
+    tau_list[[paste0("random_", s)]] <- make_tau_from_partition(
+      partition = part_random,
+      G = G,
+      eps = control$init_eps
+    )
+  }
+  if (family == "binomial" && prepared_data$p_het > 0L) {
+
+    A <- as.matrix(prepared_data$X_het)
+
+    for (j in seq_len(ncol(A))) {
+      part_x <- rank_partition(A[, j], G)
+
+      if (min(table(part_x)) >= min_size) {
+        tau_list[[paste0("quantile_A", j)]] <- make_tau_from_partition(
+          partition = part_x,
+          G = G,
+          eps = control$init_eps
+        )
+      }
+
+      part_neg_x <- rank_partition(-A[, j], G)
+
+      if (min(table(part_neg_x)) >= min_size) {
+        tau_list[[paste0("quantile_neg_A", j)]] <- make_tau_from_partition(
+          partition = part_neg_x,
+          G = G,
+          eps = control$init_eps
+        )
       }
     }
   }
 
-  if (method == "random_balanced") {
-    cl <- rep(seq_len(G), length.out = n)
-    cl <- sample(cl, size = n, replace = FALSE)
-
-    return(cl)
+  if (length(tau_list) == 0L) {
+    stop("No valid initialization starts were created.")
   }
+
+  tau_list
 }
 
-# Converts a cluster assignment vector to a 0/1 tau matrix (n x G)
-
-clustering_to_tau <- function(cl, G) {
-  n <- length(cl)
-  Z <- matrix(0, nrow = n, ncol = G)
-  Z[cbind(seq_len(n), cl)] <- 1
-  Z
-}
-
-
-# Returns a list of n_init tau matrices ready to pass to fit_fmr.
-# The first n_kmeans_init are kmeans-seeded; the rest are random_balanced.
-
-
-make_tau_list <- function(y, G, control, family = c("gaussian", "poisson", "binomial")) {
+select_best_initialization <- function(tau_list,
+                                       prepared_data,
+                                       G,
+                                       family = c("gaussian", "poisson", "binomial"),
+                                       control) {
   family <- match.arg(family)
 
-  n_init <- control$n_init
-  n_kmeans_init <- control$n_kmeans_init
-  kmeans_starts <- control$kmeans_starts
-  n <- length(y)
+  best_fit <- NULL
+  best_loglik <- -Inf
+  best_name <- NA_character_
 
-  lapply(seq_len(n_init), function(i) {
+  logliks <- rep(NA_real_, length(tau_list))
+  names(logliks) <- names(tau_list)
 
-    if (G == 1) {
-      return(matrix(1, nrow = n, ncol = 1))
+  failures <- character(0)
+
+  for (s in seq_along(tau_list)) {
+    fit_s <- try(
+      em_fmr(
+        prepared_data = prepared_data,
+        G = G,
+        tau = tau_list[[s]],
+        family = family,
+        control = control,
+        max_iter = control$init_burnin,
+        tol = 0
+      ),
+      silent = TRUE
+    )
+
+    if (inherits(fit_s, "try-error")) {
+      failures <- c(failures, names(tau_list)[s])
+      next
     }
 
-    if (family == "binomial") {
-      return(make_random_hard_tau(n = n, G = G))
+    logliks[s] <- fit_s$loglik
+
+    if (is.finite(fit_s$loglik) && fit_s$loglik > best_loglik) {
+      best_fit <- fit_s
+      best_loglik <- fit_s$loglik
+      best_name <- names(tau_list)[s]
     }
-
-    method <- if (i <= n_kmeans_init) {
-      "kmeans"
-    } else {
-      "random_balanced"
-    }
-
-    cl <- make_init_clustering(
-      y = y,
-      G = G,
-      method = method,
-      kmeans_starts = kmeans_starts
-    )
-
-    clustering_to_tau(cl, G)
-  })
-}
-
-make_random_hard_tau <- function(n, G) {
-  assignments <- sample.int(G, size = n, replace = TRUE)
-
-  # Ensure every component is represented
-  while (length(unique(assignments)) < G) {
-    assignments <- sample.int(G, size = n, replace = TRUE)
   }
 
-  tau <- matrix(0, nrow = n, ncol = G)
-  tau[cbind(seq_len(n), assignments)] <- 1
-  tau
-}
-
-# Create initial EM parameter values from an initial clustering
-
-initialize_parameters <- function(A,
-                                  B,
-                                  y,
-                                  G_length,
-                                  method,
-                                  kmeans_starts,
-                                  cl_init,
-                                  sigma_floor) {
-  n <- nrow(A)
-
-  # Convert hard clustering to indicator matrix Z
-  Z <- matrix(0, nrow = n, ncol = G_length)
-  Z[cbind(seq_len(n), cl_init)] <- 1
-
-  pi_g <- colMeans(Z)
-
-  # Use one M-step from the initial hard clustering to get starting coefficients
-  if (method == "sqr") {
-    fit0 <- m_step_sqr(
-      A = A,
-      B = B,
-      y = y,
-      tau = Z,
-      sigma_floor = sigma_floor
-    )
-  } else if (method == "qr") {
-    fit0 <- m_step_qr(
-      A = A,
-      B = B,
-      y = y,
-      tau = Z,
-      sigma_floor = sigma_floor
-    )
+  if (is.null(best_fit)) {
+    stop("All initialization attempts failed.")
   }
-
-  beta_g <- fit0$beta_g
-  beta <- fit0$beta
-
-  # Match the old code: compute sigma from the initial hard clustering
-  mu <- sweep(
-    A %*% t(beta_g),
-    1,
-    common_eta(B, beta),
-    "+"
-  )
-
-  res2 <- (y - mu)^2
-
-  sigma_g <- sqrt(
-    pmax(
-      1e-8,
-      colSums(Z * res2) / pmax(1e-8, colSums(Z))
-    )
-  )
-
-  if (is.null(sigma_floor)) {
-    sigma_floor <- 0.05 * stats::sd(y)
-  }
-
-  sigma_g <- pmax(sigma_floor, sigma_g)
 
   list(
-    beta_g = beta_g,
-    beta = beta,
-    pi = pi_g,
-    sigma = sigma_g,
-    tau = Z,
-    cl_init = cl_init,
-    method = method
+    best_fit = best_fit,
+    best_loglik = best_loglik,
+    best_name = best_name,
+    logliks = logliks,
+    failures = failures
   )
 }
+

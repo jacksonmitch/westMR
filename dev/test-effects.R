@@ -9,7 +9,7 @@ test_data <- do.call(simulate_fmr,
 model <- WMRModel$new(
   formula = formula(test_data),
   data = test_data,
-  G_values = 1:3,
+  G_values = 2:3,
   family = "gaussian",
   control = build_control(n_init = 5)
 )
