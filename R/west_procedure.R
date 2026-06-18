@@ -91,14 +91,20 @@ west_procedure <- function(
 
   tab <- do.call(rbind, rows)
 
-  valid <- is.finite(tab$bic_null) & is.finite(tab$p_value)
+  if (direction == "forward") {
+    model_bic <- tab$bic_alt
+  }
+  else {
+    model_bic <- tab$bic_null
+  }
+  valid <- is.finite(model_bic) & is.finite(tab$p_value)
 
   if (!any(valid)) {
     p0 <- NA_real_
     weights <- rep(NA_real_, nrow(tab))
     reject <- FALSE
   } else {
-    bic_valid <- tab$bic_null[valid]
+    bic_valid <- model_bic[valid]
     shifted <- -0.5 * (bic_valid - min(bic_valid))
     w_valid <- exp(shifted) / sum(exp(shifted))
 

@@ -232,9 +232,8 @@ make_tau_list <- function(prepared_data,
 select_best_initialization <- function(tau_list,
                                        prepared_data,
                                        G,
-                                       family = c("gaussian", "poisson", "binomial"),
+                                       family,
                                        control) {
-  family <- match.arg(family)
 
   best_fit <- NULL
   best_loglik <- -Inf
@@ -245,18 +244,19 @@ select_best_initialization <- function(tau_list,
 
   failures <- character(0)
 
+  control$tol <- 0
+  control$max_iter <- control$init_burnin
+
   for (s in seq_along(tau_list)) {
     fit_s <- try(
       em_fmr(
         prepared_data = prepared_data,
         G = G,
-        tau = tau_list[[s]],
+        em_state = list(tau = tau_list[[s]]),
         family = family,
-        control = control,
-        max_iter = control$init_burnin,
-        tol = 0
-      ),
-      silent = TRUE
+        control = control
+      )
+      # ,silent = TRUE
     )
 
     if (inherits(fit_s, "try-error")) {

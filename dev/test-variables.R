@@ -3,15 +3,15 @@ devtools::load_all()
 
 
 test_data <- do.call(simulate_fmr,
-                       c(scenarios$three_group_variables,
+                       c(scenarios$three_group_four_variables,
                          list(n = 500, seed = 1)))
 
 model <- WMRModel$new(
   formula = formula(test_data),
   data = test_data,
-  G_values = 1:3,
+  G_values = 2:3,
   family = "gaussian",
-  control = build_control()
+  control = build_control(n_init = 5)
 )
 
 forward_fit <- select_variables(
@@ -25,3 +25,23 @@ backward_fit <- select_variables(
   direction = "backward"
 )
 print(backward_fit)
+
+# bench <- microbenchmark::microbenchmark(
+#   forward_fit = determine_effects(
+#     model = model,
+#     direction = "forward"
+#   ),
+#   backward_fit = determine_effects(
+#     model = model,
+#     direction = "backward"
+#   ),
+#   times = 10
+# )
+# print(bench)
+
+# profvis::profvis({
+#   forward_fit = determine_effects(
+#     model = model,
+#     direction = "forward"
+#   )
+# })

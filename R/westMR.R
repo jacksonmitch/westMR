@@ -49,16 +49,6 @@ westMR <- function(
     add = collection
   )
   checkmate::assert_class(control, "WMRControl", add = collection)
-  if (family == "gaussian" && is.null(control$sigma_floor)) {
-    mf <- stats::model.frame(
-      formula = formula,
-      data = data,
-      na.action = stats::na.fail
-    )
-
-    response <- as.numeric(stats::model.response(mf))
-    control$sigma_floor <- 0.05 * stats::sd(response)
-  }
 
   if (!collection$isEmpty()) {
     err_messages <- paste0("- ", collection$getMessages(), collapse = "\n")
@@ -69,7 +59,7 @@ westMR <- function(
   model <- WMRModel$new(
     formula = formula,
     data = data,
-    G_values = 1:G_max, # seq_len(as.integer(G_max)) ?? 2:G ??
+    G_values = 2:G_max, # seq_len(as.integer(G_max)) ?? 2:G ??
     family = family,
     control = control
   )

@@ -38,7 +38,7 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 
   for (s in steps) {
     out_set <- setdiff(all_predictors, in_set)
-    state   <- label_state(in_set, out_set)
+    state <- label_state(in_set, out_set)
 
     cat(sprintf("Step %d  (%s)\n", s$step, state))
     cat(sprintf("  %-20s  %-12s\n", "Candidate", "weighted p-value"))
@@ -52,8 +52,11 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 
     if (!is.na(s$chosen)) {
       cat(sprintf("  Chosen: %s\n", s$chosen))
-      in_set <- if (direction == "forward") c(in_set, s$chosen)
-      else setdiff(in_set, s$chosen)
+      in_set <- if (direction == "forward") {
+        c(in_set, s$chosen)
+      } else {
+        setdiff(in_set, s$chosen)
+      }
     } else {
       cat("  No eligible candidate -- stopping.\n")
     }
@@ -73,23 +76,37 @@ steps_table <- function(x, ...) UseMethod("steps_table")
 #' @export
 steps_table.determine_effects <- function(x, ...) {
   label_state <- function(het, common) {
-    if (length(het) == 0)    return("all common")
-    if (length(common) == 0) return("all heterogeneous")
-    paste0("het: ", paste(het, collapse = ", "),
-           "  |  common: ", paste(common, collapse = ", "))
+    if (length(het) == 0) {
+      return("all common")
+    }
+    if (length(common) == 0) {
+      return("all heterogeneous")
+    }
+    paste0(
+      "het: ", paste(het, collapse = ", "),
+      "  |  common: ", paste(common, collapse = ", ")
+    )
   }
-  print_steps(x$steps, union(x$heterogeneous, x$homogeneous),
-              x$direction, label_state)
+  print_steps(
+    x$steps, union(x$heterogeneous, x$homogeneous),
+    x$direction, label_state
+  )
   invisible(x)
 }
 
 #' @export
 steps_table.select_variables <- function(x, ...) {
   label_state <- function(included, excluded) {
-    if (length(included) == 0) return("none included")
-    if (length(excluded) == 0) return("all included")
-    paste0("included: ", paste(included, collapse = ", "),
-           "  |  excluded: ", paste(excluded, collapse = ", "))
+    if (length(included) == 0) {
+      return("none included")
+    }
+    if (length(excluded) == 0) {
+      return("all included")
+    }
+    paste0(
+      "included: ", paste(included, collapse = ", "),
+      "  |  excluded: ", paste(excluded, collapse = ", ")
+    )
   }
   print_steps(x$steps, x$all_predictors, x$direction, label_state)
   invisible(x)
@@ -111,7 +128,7 @@ print.select_variables <- function(x, ...) {
 
 #' @export
 summary.determine_effects <- function(object, ...) {
-  cat("westMR effect-type determination\n")
+  cat("westMR effect-type determination results\n")
   cat("---------------------------------\n")
   cat("Direction: ", object$direction, "\n", sep = "")
   cat("Alpha:     ", object$alpha, "\n", sep = "")
@@ -119,22 +136,28 @@ summary.determine_effects <- function(object, ...) {
   cat("\n")
 
   cat("Heterogeneous: ")
-  cat(if (length(object$heterogeneous) == 0) "none"
-      else paste(object$heterogeneous, collapse = ", "))
+  cat(if (length(object$heterogeneous) == 0) {
+    "none"
+  } else {
+    paste(object$heterogeneous, collapse = ", ")
+  })
   cat("\nHomogeneous:   ")
-  cat(if (length(object$homogeneous)   == 0) "none"
-      else paste(object$homogeneous,   collapse = ", "))
+  cat(if (length(object$homogeneous) == 0) {
+    "none"
+  } else {
+    paste(object$homogeneous, collapse = ", ")
+  })
   cat("\n\n")
 
   cat("Final model:\n")
   cat("  Formula: ", format(object$final_formula), "\n", sep = "")
-  cat("  Common:  ", format(object$final_common),  "\n", sep = "")
+  cat("  Common:  ", format(object$final_common), "\n", sep = "")
   cat("\n")
 }
 
 #' @export
 summary.select_variables <- function(object, ...) {
-  cat("westMR variable selection\n")
+  cat("westMR variable selection results\n")
   cat("--------------------------\n")
   cat("Direction: ", object$direction, "\n", sep = "")
   cat("Alpha:     ", object$alpha, "\n", sep = "")
@@ -142,8 +165,11 @@ summary.select_variables <- function(object, ...) {
   cat("\n")
 
   cat("Selected: ")
-  cat(if (length(object$selected) == 0) "none"
-      else paste(object$selected, collapse = ", "))
+  cat(if (length(object$selected) == 0) {
+    "none"
+  } else {
+    paste(object$selected, collapse = ", ")
+  })
   cat("\n\n")
 
   cat("Final formula: ", format(object$final_formula), "\n\n", sep = "")

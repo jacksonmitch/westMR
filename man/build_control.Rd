@@ -11,12 +11,17 @@ build_control(
   direction = "forward",
   verbose = FALSE,
   tol = 1e-06,
-  n_kmeans_init = 2,
+  n_kmeans_init = 3,
   kmeans_starts = 20,
   sigma_floor = NULL,
   irwls_max_iter = 50,
   irwls_tol = 1e-08,
-  weight_floor = 1e-10
+  weight_floor = 1e-10,
+  init_burnin = 10,
+  init_eps = 1e-06,
+  init_min_size = NULL,
+  use_mclust = TRUE,
+  return_qr_parts = FALSE
 )
 }
 \arguments{
@@ -55,6 +60,16 @@ variance.}
 \item{irwls_tol}{description}
 
 \item{weight_floor}{description}
+
+\item{init_burnin}{description}
+
+\item{init_eps}{desc}
+
+\item{init_min_size}{desc}
+
+\item{use_mclust}{description}
+
+\item{return_qr_parts}{description}
 }
 \value{
 A structured list of class \code{"WMRControl"} containing all

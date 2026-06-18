@@ -2,9 +2,13 @@
 #   # 1. Mock your object exactly how your package generates it
 #   # (Replace this with a minimal dummy version or a saved test object)
 
-test_data <- do.call(simulate_fmr,
-                     c(scenarios$two_group_effects,
-                       list(n = 300, seed = 1)))
+test_data <- do.call(
+  simulate_fmr,
+  c(
+    scenarios$two_group_effects,
+    list(n = 300, seed = 1)
+  )
+)
 
 model <- WMRModel$new(
   formula = formula(test_data),
@@ -31,7 +35,7 @@ test_that("print.fit_fmr uses the correct method", {
 })
 test_that("print.determine_effects uses the correct method", {
   output <- capture.output(print(test_effects))
-  expect_match(output[[1]], "westMR effect-type determination")
+  expect_match(output[[1]], "westMR effect-type determination results")
 })
 test_that("select_variables uses the correct method", {
   output <- capture.output(print(test_variables))

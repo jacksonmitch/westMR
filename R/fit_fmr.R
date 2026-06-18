@@ -75,11 +75,11 @@ add_extra_tau_start <- function(init_list,
 }
 
 
+# Find the best fit given a specific G and a list of initializations
 fit_fmr <- function(model,
                     G,
                     init_list,
                     prepared_data) {
-
   control <- model$control
   family <- model$family
 
@@ -94,20 +94,23 @@ fit_fmr <- function(model,
     control = control
   )
 
-  # Final EM stage
+  init_values <- init_fit$best_fit$em_state
   # continue from the best burn-in start
+  em_state <- list(
+    pi_g = init_values[["pi_g"]],
+    tau = init_values[["tau"]],
+    beta_g = init_values[["beta_g"]],
+    beta = init_values[["beta"]],
+    sigma_g = init_values[["sigma_g"]]
+  )
+
+  # Final EM stage
   best_fit <- em_fmr(
     prepared_data = prepared_data,
     G = G,
-    tau = init_fit$best_fit$tau,
+    em_state = em_state,
     family = family,
-    control = control,
-    max_iter = control$max_iter,
-    tol = control$tol,
-    beta_g_start = init_fit$best_fit$beta_g,
-    beta_start = init_fit$best_fit$beta,
-    sigma_g_start = init_fit$best_fit$sigma_g,
-    pi_g_start = init_fit$best_fit$pi_g
+    control = control
   )
 
   k <- count_params_gmr(
@@ -123,23 +126,23 @@ fit_fmr <- function(model,
     k = k
   )
 
+  final_em_state <- best_fit$em_state
+
   out <- list(
     best_fit = best_fit,
-
-    beta_g = best_fit$beta_g,
-    beta = best_fit$beta,
-    sigma_g = best_fit$sigma_g,
-    pi_g = best_fit$pi_g,
-    tau = best_fit$tau,
-
+    beta_g = final_em_state[["beta_g"]],
+    beta = final_em_state[["beta"]],
+    sigma_g = final_em_state[["sigma_g"]],
+    pi_g = final_em_state[["pi_g"]],
+    tau = final_em_state[["tau"]],
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
 
-    best_init_name = init_fit$best_name,
-    best_init_loglik = init_fit$best_loglik,
-    n_valid_init = sum(is.finite(init_fit$logliks)),
+    # best_init_name = init_fit$best_name,
+    # best_init_loglik = init_fit$best_loglik,
+    # n_valid_init = sum(is.finite(init_fit$logliks)),
 
     bic = bic,
     k = k,
@@ -147,19 +150,19 @@ fit_fmr <- function(model,
     family = family,
     G = G,
     n_init = length(init_list),
-    logliks = init_fit$logliks,
+    # logliks = init_fit$logliks,
 
     irwls_iterations = best_fit$irwls_iterations,
     irwls_converged = best_fit$irwls_converged,
 
-    init = list(
-      strategy = "multistart_tau_burnin",
-      burnin = control$init_burnin,
-      n_starts = length(init_list),
-      best_start = init_fit$best_name,
-      burnin_logliks = init_fit$logliks,
-      failed_starts = init_fit$failures
-    ),
+    # init = list(
+    #   strategy = "multistart_tau_burnin",
+    #   burnin = control$init_burnin,
+    #   n_starts = length(init_list),
+    #   best_start = init_fit$best_name,
+    #   burnin_logliks = init_fit$logliks,
+    #   failed_starts = init_fit$failures
+    # ),
 
     call = match.call()
   )

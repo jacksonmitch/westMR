@@ -1,25 +1,27 @@
-irwls_gmr <- function(A, B, y, tau,
-                      beta_g = NULL, beta = NULL, trials = NULL,
-                      maxit = 50, tol = 1e-8, weight_floor = 1e-10,
-                      family = c("poisson", "binomial")
-                      ){
 
+irwls_fmr <- function(dat, em_state, control,
+                      family = c("poisson", "binomial")) {
   family <- match.arg(family)
+  A <- dat$X_het
+  B <- dat$X_com
+  stopifnot(!is.null(dat$B))
+  y <- dat$y
 
-  A <- as.matrix(A)
-
-  if (is.null(B)) {
-    B <- matrix(numeric(0), nrow = nrow(A), ncol = 0)
-  } else {
-    B <- as.matrix(B)
-  }
-
-  y <- as.numeric(y)
-  tau <- as.matrix(tau)
+  tau <- em_state[["tau"]]
+  beta_g <- em_state[["beta_g"]]
+  beta <- em_state[["beta"]]
 
   n <- nrow(A)
   G <- ncol(tau)
 
+  maxit <- control$maxit
+  tol <- control$tol
+  weight_floor <- control$weight_floor
+
+  # I think trials should be saved somewhere but don't know where
+  trials <- dat$trials
+  # this will keep it being generated until we decide where it goes, but
+  # calculations stay safe
   if (is.null(trials)) {
     trials <- rep(1, n)
   }
@@ -28,7 +30,6 @@ irwls_gmr <- function(A, B, y, tau,
 
   # Initial values for beta_g and beta
   if (is.null(beta_g) || is.null(beta)) {
-
     if (family == "poisson") {
       z0 <- log(pmax(y, 0) + 0.25)
     }
@@ -38,20 +39,14 @@ irwls_gmr <- function(A, B, y, tau,
       p0 <- pmin(pmax(p0, 1e-8), 1 - 1e-8)
       z0 <- stats::qlogis(p0)
     }
-
-    init <- wls_sqr(
-      A = A,
-      B = B,
+    out <- wls_sqr(
+      dat = dat,
       z = z0,
-      w = tau
+      weights = tau,
+      control = control
     )
-
-    beta_g <- init$beta_g
-    beta <- init$beta
-
-  } else {
-    beta_g <- as.matrix(beta_g)
-    beta <- as.numeric(beta)
+    beta_g <- out[["beta_g"]]
+    beta <- out[["beta"]]
   }
 
   converged <- FALSE
@@ -72,7 +67,6 @@ irwls_gmr <- function(A, B, y, tau,
     }
 
     if (family == "binomial") {
-
       eta_safe <- pmin(pmax(eta, -30), 30)
       mu <- stats::plogis(eta_safe)
       mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
@@ -83,19 +77,20 @@ irwls_gmr <- function(A, B, y, tau,
 
       z <- eta_safe + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
       w <- tau * trials_mat * mu * (1 - mu)
+
     }
 
     w <- pmax(w, weight_floor)
 
-    fit <- wls_sqr(
-      A = A,
-      B = B,
-      z = z,
-      w = w
-    )
 
-    beta_g <- fit$beta_g
-    beta <- fit$beta
+    out <- wls_sqr(
+      dat = dat,
+      z = z,
+      weights = w,
+      control = control
+    )
+    beta_g <- out[["beta_g"]]
+    beta <- out[["beta"]]
 
     diff <- max(abs(c(beta_g - beta_g_old, beta - beta_old)))
 
@@ -105,10 +100,9 @@ irwls_gmr <- function(A, B, y, tau,
     }
   }
 
-  list(
-    beta_g = beta_g,
-    beta = beta,
-    iterations = r,
-    converged = converged
-  )
+  em_state[["beta_g"]] <- beta_g
+  em_state[["beta"]] <- beta
+  em_state[["irwls_iterations"]] <- r
+  em_state[["irwls_converged"]] <- converged
+  em_state
 }

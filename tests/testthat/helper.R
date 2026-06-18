@@ -70,7 +70,7 @@ scenarios <- list(
     pi = c(0.5, 0.5),
     sigma = c(1.0, 1.0)
   ),
-  three_group_variables = list(
+  three_group_four_variables = list(
     betas = rbind(
       g1 = c("x0" = -3, x1 = 0.3, x2 = -0.4, x3 = 0.25, x4 = 0),
       g2 = c("x0" = 0, x1 = 0.6, x2 = -0.4, x3 = 0.25, x4 = 0),

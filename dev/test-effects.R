@@ -6,6 +6,7 @@ test_data <- do.call(simulate_fmr,
                      c(scenarios$two_group_effects,
                        list(n = 400, seed = 123)))
 
+
 model <- WMRModel$new(
   formula = formula(test_data),
   data = test_data,
@@ -19,29 +20,49 @@ forward_fit <- determine_effects(
   direction = "forward"
 )
 print(forward_fit)
-
-backward_fit <- determine_effects(
-  model = model,
-  direction = "backward"
-)
-print(backward_fit)
-
-# bench <- microbenchmark::microbenchmark(
-#   forward_fit = determine_effects(
-#     model = model,
-#     direction = "forward"
-#   ),
-#   backward_fit = determine_effects(
-#     model = model,
-#     direction = "backward"
-#   ),
-#   times = 10
+#
+# backward_fit <- determine_effects(
+#   model = model,
+#   direction = "backward"
 # )
-# print(bench)
+# print(backward_fit)
+
+bench <- microbenchmark::microbenchmark(
+  forward_fit = determine_effects(
+    model = model,
+    direction = "forward"
+  ),
+  # backward_fit = determine_effects(
+  #   model = model,
+  #   direction = "backward"
+  # ),
+  # westMR_test = westMR(
+  #   formula = formula,
+  #   data = test_data,
+  #   G_max = 3,
+  #   family = "gaussian",
+  #   task = "effects",
+  #   control = build_control(n_init = 5)
+  # ),
+  # westMR_sim = westMR(
+  #   formula = formula,
+  #   data = sim_data,
+  #   G_max = 3,
+  #   family = "gaussian",
+  #   task = "effects",
+  #   control = build_control(n_init = 5)
+  # ),
+  times = 10
+)
+print(bench)
 
 # profvis::profvis({
-#   forward_fit = determine_effects(
-#     model = model,
-#     direction = "forward"
+#   westMR_test = westMR(
+#     formula = formula,
+#     data = sim_data,
+#     G_max = 3,
+#     family = "gaussian",
+#     task = "effects",
+#     control = build_control(n_init = 5)
 #   )
 # })

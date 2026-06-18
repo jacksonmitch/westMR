@@ -1,20 +1,16 @@
 # Universal weighted least square structured QR decomposition function
 
-wls_sqr <- function(A, B, z, w, return_qr_parts = FALSE) {
+wls_sqr <- function(dat, z, weights, control) {
+  A <- dat$X_het
+  B <- dat$X_com
 
-  A <- as.matrix(A)
+  stopifnot(!is.null(B))
 
-  if (is.null(B)) {
-    B <- matrix(numeric(0), nrow = nrow(A), ncol = 0)
-  } else {
-    B <- as.matrix(B)
-  }
+  w <- weights
 
-  w <- as.matrix(w)
-
-  n <- nrow(A)
+  n <- dat$n
   G <- ncol(w)
-  p1 <- ncol(A)
+  p1 <- dat$p_het
   q <- ncol(B)
   nG <- n * G
 
@@ -91,7 +87,8 @@ wls_sqr <- function(A, B, z, w, return_qr_parts = FALSE) {
     } else {
       rhs <- b_list[[g]]
     }
-    as.list(environment())
+    as.list(environment()) # is this for debugging?
+
     beta_g[g, ] <- backsolve(R1_list[[g]], rhs)
   }
 
@@ -100,7 +97,8 @@ wls_sqr <- function(A, B, z, w, return_qr_parts = FALSE) {
     beta = beta
   )
 
-  if (isTRUE(return_qr_parts)) {
+
+  if (isTRUE(control$return_qr_parts)) {
     out$R1_list <- R1_list
     out$E_list <- E_list
     out$R2 <- R2

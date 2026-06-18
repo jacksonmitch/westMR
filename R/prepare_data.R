@@ -2,6 +2,8 @@
 # All structural checks happen once here so callers can trust the contents.
 
 prepare_data <- function(model, included = model$predictors, common = NULL) {
+
+
   mf <- stats::model.frame(
     formula = model$formula,
     data = model$data,
@@ -14,6 +16,7 @@ prepare_data <- function(model, included = model$predictors, common = NULL) {
     predictors = setdiff(included, common),
     response = model$response
   )
+  # Creates intercept column
   X_het <- stats::model.matrix(het_formula, data = mf)
 
   if (length(common) > 0) {
@@ -73,7 +76,8 @@ WMRData <- R6::R6Class(
 
       if (n <= ncol(X_het)) {
         stop(sprintf(
-          "Need n > ncol(X_het) for the weighted QR M-step. Got n = %d, ncol(X_het) = %d.",
+          "Need n > ncol(X_het) for the weighted QR M-step.
+          Got n = %d, ncol(X_het) = %d.",
           n, ncol(X_het)
         ))
       }

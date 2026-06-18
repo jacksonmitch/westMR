@@ -20,6 +20,12 @@ WMRModel <- R6::R6Class(
       self$data <- data
       self$G_values <- G_values
       self$family <- family
+
+      if (is.null(control$sigma_floor)) {
+        mf <- stats::model.frame(formula, data, na.action = stats::na.fail)
+        response <- as.numeric(stats::model.response(mf))
+        control$sigma_floor <- 0.05 * stats::sd(response)
+      }
       self$control <- control
     },
     print = function(...) {
@@ -33,3 +39,7 @@ WMRModel <- R6::R6Class(
     }
   )
 )
+
+
+
+

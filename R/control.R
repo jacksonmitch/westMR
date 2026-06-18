@@ -27,6 +27,11 @@
 #' @param irwls_max_iter description
 #' @param irwls_tol description
 #' @param weight_floor description
+#' @param return_qr_parts description
+#' @param init_burnin description
+#' @param init_eps desc
+#' @param init_min_size desc
+#' @param use_mclust description
 #'
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
@@ -55,7 +60,8 @@ build_control <- function(
   init_burnin = 10,
   init_eps = 1e-6,
   init_min_size = NULL,
-  use_mclust = TRUE
+  use_mclust = TRUE,
+  return_qr_parts = FALSE
 ) {
   # User Input checks
 
@@ -64,7 +70,8 @@ build_control <- function(
   checkmate::assert_number(alpha, lower = 0, upper = 1, add = collection)
   checkmate::assert_int(max_iter, lower = 1, add = collection)
   checkmate::assert_int(n_init, lower = 1, add = collection)
-  checkmate::assert_choice(direction, choices = c("forward", "backward"), add = collection)
+  checkmate::assert_choice(direction, choices = c("forward", "backward"),
+                           add = collection)
   checkmate::assert_flag(verbose, add = collection)
   checkmate::assert_number(tol, lower = 0, add = collection) # TODO: allows 0
   checkmate::assert_int(n_kmeans_init, lower = 0, add = collection)
@@ -84,7 +91,8 @@ build_control <- function(
   checkmate::assert_number(weight_floor, lower = 0, add = collection)
   checkmate::assert_int(init_burnin, lower = 1, add = collection)
   checkmate::assert_number(init_eps, lower = 0, upper = 0.5, add = collection)
-  checkmate::assert_int(init_min_size, lower = 1, add = collection, null.ok = TRUE)
+  checkmate::assert_int(init_min_size, lower = 1, add = collection,
+                        null.ok = TRUE)
   checkmate::assert_flag(use_mclust, add = collection)
 
   max_iter <- as.integer(max_iter)

@@ -16,12 +16,12 @@ select_variables <- function(
   }
 
   result <- test_predictors(
-    model           = model,
-    predictors      = predictors,
-    included        = included,
-    heterogeneous   = included, # selection: het always mirrors included
+    model = model,
+    predictors = predictors,
+    included = included,
+    heterogeneous = included, # selection: het always mirrors included
     update_included = update_included,
-    direction       = direction
+    direction = direction
   )
 
   out <- list(

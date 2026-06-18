@@ -35,6 +35,7 @@ test_predictors <- function(
 
   common <- setdiff(included, heterogeneous)
   shared_data <- prepare_data(model, included = included, common = common)
+
   shared_fits <- fit_across_G(model, shared_data)
 
   while (length(remaining_predictors) > 0) {
