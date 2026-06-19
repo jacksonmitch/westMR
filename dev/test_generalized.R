@@ -64,7 +64,7 @@ print(lapply(fits_gauss, function(fit) {
 
 set.seed(20)
 
-n <- 400
+n <- 500
 G_values <- 2:3
 
 x1 <- rnorm(n)
@@ -84,8 +84,8 @@ y <- rpois(n, lambda = mu)
 dat_pois <- data.frame(y = y, x1 = x1, x2 = x2)
 
 control_pois <- build_control(
-  n_init = 5,
-  n_kmeans_init = 2,
+  n_init = 10,
+  n_kmeans_init = 3,
   max_iter = 150,
   irwls_max_iter = 50,
   irwls_tol = 1e-8,
@@ -132,39 +132,49 @@ print(lapply(fits_pois, function(fit) {
 
 # Test Bernoulli-binomial mixture regression
 
-
 set.seed(30)
 
-n <- 1000
+n <- 500
 G_values <- 2:3
 
 x1 <- rnorm(n)
 x2 <- rnorm(n)
 
-true_g <- sample(1:2, n, replace = TRUE, prob = c(0.45, 0.55))
+binomial_size <- sample(15:30, n, replace = TRUE)
+
+true_g <- sample(
+  1:2,
+  size = n,
+  replace = TRUE,
+  prob = c(0.45, 0.55)
+)
 
 eta <- ifelse(
   true_g == 1,
   -1.25 + 0.75 * x1,
-  1.25 + 0.75 * x1
+  1.25 - 0.75 * x1
 ) + 0.2 * x2
 
 p <- stats::plogis(eta)
-y <- stats::rbinom(n, size = 1, prob = p)
 
-dat_bin <- data.frame(y = y, x1 = x1, x2 = x2)
+y <- stats::rbinom(
+  n = n,
+  size = binomial_size,
+  prob = p
+)
 
-p <- stats::plogis(eta)
-y <- stats::rbinom(n, size = 1, prob = p)
-
-dat_bin <- data.frame(y = y, x1 = x1, x2 = x2)
+dat_bin_grouped <- data.frame(
+  y = y,
+  binomial_size = binomial_size,
+  x1 = x1,
+  x2 = x2,
+  true_g = true_g
+)
 
 control_bin <- build_control(
-  n_init = 50,
-  n_kmeans_init = 10,
-  kmeans_starts = 25,
-  max_iter = 500,
-  init_burnin = 30,
+  n_init = 20,
+  n_kmeans_init = 5,
+  max_iter = 200,
   irwls_max_iter = 100,
   irwls_tol = 1e-8,
   weight_floor = 1e-10,
@@ -173,7 +183,7 @@ control_bin <- build_control(
 
 model_bin <- WMRModel$new(
   formula = y ~ x1 + x2,
-  data = dat_bin,
+  data = dat_bin_grouped,
   G_values = G_values,
   family = "binomial",
   control = control_bin
@@ -182,15 +192,18 @@ model_bin <- WMRModel$new(
 prepared_bin <- prepare_data(
   model = model_bin,
   included = model_bin$predictors,
-  common = "x2"
+  common = "x2",
+  binomial_size = "binomial_size"
 )
+
+prepared_bin$binomial_size[1:10]
+range(prepared_bin$binomial_size)
 
 fits_bin <- fit_across_G(
   model = model_bin,
   prepared_data = prepared_bin
 )
 
-cat("\n================ Binomial results ================\n")
 print(lapply(fits_bin, function(fit) {
   list(
     G = fit$G,
@@ -198,53 +211,9 @@ print(lapply(fits_bin, function(fit) {
     bic = fit$bic,
     converged = fit$converged,
     pi_g = fit$pi_g,
-    sigma_g = fit$sigma_g,
     beta_g = fit$beta_g,
     beta = fit$beta,
     irwls_iterations = fit$irwls_iterations,
     irwls_converged = fit$irwls_converged
   )
 }))
-
-tau_oracle <- make_tau_from_partition(
-  partition = true_g,
-  G = 2,
-  eps = 1e-6
-)
-
-fit_bin_oracle <- em_fmr(
-  prepared_data = prepared_bin,
-  G = 2,
-  tau = tau_oracle,
-  family = "binomial",
-  control = control_bin,
-  max_iter = 500,
-  tol = 1e-8
-)
-
-fit_bin_oracle$converged
-fit_bin_oracle$iterations
-fit_bin_oracle$loglik
-fit_bin_oracle$pi_g
-fit_bin_oracle$beta_g
-fit_bin_oracle$beta
-
-fit_bin_oracle_1 <- em_fmr(
-  prepared_data = prepared_bin,
-  G = 2,
-  tau = tau_oracle,
-  family = "binomial",
-  control = control_bin,
-  max_iter = 1,
-  tol = 0
-)
-
-fit_bin_oracle_1$pi_g
-fit_bin_oracle_1$beta_g
-fit_bin_oracle_1$beta
-
-diff_ll <- diff(fit_bin_oracle$loglik_trace)
-
-tail(fit_bin_oracle$loglik_trace, 20)
-tail(diff_ll, 20)
-min(diff_ll)

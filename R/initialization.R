@@ -91,7 +91,14 @@ make_initialization_features <- function(prepared_data,
   }
 
   if (family == "binomial") {
-    y_bin <- pmin(pmax(y, 0), 1)
+    binomial_size <- prepared_data$binomial_size
+
+    if (is.null(binomial_size)) {
+      binomial_size <- rep(1, n)
+    }
+
+    binomial_size <- as.numeric(binomial_size)
+    y_bin <- cbind(y, binomial_size - y)
 
     fit0 <- stats::glm.fit(
       x = X,
@@ -102,10 +109,13 @@ make_initialization_features <- function(prepared_data,
     eta0 <- as.numeric(X %*% fit0$coefficients)
     mu0 <- as.numeric(fit0$fitted.values)
 
-    p0 <- pmin(pmax((y_bin + 0.5) / 2, 1e-8), 1 - 1e-8)
+    p0 <- (y + 0.5) / (binomial_size + 1)
+    p0 <- pmin(pmax(p0, 1e-8), 1 - 1e-8)
+
     logit <- stats::qlogis(p0)
 
-    resid0 <- (y_bin - mu0) / sqrt(pmax(mu0 * (1 - mu0), 1e-8))
+    resid0 <- (y - binomial_size * mu0) /
+      sqrt(pmax(binomial_size * mu0 * (1 - mu0), 1e-8))
 
     return(cbind(
       response = logit,

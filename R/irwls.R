@@ -4,7 +4,7 @@ irwls_fmr <- function(dat, em_state, control,
   family <- match.arg(family)
   A <- dat$X_het
   B <- dat$X_com
-  stopifnot(!is.null(dat$B))
+  # stopifnot(!is.null(dat$B))
   y <- dat$y
 
   tau <- em_state[["tau"]]
@@ -14,19 +14,19 @@ irwls_fmr <- function(dat, em_state, control,
   n <- nrow(A)
   G <- ncol(tau)
 
-  maxit <- control$maxit
-  tol <- control$tol
+  maxit <- control$irwls_max_iter
+  tol <- control$irwls_tol
   weight_floor <- control$weight_floor
 
   # I think trials should be saved somewhere but don't know where
-  trials <- dat$trials
+  binomial_size <- dat$binomial_size
   # this will keep it being generated until we decide where it goes, but
   # calculations stay safe
-  if (is.null(trials)) {
-    trials <- rep(1, n)
+  if (is.null(binomial_size)) {
+    binomial_size <- rep(1, n)
   }
 
-  trials <- as.numeric(trials)
+  binomial_size <- as.numeric(binomial_size)
 
   # Initial values for beta_g and beta
   if (is.null(beta_g) || is.null(beta)) {
@@ -35,7 +35,7 @@ irwls_fmr <- function(dat, em_state, control,
     }
 
     if (family == "binomial") {
-      p0 <- (y + 0.5) / (trials + 1)
+      p0 <- (y + 0.5) / (binomial_size + 1)
       p0 <- pmin(pmax(p0, 1e-8), 1 - 1e-8)
       z0 <- stats::qlogis(p0)
     }
@@ -58,11 +58,18 @@ irwls_fmr <- function(dat, em_state, control,
 
     eta <- linear_predictor_matrix(A, B, beta_g, beta)
 
+    eta <- as.matrix(eta)
+    storage.mode(eta) <- "double"
+
     if (family == "poisson") {
+      eta_safe <- pmin(pmax(eta, -20), 20)
 
-      mu <- exp(eta)
+      mu <- exp(eta_safe)
+      mu <- pmin(pmax(mu, 1e-10), 1e8)
 
-      z <- eta + (y - mu) / pmax(mu, 1e-10)
+      y_mat <- matrix(y, nrow = n, ncol = G)
+
+      z <- eta_safe + (y_mat - mu) / mu
       w <- tau * mu
     }
 
@@ -71,12 +78,12 @@ irwls_fmr <- function(dat, em_state, control,
       mu <- stats::plogis(eta_safe)
       mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
 
-      y_bar <- y / trials
+      y_bar <- y / binomial_size
       y_bar_mat <- matrix(y_bar, nrow = n, ncol = G)
-      trials_mat <- matrix(trials, nrow = n, ncol = G)
+      binomial_size_mat <- matrix(binomial_size, nrow = n, ncol = G)
 
       z <- eta_safe + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
-      w <- tau * trials_mat * mu * (1 - mu)
+      w <- tau * binomial_size * mu * (1 - mu)
 
     }
 
@@ -102,6 +109,7 @@ irwls_fmr <- function(dat, em_state, control,
 
   em_state[["beta_g"]] <- beta_g
   em_state[["beta"]] <- beta
+  em_state[["eta"]] <- eta
   em_state[["irwls_iterations"]] <- r
   em_state[["irwls_converged"]] <- converged
   em_state

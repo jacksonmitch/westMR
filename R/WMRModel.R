@@ -9,17 +9,20 @@ WMRModel <- R6::R6Class(
     G_values = NULL,
     family = NULL,
     control = NULL,
+    binomial_size = NULL,
     initialize = function(formula,
                           data,
                           G_values,
                           family,
-                          control) {
+                          control,
+                          binomial_size = NULL) {
       self$formula <- formula
       self$response <- get_response(formula)
       self$predictors <- get_predictors(formula)
       self$data <- data
       self$G_values <- G_values
       self$family <- family
+      self$binomial_size <- binomial_size
 
       if (is.null(control$sigma_floor)) {
         mf <- stats::model.frame(formula, data, na.action = stats::na.fail)

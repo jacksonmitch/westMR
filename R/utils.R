@@ -43,5 +43,9 @@ linear_predictor_matrix <- function(A, B, beta_g, beta) {
   beta_g <- as.matrix(beta_g)
   beta <- as.numeric(beta)
 
-  sweep(A %*% t(beta_g), 1, common_eta(B, beta), "+")
+  eta <- sweep(A %*% t(beta_g), 1, common_eta(B, beta), "+")
+  eta <- as.matrix(eta)
+  storage.mode(eta) <- "double"
+
+  eta
 }

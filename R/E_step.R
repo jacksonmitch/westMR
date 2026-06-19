@@ -11,9 +11,18 @@ e_step_fmr <- function(dat, em_state, family) {
   beta <- em_state[["beta"]]
   pi_g <- em_state[["pi_g"]]
   sigma_g <- em_state[["sigma_g"]]
-  eta <- em_state[["mu"]]
 
   G <- nrow(beta_g)
+
+  eta <- linear_predictor_matrix(
+    A = A,
+    B = B,
+    beta_g = beta_g,
+    beta = beta
+  )
+
+  eta <- as.matrix(eta)
+  storage.mode(eta) <- "double"
 
 
   log_pi <- log(pmax(pi_g, 1e-16))
@@ -23,6 +32,7 @@ e_step_fmr <- function(dat, em_state, family) {
 
   if (family == "gaussian") {
     sigma_g <- as.numeric(sigma_g)
+    mu <- eta
 
     if (length(sigma_g) != G) {
       stop("length(sigma_g) must equal nrow(beta_g).")
@@ -49,16 +59,12 @@ e_step_fmr <- function(dat, em_state, family) {
     }
   }
   else if (family == "binomial") {
-    trials <- dat$trials
-    if (is.null(trials)) {
-      trials <- rep(1, n)
+    binomial_size <- dat$binomial_size
+    if (is.null(binomial_size)) {
+      binomial_size <- rep(1, n)
     }
 
-    trials <- as.numeric(trials)
-
-    if (length(trials) != n) {
-      stop("length(trials) must equal length(y).")
-    }
+    binomial_size <- as.numeric(binomial_size)
 
     mu <- stats::plogis(eta)
     mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
@@ -66,7 +72,7 @@ e_step_fmr <- function(dat, em_state, family) {
     for (g in seq_len(G)) {
       log_w[, g] <- log_pi[g] + stats::dbinom(
         x = y,
-        size = trials,
+        size = binomial_size,
         prob = mu[, g],
         log = TRUE
       )
@@ -81,7 +87,14 @@ e_step_fmr <- function(dat, em_state, family) {
   tau <- w / w_sum
   colnames(tau) <- paste0("g", seq_len(G)) #is this necesary?
 
+  pi_new <- colMeans(tau)
+  pi_new <- pmax(pi_new, 1e-16)
+  pi_new <- pi_new / sum(pi_new)
+  names(pi_new) <- paste0("g", seq_len(G))
+
   em_state[["loglik"]] <- loglik
   em_state[["tau"]] <- tau
+  em_state[["pi_g"]] <- pi_new
+  em_state[["eta"]] <- eta
   em_state
 }

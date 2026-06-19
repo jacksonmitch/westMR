@@ -16,6 +16,7 @@ m_step <- function(dat, em_state, family, control) {
                        stop(sprintf("No M-step for family '%s'", family))
     )
   }
+  em_state
 }
 
 m_step_gaussian <- function(dat, em_state, control) {
@@ -54,7 +55,7 @@ m_step_gaussian <- function(dat, em_state, control) {
   sigma_g <- pmax(sigma_g, control$sigma_floor)
 
   em_state[["beta_g"]] <- beta_g
-  em_state[["mu"]] <- mu
+  em_state[["eta"]] <- mu
   em_state[["sigma_g"]] <- sigma_g
   em_state
 }
@@ -115,7 +116,7 @@ m_step_sqr_gaussian <- function(dat, em_state, control) {
 
   em_state[["beta_g"]] <- beta_g
   em_state[["beta"]] <- beta
-  em_state[["mu"]] <- mu
+  em_state[["eta"]] <- mu
   em_state[["sigma_g"]] <- sigma_g
   em_state
 }
@@ -123,7 +124,7 @@ m_step_sqr_gaussian <- function(dat, em_state, control) {
 # Poisson M-step using inner IRWLS and structured QR
 
 m_step_sqr_poisson <- function(dat, em_state, control) {
-  em_state <- irwls_fmr(dat, em_state, control, "poisson")
+  em_state <- irwls_fmr(dat, em_state, control, family="poisson")
   em_state
 }
 

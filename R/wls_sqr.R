@@ -87,7 +87,6 @@ wls_sqr <- function(dat, z, weights, control) {
     } else {
       rhs <- b_list[[g]]
     }
-    as.list(environment()) # is this for debugging?
 
     beta_g[g, ] <- backsolve(R1_list[[g]], rhs)
   }
