@@ -140,9 +140,12 @@ fit_fmr <- function(model,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
 
-    # best_init_name = init_fit$best_name,
-    # best_init_loglik = init_fit$best_loglik,
-    # n_valid_init = sum(is.finite(init_fit$logliks)),
+    het_names = colnames(prepared_data$X_het),
+    com_names = colnames(prepared_data$X_com),
+
+    best_init_name = init_fit$best_name,
+    best_init_loglik = init_fit$best_loglik,
+    n_valid_init = sum(is.finite(init_fit$logliks)),
 
     bic = bic,
     k = k,
@@ -150,19 +153,21 @@ fit_fmr <- function(model,
     family = family,
     G = G,
     n_init = length(init_list),
-    # logliks = init_fit$logliks,
+    logliks = init_fit$logliks,
 
     irwls_iterations = best_fit$irwls_iterations,
     irwls_converged = best_fit$irwls_converged,
 
-    # init = list(
-    #   strategy = "multistart_tau_burnin",
-    #   burnin = control$init_burnin,
-    #   n_starts = length(init_list),
-    #   best_start = init_fit$best_name,
-    #   burnin_logliks = init_fit$logliks,
-    #   failed_starts = init_fit$failures
-    # ),
+    init = list(
+      strategy = "multistart_tau_burnin",
+      burnin = control$init_burnin,
+      n_starts = length(init_list),
+      best_start = init_fit$best_name,
+      burnin_logliks = init_fit$logliks,
+      failed_starts = init_fit$failures
+    ),
+
+    model = model,
 
     call = match.call()
   )

@@ -64,14 +64,6 @@ west_procedure <- function(
       NA_real_
     }
 
-    if (model$control$verbose) {
-      message(
-        "G = ", G, "  lrt = ", round(lrt, 4),
-        "  df = ", df,
-        "  p = ", round(p_value, 4)
-      )
-    }
-
     rows[[i]] <- data.frame(
       G = G,
       loglik_null = fit_null$loglik,

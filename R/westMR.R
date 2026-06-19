@@ -59,25 +59,29 @@ westMR <- function(
   model <- WMRModel$new(
     formula = formula,
     data = data,
-    G_values = 2:G_max, # seq_len(as.integer(G_max)) ?? 2:G ??
+    G_values = seq(2, G_max),
     family = family,
     control = control
   )
 
   # Run Variable Selection
   if ("variables" %in% task) {
-    variable_selection <- select_variables(model,
+    result <- select_variables(model,
       direction = control$direction
     )
-    if (control$verbose) print(variable_selection)
+    if (control$verbose) print(result)
+    # Update formula with the variables selected in case effects is next
+    model$formula <- result$final_formula
   }
   # Run Effect Type Determination
   if ("effects" %in% task) {
-    effect_determination <- determine_effects(model,
+    result <- determine_effects(model,
       direction = control$direction
     )
-    if (control$verbose) print(effect_determination)
+    if (control$verbose) print(result)
   }
 
-  # result <- both? TODO, maybe find best G and fit
+  bics <- vapply(result$final_fits, function(f) f$bic, numeric(1))
+  best_fit <- result$final_fits[[which.min(bics)]]
+  print(best_fit)
 }

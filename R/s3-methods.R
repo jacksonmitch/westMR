@@ -2,11 +2,12 @@
 print.fit_fmr <- function(x, ...) {
   cat("westMR mixture regression fit\n")
   cat("------------------------------\n")
-  cat("G:              ", x$best_fit$G, "\n", sep = "")
+  cat("G:              ", x$G, "\n", sep = "")
   cat("Log-likelihood: ", round(x$loglik, 4), "\n", sep = "")
+  cat("BIC:            ", round(x$bic, 4), "\n", sep = "")
   cat("Converged:      ", x$converged, "\n", sep = "")
   cat("Iterations:     ", x$iterations, "\n", sep = "")
-  cat("Best init:      ", x$best_init, "\n", sep = "")
+  cat("Best init:      ", x$best_init_name, "\n", sep = "")
   cat("Valid inits:    ", x$n_valid_init, "\n", sep = "")
   cat("\n")
 
@@ -22,12 +23,15 @@ print.fit_fmr <- function(x, ...) {
 
   cat("\nComponent-specific coefficients:\n")
   beta_g <- x$beta_g
+  colnames(beta_g) <- x$het_names
   rownames(beta_g) <- paste0("g", seq_len(nrow(beta_g)))
   print(round(beta_g, 4))
 
   if (length(x$beta) > 0) {
     cat("\nCommon-effect coefficients:\n")
-    print(round(x$beta, 4))
+    beta <- x$beta
+    names(beta) <- x$com_names
+    print(round(beta, 4))
   }
 
   invisible(x)
@@ -77,14 +81,14 @@ steps_table <- function(x, ...) UseMethod("steps_table")
 steps_table.determine_effects <- function(x, ...) {
   label_state <- function(het, common) {
     if (length(het) == 0) {
-      return("all common")
+      return("all homogeneous")
     }
     if (length(common) == 0) {
       return("all heterogeneous")
     }
     paste0(
-      "het: ", paste(het, collapse = ", "),
-      "  |  common: ", paste(common, collapse = ", ")
+      "heterogeneous: ", paste(het, collapse = ", "),
+      "  |  homogeneous: ", paste(common, collapse = ", ")
     )
   }
   print_steps(
@@ -151,7 +155,7 @@ summary.determine_effects <- function(object, ...) {
 
   cat("Final model:\n")
   cat("  Formula: ", format(object$final_formula), "\n", sep = "")
-  cat("  Common:  ", format(object$final_common), "\n", sep = "")
+  cat("  Homogeneous:  ", format(object$final_common), "\n", sep = "")
   cat("\n")
 }
 
