@@ -24,10 +24,15 @@ determine_effects <- function(
 
   homogeneous <- setdiff(predictors, result$heterogeneous)
 
+  G_selection <- select_best_G(result$final_fits, criterion = "bic")
+
   out <- list(
     direction = direction,
     alpha = model$control$alpha,
     G_values = model$G_values,
+    selected_G = G_selection$selected_G,
+    best_fit = G_selection$best_fit,
+    G_selection = G_selection,
     heterogeneous = result$heterogeneous,
     homogeneous = homogeneous,
     steps = result$steps,

@@ -32,7 +32,6 @@ e_step_fmr <- function(dat, em_state, family) {
 
   if (family == "gaussian") {
     sigma_g <- as.numeric(sigma_g)
-    mu <- eta
 
     if (length(sigma_g) != G) {
       stop("length(sigma_g) must equal nrow(beta_g).")
@@ -79,22 +78,19 @@ e_step_fmr <- function(dat, em_state, family) {
     }
   }
 
-  row_max <- apply(log_w, 1, max) # big time sink
-  w <- exp(log_w - row_max)
-  w_sum <- rowSums(w)
+  log_denom <- row_logsumexp(log_w)
 
-  loglik <- sum(row_max + log(w_sum))
-  tau <- w / w_sum
-  colnames(tau) <- paste0("g", seq_len(G)) #is this necesary?
+  loglik <- sum(log_denom)
+  tau <- exp(log_w - log_denom)
 
   pi_new <- colMeans(tau)
   pi_new <- pmax(pi_new, 1e-16)
   pi_new <- pi_new / sum(pi_new)
-  names(pi_new) <- paste0("g", seq_len(G))
 
   em_state[["loglik"]] <- loglik
   em_state[["tau"]] <- tau
   em_state[["pi_g"]] <- pi_new
   em_state[["eta"]] <- eta
+
   em_state
 }

@@ -128,13 +128,48 @@ fit_fmr <- function(model,
 
   final_em_state <- best_fit$em_state
 
+  beta_g <- final_em_state[["beta_g"]]
+  beta <- final_em_state[["beta"]]
+  sigma_g <- final_em_state[["sigma_g"]]
+  pi_g <- final_em_state[["pi_g"]]
+  tau <- final_em_state[["tau"]]
+
+  if (!is.null(beta_g)) {
+    beta_g <- as.matrix(beta_g)
+    rownames(beta_g) <- paste0("g", seq_len(nrow(beta_g)))
+
+    if (!is.null(colnames(prepared_data$X_het))) {
+      colnames(beta_g) <- colnames(prepared_data$X_het)
+    }
+  }
+
+  if (!is.null(beta) && length(beta) > 0L) {
+    beta <- as.numeric(beta)
+
+    if (!is.null(colnames(prepared_data$X_com))) {
+      names(beta) <- colnames(prepared_data$X_com)
+    }
+  }
+
+  if (!is.null(sigma_g)) {
+    names(sigma_g) <- paste0("g", seq_along(sigma_g))
+  }
+
+  if (!is.null(pi_g)) {
+    names(pi_g) <- paste0("g", seq_along(pi_g))
+  }
+
+  if (!is.null(tau)) {
+    colnames(tau) <- paste0("g", seq_len(ncol(tau)))
+  }
+
   out <- list(
     best_fit = best_fit,
-    beta_g = final_em_state[["beta_g"]],
-    beta = final_em_state[["beta"]],
-    sigma_g = final_em_state[["sigma_g"]],
-    pi_g = final_em_state[["pi_g"]],
-    tau = final_em_state[["tau"]],
+    beta_g = beta_g,
+    beta = beta,
+    sigma_g = sigma_g,
+    pi_g = pi_g,
+    tau = tau,
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
@@ -149,7 +184,6 @@ fit_fmr <- function(model,
 
     bic = bic,
     k = k,
-
     family = family,
     G = G,
     n_init = length(init_list),
@@ -168,7 +202,6 @@ fit_fmr <- function(model,
     ),
 
     model = model,
-
     call = match.call()
   )
 

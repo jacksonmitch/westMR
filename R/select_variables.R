@@ -24,10 +24,15 @@ select_variables <- function(
     direction = direction
   )
 
+  G_selection <- select_best_G(result$final_fits, criterion = "bic")
+
   out <- list(
     direction = direction,
     alpha = model$control$alpha,
     G_values = model$G_values,
+    selected_G = G_selection$selected_G,
+    best_fit = G_selection$best_fit,
+    G_selection = G_selection,
     all_predictors = predictors,
     selected = result$included,
     steps = result$steps,

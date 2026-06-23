@@ -29,14 +29,19 @@ m_step_gaussian <- function(dat, em_state, control) {
   beta_g <- matrix(NA_real_, nrow = G, ncol = p)
 
   for (g in seq_len(G)) {
-    w <- tau[, g]          # n-vector
-    Xw <- X * w            # n x p, broadcasts column-wise
-    XtWX <- t(Xw) %*% X   # p x p
-    XtWy <- t(Xw) %*% y   # p x 1
+    wg <- pmax(tau[, g], 0)
 
-    beta_g[g, ] <- solve(XtWX + 1e-8 * diag(p), XtWy)
+    fit_g <- stats::lm.wfit(
+      x = X,
+      y = y,
+      w = wg
+    )
+
+    coef_g <- fit_g$coefficients
+    coef_g[is.na(coef_g)] <- 0
+
+    beta_g[g, ] <- coef_g
   }
-
 
   # TODO: look at this line and think of alternatives
   mu <- linear_predictor_matrix(A = dat$X_het,
@@ -61,7 +66,43 @@ m_step_gaussian <- function(dat, em_state, control) {
 }
 
 m_step_poisson <- function(dat, em_state, control) {
-  stop("poisson not done yet")
+  tau <- em_state[["tau"]]
+  G <- ncol(tau)
+
+  X <- dat$X_het
+  y <- dat$y
+  p <- dat$p_het
+
+  beta_g <- matrix(NA_real_, nrow = G, ncol = p)
+
+  for (g in seq_len(G)) {
+    wg <- pmax(tau[, g], control$weight_floor)
+
+    fit_g <- stats::glm.fit(
+      x = X,
+      y = y,
+      weights = wg,
+      family = stats::poisson()
+    )
+
+    coef_g <- fit_g$coefficients
+    coef_g[is.na(coef_g)] <- 0
+
+    beta_g[g, ] <- coef_g
+  }
+
+  eta <- linear_predictor_matrix(
+    A = dat$X_het,
+    B = dat$X_com,
+    beta_g = beta_g,
+    beta = NULL
+  )
+
+  em_state[["beta_g"]] <- beta_g
+  em_state[["eta"]] <- eta
+  em_state[["sigma_g"]] <- NULL
+
+  em_state
 }
 
 m_step_binomial <- function(dat, em_state, control) {

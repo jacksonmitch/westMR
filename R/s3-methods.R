@@ -1,40 +1,21 @@
-#' @export
-print.fit_fmr <- function(x, ...) {
-  cat("westMR mixture regression fit\n")
-  cat("------------------------------\n")
-  cat("G:              ", x$G, "\n", sep = "")
-  cat("Log-likelihood: ", round(x$loglik, 4), "\n", sep = "")
-  cat("BIC:            ", round(x$bic, 4), "\n", sep = "")
-  cat("Converged:      ", x$converged, "\n", sep = "")
-  cat("Iterations:     ", x$iterations, "\n", sep = "")
-  cat("Best init:      ", x$best_init_name, "\n", sep = "")
-  cat("Valid inits:    ", x$n_valid_init, "\n", sep = "")
-  cat("\n")
-
-  cat("Mixing proportions:\n")
-  pi_named <- x$pi_g
-  names(pi_named) <- paste0("g", seq_along(pi_named))
-  print(round(pi_named, 4))
-
-  cat("\nComponent standard deviations:\n")
-  sigma_named <- x$sigma_g
-  names(sigma_named) <- paste0("g", seq_along(sigma_named))
-  print(round(sigma_named, 4))
-
-  cat("\nComponent-specific coefficients:\n")
-  beta_g <- x$beta_g
-  colnames(beta_g) <- x$het_names
-  rownames(beta_g) <- paste0("g", seq_len(nrow(beta_g)))
-  print(round(beta_g, 4))
-
-  if (length(x$beta) > 0) {
-    cat("\nCommon-effect coefficients:\n")
-    beta <- x$beta
-    names(beta) <- x$com_names
-    print(round(beta, 4))
+format_formula_clean <- function(x) {
+  if (is.null(x)) {
+    return("NULL")
   }
 
-  invisible(x)
+  if (inherits(x, "formula")) {
+    return(paste(deparse(x), collapse = " "))
+  }
+
+  paste(deparse(x), collapse = " ")
+}
+
+format_none <- function(x) {
+  if (is.null(x) || length(x) == 0L) {
+    return("none")
+  }
+
+  paste(x, collapse = ", ")
 }
 
 print_steps <- function(steps, all_predictors, direction, label_state) {
@@ -68,6 +49,222 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
   }
 }
 
+####
+# westMR methods
+####
+
+#' @export
+print.westMR <- function(x, ...) {
+  cat("westMR result\n")
+  cat("-------------\n")
+  cat("Family:     ", x$family, "\n", sep = "")
+  cat("Task:       ", x$task, "\n", sep = "")
+  cat("G values:   ", paste(x$G_values, collapse = ", "), "\n", sep = "")
+
+  if (!is.null(x$selected_G)) {
+    cat("Selected G: ", x$selected_G, "\n", sep = "")
+  }
+
+  cat("\n")
+
+  if (!is.null(x$variable_selection)) {
+    cat("Variable selection:\n")
+    cat("  Selected predictors: ",
+        format_none(x$variable_selection$selected),
+        "\n",
+        sep = "")
+  }
+
+  if (!is.null(x$effect_determination)) {
+    cat("\nEffect-type determination:\n")
+    cat("  Heterogeneous effects: ",
+        format_none(x$effect_determination$heterogeneous),
+        "\n",
+        sep = "")
+    cat("  Homogeneous effects:   ",
+        format_none(x$effect_determination$homogeneous),
+        "\n",
+        sep = "")
+  }
+
+  if (is.null(x$effect_determination) &&
+      !is.null(x$variable_selection) &&
+      length(x$variable_selection$selected) == 0L) {
+    cat("\nEffect-type determination was skipped because no predictors were selected.\n")
+  }
+
+  invisible(x)
+}
+
+#' @export
+summary.westMR <- function(object, ...) {
+  variable_summary <- NULL
+  effect_summary <- NULL
+
+  if (!is.null(object$variable_selection)) {
+    variable_summary <- list(
+      direction = object$variable_selection$direction,
+      alpha = object$variable_selection$alpha,
+      G_values = object$variable_selection$G_values,
+      selected_G = object$variable_selection$selected_G,
+      selected = object$variable_selection$selected,
+      final_formula = object$variable_selection$final_formula,
+      n_steps = length(object$variable_selection$steps)
+    )
+  }
+
+  if (!is.null(object$effect_determination)) {
+    effect_summary <- list(
+      direction = object$effect_determination$direction,
+      alpha = object$effect_determination$alpha,
+      G_values = object$effect_determination$G_values,
+      selected_G = object$effect_determination$selected_G,
+      heterogeneous = object$effect_determination$heterogeneous,
+      homogeneous = object$effect_determination$homogeneous,
+      final_formula = object$effect_determination$final_formula,
+      final_common = object$effect_determination$final_common,
+      n_steps = length(object$effect_determination$steps)
+    )
+  }
+
+  out <- list(
+    call = object$call,
+    formula = object$formula,
+    family = object$family,
+    task = object$task,
+    G_values = object$G_values,
+    selected_G = object$selected_G,
+    best_fit = object$best_fit,
+    variable_selection = variable_summary,
+    effect_determination = effect_summary
+  )
+
+  class(out) <- "summary.westMR"
+  out
+}
+
+#' @export
+print.summary.westMR <- function(x, ...) {
+  cat("Summary of westMR result\n")
+  cat("------------------------\n")
+  cat("Family:     ", x$family, "\n", sep = "")
+  cat("Task:       ", x$task, "\n", sep = "")
+  cat("G values:   ", paste(x$G_values, collapse = ", "), "\n", sep = "")
+
+  if (!is.null(x$selected_G)) {
+    cat("Selected G: ", x$selected_G, "\n", sep = "")
+  }
+
+  cat("\n")
+
+  if (!is.null(x$variable_selection)) {
+    cat("Variable selection\n")
+    cat("------------------\n")
+    cat("Direction:     ", x$variable_selection$direction, "\n", sep = "")
+    cat("Alpha:         ", x$variable_selection$alpha, "\n", sep = "")
+    cat("Steps:         ", x$variable_selection$n_steps, "\n", sep = "")
+    cat("Selected G:    ", x$variable_selection$selected_G, "\n", sep = "")
+    cat("Selected:      ", format_none(x$variable_selection$selected), "\n", sep = "")
+    cat("Final formula: ",
+        format_formula_clean(x$variable_selection$final_formula),
+        "\n\n",
+        sep = "")
+  }
+
+  if (!is.null(x$effect_determination)) {
+    cat("Effect-type determination\n")
+    cat("-------------------------\n")
+    cat("Direction:     ", x$effect_determination$direction, "\n", sep = "")
+    cat("Alpha:         ", x$effect_determination$alpha, "\n", sep = "")
+    cat("Steps:         ", x$effect_determination$n_steps, "\n", sep = "")
+    cat("Selected G:    ", x$effect_determination$selected_G, "\n", sep = "")
+    cat("Heterogeneous: ",
+        format_none(x$effect_determination$heterogeneous),
+        "\n",
+        sep = "")
+    cat("Homogeneous:   ",
+        format_none(x$effect_determination$homogeneous),
+        "\n",
+        sep = "")
+    cat("Final formula: ",
+        format_formula_clean(x$effect_determination$final_formula),
+        "\n",
+        sep = "")
+  }
+
+  invisible(x)
+}
+
+####
+# fit_fmr methods
+####
+
+#' @export
+print.fit_fmr <- function(x, ...) {
+  cat("westMR mixture regression fit\n")
+  cat("------------------------------\n")
+
+  if (!is.null(x$family)) {
+    cat("Family:         ", x$family, "\n", sep = "")
+  }
+
+  if (!is.null(x$G)) {
+    cat("G:              ", x$G, "\n", sep = "")
+  }
+
+  if (!is.null(x$loglik)) {
+    cat("Log-likelihood: ", round(x$loglik, 4), "\n", sep = "")
+  }
+
+  if (!is.null(x$bic)) {
+    cat("BIC:            ", round(x$bic, 4), "\n", sep = "")
+  }
+
+  if (!is.null(x$converged)) {
+    cat("Converged:      ", x$converged, "\n", sep = "")
+  }
+
+  if (!is.null(x$iterations)) {
+    cat("Iterations:     ", x$iterations, "\n", sep = "")
+  }
+
+  if (!is.null(x$best_init)) {
+    cat("Best init:      ", x$best_init, "\n", sep = "")
+  }
+
+  if (!is.null(x$n_valid_init)) {
+    cat("Valid inits:    ", x$n_valid_init, "\n", sep = "")
+  }
+
+  if (!is.null(x$pi_g)) {
+    cat("\nMixing proportions:\n")
+    pi_named <- x$pi_g
+    names(pi_named) <- paste0("g", seq_along(pi_named))
+    print(round(pi_named, 4))
+  }
+
+  if (!is.null(x$sigma_g)) {
+    cat("\nComponent standard deviations:\n")
+    sigma_named <- x$sigma_g
+    names(sigma_named) <- paste0("g", seq_along(sigma_named))
+    print(round(sigma_named, 4))
+  }
+
+  if (!is.null(x$beta_g)) {
+    cat("\nHeterogeneous coefficients:\n")
+    print(round(x$beta_g, 4))
+  }
+
+  if (!is.null(x$beta) && length(x$beta) > 0L) {
+    cat("\nHomogeneous coefficients:\n")
+    print(round(x$beta, 4))
+  }
+
+  invisible(x)
+}
+
+
+
 #' Print the step-by-step selection table
 #'
 #' @param x An object of class \code{effect_determination} or
@@ -87,8 +284,8 @@ steps_table.determine_effects <- function(x, ...) {
       return("all heterogeneous")
     }
     paste0(
-      "heterogeneous: ", paste(het, collapse = ", "),
-      "  |  homogeneous: ", paste(common, collapse = ", ")
+      "het: ", paste(het, collapse = ", "),
+      "  |  homo: ", paste(common, collapse = ", ")
     )
   }
   print_steps(
@@ -155,7 +352,6 @@ summary.determine_effects <- function(object, ...) {
 
   cat("Final model:\n")
   cat("  Formula: ", format(object$final_formula), "\n", sep = "")
-  cat("  Homogeneous:  ", format(object$final_common), "\n", sep = "")
   cat("\n")
 }
 

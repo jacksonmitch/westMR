@@ -1,10 +1,15 @@
 Package: westMR
-Title: Mixture Effect and Variable Selection
+Title: Finite Mixture Regression with Variable and Effect-Type Selection
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Tulio", "Martins", email = "tbatista@uoguelph.ca", role = c("aut", "cre")),
       person("Jackson", "Mitchell", email = "jmitch19@uoguelph.ca", role = c("aut")))
-Description: What the package does (one paragraph).
+Description: Implements finite mixture regression models for Gaussian, Poisson,
+    and binomial responses, with procedures for selecting predictors and
+    determining whether covariate effects are heterogeneous or homogeneous across
+    mixture components. Estimation is performed using EM algorithms,
+    with weighted least squares and structured QR decompositions used in the
+    M-step.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

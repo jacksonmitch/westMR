@@ -27,10 +27,11 @@ westMR <- function(
   data,
   G_max = 4,
   family = c("gaussian", "poisson", "binomial"),
-  task = c("variables", "effects"),
+  task = c("both", "variables", "effects"),
   control = build_control()
 ) {
   family <- match.arg(family) # defaults to gaussian
+  task <- match.arg(task)
 
   collection <- checkmate::makeAssertCollection()
   # User Input Checks
@@ -45,7 +46,7 @@ westMR <- function(
     add = collection
   )
   checkmate::assert_subset(task,
-    choices = c("variables", "effects"),
+    choices = c("both", "variables", "effects"),
     add = collection
   )
   checkmate::assert_class(control, "WMRControl", add = collection)
@@ -65,6 +66,7 @@ westMR <- function(
   )
 
   # Run Variable Selection
+<<<<<<< HEAD
   if ("variables" %in% task) {
     result <- select_variables(model,
       direction = control$direction
@@ -84,4 +86,72 @@ westMR <- function(
   bics <- vapply(result$final_fits, function(f) f$bic, numeric(1))
   best_fit <- result$final_fits[[which.min(bics)]]
   print(best_fit)
+=======
+  variable_selection <- NULL
+  effect_determination <- NULL
+
+  run_variables <- task %in% c("both", "variables")
+  run_effects <- task %in% c("both", "effects")
+
+  if (run_variables) {
+    variable_selection <- select_variables(
+      model = model,
+      direction = control$direction
+    )
+
+    if (control$verbose) {
+      print(variable_selection)
+    }
+  }
+
+  if (run_effects) {
+    effect_predictors <- if (!is.null(variable_selection)) {
+      variable_selection$selected
+    } else {
+      model$predictors
+    }
+
+    if (length(effect_predictors) > 0L) {
+      effect_determination <- determine_effects(
+        model = model,
+        direction = control$direction,
+        predictors = effect_predictors
+      )
+
+      if (control$verbose) {
+        print(effect_determination)
+      }
+    }
+  }
+
+  selected_G <- NULL
+  best_fit <- NULL
+  final_fits <- NULL
+
+  if (!is.null(effect_determination)) {
+    selected_G <- effect_determination$selected_G
+    best_fit <- effect_determination$best_fit
+    final_fits <- effect_determination$final_fits
+  } else if (!is.null(variable_selection)) {
+    selected_G <- variable_selection$selected_G
+    best_fit <- variable_selection$best_fit
+    final_fits <- variable_selection$final_fits
+  }
+
+  out <- list(
+    call = match.call(),
+    formula = formula,
+    family = family,
+    task = task,
+    G_values = 2:G_max,
+    selected_G = selected_G,
+    best_fit = best_fit,
+    final_fits = final_fits,
+    variable_selection = variable_selection,
+    effect_determination = effect_determination
+  )
+
+  class(out) <- "westMR"
+  out
+>>>>>>> 4146e87 (updated code to include best fit and added westMR s3-methods)
 }

@@ -9,7 +9,7 @@ westMR(
   data,
   G_max = 4,
   family = c("gaussian", "poisson", "binomial"),
-  task = c("variables", "effects"),
+  task = c("both", "variables", "effects"),
   control = build_control()
 )
 }
