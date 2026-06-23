@@ -65,28 +65,6 @@ westMR <- function(
     control = control
   )
 
-  # Run Variable Selection
-<<<<<<< HEAD
-  if ("variables" %in% task) {
-    result <- select_variables(model,
-      direction = control$direction
-    )
-    if (control$verbose) print(result)
-    # Update formula with the variables selected in case effects is next
-    model$formula <- result$final_formula
-  }
-  # Run Effect Type Determination
-  if ("effects" %in% task) {
-    result <- determine_effects(model,
-      direction = control$direction
-    )
-    if (control$verbose) print(result)
-  }
-
-  bics <- vapply(result$final_fits, function(f) f$bic, numeric(1))
-  best_fit <- result$final_fits[[which.min(bics)]]
-  print(best_fit)
-=======
   variable_selection <- NULL
   effect_determination <- NULL
 
@@ -153,5 +131,4 @@ westMR <- function(
 
   class(out) <- "westMR"
   out
->>>>>>> 4146e87 (updated code to include best fit and added westMR s3-methods)
 }
