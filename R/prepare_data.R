@@ -1,58 +1,27 @@
 # Validated data container for mixture regression fitting.
 # All structural checks happen once here so callers can trust the contents.
 
-prepare_data <- function(model, included = model$predictors, common = NULL,
-                         binomial_size = model$binomial_size) {
-
-
-  mf <- stats::model.frame(
-    formula = model$formula,
-    data = model$data,
-    na.action = stats::na.fail
-  )
-
+prepare_data <- function(model, included = model$predictors, common = NULL) {
+  mf <- stats::model.frame(model$formula, model$data, na.action = stats::na.fail)
   y <- as.numeric(stats::model.response(mf))
 
   binomial_size_vec <- NULL
-
   if (identical(model$family, "binomial")) {
-    n <- length(y)
-
-    if (is.null(binomial_size)) {
-      binomial_size_vec <- rep(1, n)
-    } else if (length(binomial_size) == 1L && is.character(binomial_size)) {
-      if (!binomial_size %in% names(model$data)) {
-        stop("binomial_size variable not found in data.")
-      }
-
-      binomial_size_vec <- model$data[[binomial_size]]
-    } else if (length(binomial_size) == n) {
-      binomial_size_vec <- binomial_size
-    }
-  binomial_size_vec <- as.numeric(binomial_size_vec)
+    stopifnot (".binom_size" %in% names(data))
+    as.numeric(model$data$.binom_size)
   }
 
-
-
-  het_formula <- make_formula(
-    predictors = setdiff(included, common),
-    response = model$response
-  )
-  # Creates intercept column
+  het_formula <- make_formula(setdiff(included, common), response = model$response)
   X_het <- stats::model.matrix(het_formula, data = mf)
 
   if (length(common) > 0) {
-    com_formula <- stats::as.formula(
-      paste("~", paste(common, collapse = " + "), "- 1")
-    )
-    X_com <- stats::model.matrix(com_formula, data = mf)
+    X_com <- stats::model.matrix(stats::as.formula(paste("~", paste(common, collapse = " + "), "- 1")), data = mf)
   } else {
     X_com <- matrix(numeric(0), nrow = length(y), ncol = 0)
   }
 
   WMRData$new(y = y, X_het = X_het, X_com = X_com, binomial_size = binomial_size_vec)
 }
-
 
 WMRData <- R6::R6Class(
   "WMRData",
@@ -112,10 +81,6 @@ WMRData <- R6::R6Class(
       if (anyNA(X_com)) {
         stop("X_com contains missing values.")
       }
-      if (!is.null(binomial_size)) {
-        binomial_size <- as.numeric(binomial_size)
-      }
-
       private$.y <- y
       private$.X_het <- X_het
       private$.X_com <- X_com

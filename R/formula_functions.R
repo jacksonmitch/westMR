@@ -9,7 +9,7 @@ make_formula <- function(predictors, response = NULL) {
 }
 
 get_response <- function(formula) {
-  as.character(formula[[2]])
+  deparse(formula[[2]])
 }
 
 get_predictors <- function(formula) {
