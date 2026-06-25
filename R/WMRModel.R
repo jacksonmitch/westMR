@@ -10,7 +10,7 @@ WMRModel <- R6::R6Class(
                           G_values,
                           family,
                           control) {
-      self$formula <- formula  # goes through active binding
+      self$formula <- formula # goes through active binding
       self$data <- data
       self$G_values <- G_values
       self$family <- family
@@ -22,7 +22,6 @@ WMRModel <- R6::R6Class(
       }
       self$control <- control
     },
-
     print = function(...) {
       cat(
         "<WMRModel>  formula =", format(self$formula),
@@ -33,16 +32,16 @@ WMRModel <- R6::R6Class(
       invisible(self)
     }
   ),
-
   private = list(
     formula_ = NULL,
     predictors_ = NULL,
     response_ = NULL
   ),
-
   active = list(
     formula = function(value) {
-      if (missing(value)) return(private$formula_)
+      if (missing(value)) {
+        return(private$formula_)
+      }
       private$formula_ <- value
       private$predictors_ <- get_predictors(value)
       private$response_ <- get_response(value)

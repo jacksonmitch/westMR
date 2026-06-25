@@ -143,7 +143,7 @@ coerce_binomial_formula <- function(formula, data) {
   if (".binom_size" %in% names(data)) {
     stop("Column name '.binom_size' is reserved; please rename your column.")
   }
-  
+
   resp <- formula[[2]]
 
   if (is.call(resp) && identical(resp[[1]], as.name("cbind"))) {
@@ -158,7 +158,7 @@ coerce_binomial_formula <- function(formula, data) {
     }
 
     data$.binom_size <- successes + failures
-    formula[[2]] <- success_expr  # response becomes the success count only instead of am ugly cbind
+    formula[[2]] <- success_expr # response becomes the success count only instead of am ugly cbind
 
     return(list(formula = formula, data = data))
   }

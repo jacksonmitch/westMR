@@ -70,8 +70,10 @@ build_control <- function(
   checkmate::assert_number(alpha, lower = 0, upper = 1, add = collection)
   checkmate::assert_int(max_iter, lower = 1, add = collection)
   checkmate::assert_int(n_init, lower = 1, add = collection)
-  checkmate::assert_choice(direction, choices = c("forward", "backward"),
-                           add = collection)
+  checkmate::assert_choice(direction,
+    choices = c("forward", "backward"),
+    add = collection
+  )
   checkmate::assert_flag(verbose, add = collection)
   checkmate::assert_number(tol, lower = 0, add = collection) # TODO: allows 0
   checkmate::assert_int(n_kmeans_init, lower = 0, add = collection)
@@ -91,8 +93,10 @@ build_control <- function(
   checkmate::assert_number(weight_floor, lower = 0, add = collection)
   checkmate::assert_int(init_burnin, lower = 1, add = collection)
   checkmate::assert_number(init_eps, lower = 0, upper = 0.5, add = collection)
-  checkmate::assert_int(init_min_size, lower = 1, add = collection,
-                        null.ok = TRUE)
+  checkmate::assert_int(init_min_size,
+    lower = 1, add = collection,
+    null.ok = TRUE
+  )
   checkmate::assert_flag(use_mclust, add = collection)
 
   max_iter <- as.integer(max_iter)
