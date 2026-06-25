@@ -7,7 +7,7 @@ prepare_data <- function(model, included = model$predictors, common = NULL) {
 
   binomial_size_vec <- NULL
   if (identical(model$family, "binomial")) {
-    stopifnot (".binom_size" %in% names(data))
+    stopifnot(".binom_size" %in% names(model$data))
     as.numeric(model$data$.binom_size)
   }
 
