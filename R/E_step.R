@@ -1,16 +1,15 @@
 # E-step for Gaussian mixture regression
 
 e_step_fmr <- function(dat, em_state, family) {
-
   A <- dat$X_het
   B <- dat$X_com
   y <- dat$y
   n <- dat$n
 
-  beta_g <- em_state[["beta_g"]]
-  beta <- em_state[["beta"]]
-  pi_g <- em_state[["pi_g"]]
-  sigma_g <- em_state[["sigma_g"]]
+  beta_g <- em_state$beta_g
+  beta <- em_state$beta
+  pi_g <- em_state$pi_g
+  sigma_g <- em_state$sigma_g
 
   G <- nrow(beta_g)
 
@@ -45,8 +44,7 @@ e_step_fmr <- function(dat, em_state, family) {
         log = TRUE
       )
     }
-  }
-  else if (family == "poisson") {
+  } else if (family == "poisson") {
     mu <- exp(eta)
 
     for (g in seq_len(G)) {
@@ -56,14 +54,8 @@ e_step_fmr <- function(dat, em_state, family) {
         log = TRUE
       )
     }
-  }
-  else if (family == "binomial") {
+  } else if (family == "binomial") {
     binomial_size <- dat$binomial_size
-    if (is.null(binomial_size)) {
-      binomial_size <- rep(1, n)
-    }
-
-    binomial_size <- as.numeric(binomial_size)
 
     mu <- stats::plogis(eta)
     mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
@@ -87,10 +79,8 @@ e_step_fmr <- function(dat, em_state, family) {
   pi_new <- pmax(pi_new, 1e-16)
   pi_new <- pi_new / sum(pi_new)
 
-  em_state[["loglik"]] <- loglik
-  em_state[["tau"]] <- tau
-  em_state[["pi_g"]] <- pi_new
-  em_state[["eta"]] <- eta
-
-  em_state
+  em_state$loglik <- loglik
+  em_state$tau <- tau
+  em_state$pi_g <- pi_new
+  em_state$eta <- eta
 }

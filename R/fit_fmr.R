@@ -94,17 +94,8 @@ fit_fmr <- function(model,
     control = control
   )
 
-  init_values <- init_fit$best_fit$em_state
-  # continue from the best burn-in start
-  em_state <- list(
-    pi_g = init_values[["pi_g"]],
-    tau = init_values[["tau"]],
-    beta_g = init_values[["beta_g"]],
-    beta = init_values[["beta"]],
-    sigma_g = init_values[["sigma_g"]]
-  )
+  em_state <- init_fit$best_fit$em_state
 
-  # Final EM stage
   best_fit <- em_fmr(
     prepared_data = prepared_data,
     G = G,
@@ -120,78 +111,27 @@ fit_fmr <- function(model,
     family = family
   )
 
-  bic <- compute_bic(
-    loglik = best_fit$loglik,
-    n = prepared_data$n,
-    k = k
-  )
+  bic <- compute_bic(loglik = best_fit$loglik, n = prepared_data$n, k = k)
 
-  final_em_state <- best_fit$em_state
-
-  beta_g <- final_em_state[["beta_g"]]
-  beta <- final_em_state[["beta"]]
-  sigma_g <- final_em_state[["sigma_g"]]
-  pi_g <- final_em_state[["pi_g"]]
-  tau <- final_em_state[["tau"]]
-
-  if (!is.null(beta_g)) {
-    beta_g <- as.matrix(beta_g)
-    rownames(beta_g) <- paste0("g", seq_len(nrow(beta_g)))
-
-    if (!is.null(colnames(prepared_data$X_het))) {
-      colnames(beta_g) <- colnames(prepared_data$X_het)
-    }
-  }
-
-  if (!is.null(beta) && length(beta) > 0L) {
-    beta <- as.numeric(beta)
-
-    if (!is.null(colnames(prepared_data$X_com))) {
-      names(beta) <- colnames(prepared_data$X_com)
-    }
-  }
-
-  if (!is.null(sigma_g)) {
-    names(sigma_g) <- paste0("g", seq_along(sigma_g))
-  }
-
-  if (!is.null(pi_g)) {
-    names(pi_g) <- paste0("g", seq_along(pi_g))
-  }
-
-  if (!is.null(tau)) {
-    colnames(tau) <- paste0("g", seq_len(ncol(tau)))
-  }
+  add_parameter_labels(em_state, prepared_data)
 
   out <- list(
-    best_fit = best_fit,
-    beta_g = beta_g,
-    beta = beta,
-    sigma_g = sigma_g,
-    pi_g = pi_g,
-    tau = tau,
+    em_state = em_state,
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
     converged = best_fit$converged,
-
-    het_names = colnames(prepared_data$X_het),
-    com_names = colnames(prepared_data$X_com),
-
+    irwls_iterations = best_fit$irwls_iterations,
+    irwls_converged = best_fit$irwls_converged,
     best_init_name = init_fit$best_name,
     best_init_loglik = init_fit$best_loglik,
     n_valid_init = sum(is.finite(init_fit$logliks)),
-
     bic = bic,
     k = k,
     family = family,
     G = G,
     n_init = length(init_list),
     logliks = init_fit$logliks,
-
-    irwls_iterations = best_fit$irwls_iterations,
-    irwls_converged = best_fit$irwls_converged,
-
     init = list(
       strategy = "multistart_tau_burnin",
       burnin = control$init_burnin,
@@ -200,12 +140,47 @@ fit_fmr <- function(model,
       burnin_logliks = init_fit$logliks,
       failed_starts = init_fit$failures
     ),
-
     model = model,
     call = match.call()
   )
 
   class(out) <- "fit_fmr"
-
   out
+}
+
+add_parameter_labels <- function(em_state, prepared_data) {
+  if (!is.null(em_state$beta_g)) {
+    bg <- em_state$beta_g
+    rownames(bg) <- paste0("g", seq_len(nrow(bg)))
+    if (!is.null(colnames(prepared_data$X_het))) {
+      colnames(bg) <- colnames(prepared_data$X_het)
+    }
+    em_state$beta_g <- bg
+  }
+
+  if (!is.null(em_state$beta) && length(em_state$beta) > 0L) {
+    b <- as.numeric(em_state$beta)
+    if (!is.null(colnames(prepared_data$X_com))) {
+      names(b) <- colnames(prepared_data$X_com)
+    }
+    em_state$beta <- b
+  }
+
+  if (!is.null(em_state$sigma_g)) {
+    sg <- em_state$sigma_g
+    names(sg) <- paste0("g", seq_along(sg))
+    em_state$sigma_g <- sg
+  }
+
+  if (!is.null(em_state$pi_g)) {
+    pg <- em_state$pi_g
+    names(pg) <- paste0("g", seq_along(pg))
+    em_state$pi_g <- pg
+  }
+
+  if (!is.null(em_state$tau)) {
+    tau <- em_state$tau
+    colnames(tau) <- paste0("g", seq_len(ncol(tau)))
+    em_state$tau <- tau
+  }
 }

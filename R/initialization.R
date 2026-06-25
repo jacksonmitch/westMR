@@ -1,5 +1,4 @@
-make_tau_from_partition <- function(partition, G, eps = 1e-6){
-
+make_tau_from_partition <- function(partition, G, eps = 1e-6) {
   partition <- as.integer(partition)
   n <- length(partition)
 
@@ -26,14 +25,14 @@ random_partition_balanced <- function(n, G) {
   sample(partition, size = n, replace = FALSE)
 }
 
-rank_partition <- function(score, G){
+rank_partition <- function(score, G) {
   score <- as.numeric(score)
   n <- length(score)
 
   ord <- order(score)
   partition <- integer(n)
 
-  group_sizes <- rep(floor(n/G), G)
+  group_sizes <- rep(floor(n / G), G)
   remainder <- n %% G
 
   if (remainder > 0L) {
@@ -52,8 +51,7 @@ rank_partition <- function(score, G){
 }
 
 make_initialization_features <- function(prepared_data,
-                                         family = c("gaussian","poisson","binomial")){
-
+                                         family = c("gaussian", "poisson", "binomial")) {
   family <- match.arg(family)
 
   A <- as.matrix(prepared_data$X_het)
@@ -63,8 +61,8 @@ make_initialization_features <- function(prepared_data,
   X <- cbind(A, B)
   n <- length(y)
 
-  if(family == "gaussian"){
-    fit0 <- stats::lm.fit(x=X, y=y)
+  if (family == "gaussian") {
+    fit0 <- stats::lm.fit(x = X, y = y)
     fitted0 <- as.numeric(fit0$fitted.values)
     resid0 <- as.numeric(fit0$residuals)
 
@@ -75,8 +73,8 @@ make_initialization_features <- function(prepared_data,
     ))
   }
 
-  if(family == "poisson"){
-    fit0 <- stats::glm.fit(x=X, y=y, family = stats::poisson())
+  if (family == "poisson") {
+    fit0 <- stats::glm.fit(x = X, y = y, family = stats::poisson())
 
     eta0 <- as.numeric(fit0$linear.predictors)
     mu0 <- as.numeric(fit0$fitted.values)
@@ -183,9 +181,8 @@ make_tau_list <- function(prepared_data,
     )
 
     if (!inherits(km, "try-error") &&
-        length(unique(km$cluster)) == G &&
-        min(table(km$cluster)) >= min_size) {
-
+      length(unique(km$cluster)) == G &&
+      min(table(km$cluster)) >= min_size) {
       tau_list[[paste0("kmeans_", s)]] <- make_tau_from_partition(
         partition = km$cluster,
         G = G,
@@ -206,7 +203,6 @@ make_tau_list <- function(prepared_data,
     )
   }
   if (family == "binomial" && prepared_data$p_het > 0L) {
-
     A <- as.matrix(prepared_data$X_het)
 
     for (j in seq_len(ncol(A))) {
@@ -244,7 +240,6 @@ select_best_initialization <- function(tau_list,
                                        G,
                                        family,
                                        control) {
-
   best_fit <- NULL
   best_loglik <- -Inf
   best_name <- NA_character_
@@ -258,15 +253,16 @@ select_best_initialization <- function(tau_list,
   control$max_iter <- control$init_burnin
 
   for (s in seq_along(tau_list)) {
+    em_state <- EmState$new(tau = tau_list[[s]])
     fit_s <- try(
       em_fmr(
         prepared_data = prepared_data,
         G = G,
-        em_state = list(tau = tau_list[[s]]),
+        em_state = em_state,
         family = family,
         control = control
-      )
-      # ,silent = TRUE
+      ),
+      silent = TRUE
     )
 
     if (inherits(fit_s, "try-error")) {
@@ -295,4 +291,3 @@ select_best_initialization <- function(tau_list,
     failures = failures
   )
 }
-

@@ -70,26 +70,29 @@ print.westMR <- function(x, ...) {
   if (!is.null(x$variable_selection)) {
     cat("Variable selection:\n")
     cat("  Selected predictors: ",
-        format_none(x$variable_selection$selected),
-        "\n",
-        sep = "")
+      format_none(x$variable_selection$selected),
+      "\n",
+      sep = ""
+    )
   }
 
   if (!is.null(x$effect_determination)) {
     cat("\nEffect-type determination:\n")
     cat("  Heterogeneous effects: ",
-        format_none(x$effect_determination$heterogeneous),
-        "\n",
-        sep = "")
+      format_none(x$effect_determination$heterogeneous),
+      "\n",
+      sep = ""
+    )
     cat("  Homogeneous effects:   ",
-        format_none(x$effect_determination$homogeneous),
-        "\n",
-        sep = "")
+      format_none(x$effect_determination$homogeneous),
+      "\n",
+      sep = ""
+    )
   }
 
   if (is.null(x$effect_determination) &&
-      !is.null(x$variable_selection) &&
-      length(x$variable_selection$selected) == 0L) {
+    !is.null(x$variable_selection) &&
+    length(x$variable_selection$selected) == 0L) {
     cat("\nEffect-type determination was skipped because no predictors were selected.\n")
   }
 
@@ -166,9 +169,10 @@ print.summary.westMR <- function(x, ...) {
     cat("Selected G:    ", x$variable_selection$selected_G, "\n", sep = "")
     cat("Selected:      ", format_none(x$variable_selection$selected), "\n", sep = "")
     cat("Final formula: ",
-        format_formula_clean(x$variable_selection$final_formula),
-        "\n\n",
-        sep = "")
+      format_formula_clean(x$variable_selection$final_formula),
+      "\n\n",
+      sep = ""
+    )
   }
 
   if (!is.null(x$effect_determination)) {
@@ -179,17 +183,20 @@ print.summary.westMR <- function(x, ...) {
     cat("Steps:         ", x$effect_determination$n_steps, "\n", sep = "")
     cat("Selected G:    ", x$effect_determination$selected_G, "\n", sep = "")
     cat("Heterogeneous: ",
-        format_none(x$effect_determination$heterogeneous),
-        "\n",
-        sep = "")
+      format_none(x$effect_determination$heterogeneous),
+      "\n",
+      sep = ""
+    )
     cat("Homogeneous:   ",
-        format_none(x$effect_determination$homogeneous),
-        "\n",
-        sep = "")
+      format_none(x$effect_determination$homogeneous),
+      "\n",
+      sep = ""
+    )
     cat("Final formula: ",
-        format_formula_clean(x$effect_determination$final_formula),
-        "\n",
-        sep = "")
+      format_formula_clean(x$effect_determination$final_formula),
+      "\n",
+      sep = ""
+    )
   }
 
   invisible(x)
@@ -236,33 +243,28 @@ print.fit_fmr <- function(x, ...) {
     cat("Valid inits:    ", x$n_valid_init, "\n", sep = "")
   }
 
-  if (!is.null(x$pi_g)) {
+  if (!is.null(x$em_state$pi_g)) {
     cat("\nMixing proportions:\n")
-    pi_named <- x$pi_g
-    names(pi_named) <- paste0("g", seq_along(pi_named))
-    print(round(pi_named, 4))
+    print(round(x$em_state$pi_g, 4))
   }
 
-  if (!is.null(x$sigma_g)) {
+  if (!is.null(x$em_state$sigma_g)) {
     cat("\nComponent standard deviations:\n")
-    sigma_named <- x$sigma_g
-    names(sigma_named) <- paste0("g", seq_along(sigma_named))
-    print(round(sigma_named, 4))
+    print(round(x$em_state$sigma_g, 4))
   }
 
-  if (!is.null(x$beta_g)) {
+  if (!is.null(x$em_state$beta_g)) {
     cat("\nHeterogeneous coefficients:\n")
-    print(round(x$beta_g, 4))
+    print(round(x$em_state$beta_g, 4))
   }
 
-  if (!is.null(x$beta) && length(x$beta) > 0L) {
+  if (!is.null(x$em_state$beta) && length(x$em_state$beta) > 0L) {
     cat("\nHomogeneous coefficients:\n")
-    print(round(x$beta, 4))
+    print(round(x$em_state$beta, 4))
   }
 
   invisible(x)
 }
-
 
 
 #' Print the step-by-step selection table

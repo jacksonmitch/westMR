@@ -2,26 +2,24 @@
 m_step <- function(dat, em_state, family, control) {
   if (dat$p_com > 0) {
     em_state <- switch(family,
-                       gaussian = m_step_sqr_gaussian(dat, em_state, control),
-                       poisson  = m_step_sqr_poisson(dat, em_state, control),
-                       binomial = m_step_sqr_binomial(dat, em_state, control),
-                       stop(sprintf("No sQR M-step for family '%s'", family))
+      gaussian = m_step_sqr_gaussian(dat, em_state, control),
+      poisson  = m_step_sqr_poisson(dat, em_state, control),
+      binomial = m_step_sqr_binomial(dat, em_state, control),
+      stop(sprintf("No sQR M-step for family '%s'", family))
     )
-
   } else {
     em_state <- switch(family,
-                       gaussian = m_step_gaussian(dat, em_state, control),
-                       poisson  = m_step_poisson(dat, em_state, control),
-                       binomial = m_step_binomial(dat, em_state, control),
-                       stop(sprintf("No M-step for family '%s'", family))
+      gaussian = m_step_gaussian(dat, em_state, control),
+      poisson  = m_step_poisson(dat, em_state, control),
+      binomial = m_step_binomial(dat, em_state, control),
+      stop(sprintf("No M-step for family '%s'", family))
     )
   }
-  em_state
 }
 
 m_step_gaussian <- function(dat, em_state, control) {
-  tau <- em_state[["tau"]]
-  G <- ncol(tau)
+  tau <- em_state$tau
+  G <- em_state$G
   X <- dat$X_het
   y <- dat$y
   p <- dat$p_het
@@ -44,10 +42,12 @@ m_step_gaussian <- function(dat, em_state, control) {
   }
 
   # TODO: look at this line and think of alternatives
-  mu <- linear_predictor_matrix(A = dat$X_het,
-                                B = dat$X_com,
-                                beta_g = beta_g,
-                                beta = NULL)
+  mu <- linear_predictor_matrix(
+    A = dat$X_het,
+    B = dat$X_com,
+    beta_g = beta_g,
+    beta = NULL
+  )
   res2 <- (dat$y - mu)^2
 
   # Would it be faster to do these with matrix form instead of col sums?
@@ -59,15 +59,14 @@ m_step_gaussian <- function(dat, em_state, control) {
   stopifnot(!is.null(control$sigma_floor))
   sigma_g <- pmax(sigma_g, control$sigma_floor)
 
-  em_state[["beta_g"]] <- beta_g
-  em_state[["eta"]] <- mu
-  em_state[["sigma_g"]] <- sigma_g
-  em_state
+  em_state$beta_g <- beta_g
+  em_state$eta <- mu
+  em_state$sigma_g <- sigma_g
 }
 
 m_step_poisson <- function(dat, em_state, control) {
-  tau <- em_state[["tau"]]
-  G <- ncol(tau)
+  tau <- em_state$tau
+  G <- em_state$G
 
   X <- dat$X_het
   y <- dat$y
@@ -98,11 +97,8 @@ m_step_poisson <- function(dat, em_state, control) {
     beta = NULL
   )
 
-  em_state[["beta_g"]] <- beta_g
-  em_state[["eta"]] <- eta
-  em_state[["sigma_g"]] <- NULL
-
-  em_state
+  em_state$beta_g <- beta_g
+  em_state$eta <- eta
 }
 
 m_step_binomial <- function(dat, em_state, control) {
@@ -112,12 +108,10 @@ m_step_binomial <- function(dat, em_state, control) {
 # Gaussian M-step using structured QR
 
 m_step_sqr_gaussian <- function(dat, em_state, control) {
-  tau <- em_state[["tau"]]
-  sigma_g <- em_state[["sigma_g"]]
+  tau <- em_state$tau
+  sigma_g <- em_state$sigma_g
   # Updated beta, beta_g and QR parts
   if (!is.null(sigma_g)) {
-    sigma_g <- as.numeric(sigma_g)
-
     stopifnot(length(sigma_g) == ncol(tau))
 
     sigma_g <- pmax(sigma_g, 1e-16)
@@ -132,18 +126,22 @@ m_step_sqr_gaussian <- function(dat, em_state, control) {
     w_beta <- tau
   }
 
-  out <- wls_sqr(dat = dat,
-                 z = dat$y,
-                 weights = w_beta,
-                 control = control)
+  out <- wls_sqr(
+    dat = dat,
+    z = dat$y,
+    weights = w_beta,
+    control = control
+  )
   beta <- out$beta
   beta_g <- out$beta_g
 
   # TODO: look at this line and think of alternatives
-  mu <- linear_predictor_matrix(A = dat$X_het,
-                                B = dat$X_com,
-                                beta_g = beta_g,
-                                beta = beta)
+  mu <- linear_predictor_matrix(
+    A = dat$X_het,
+    B = dat$X_com,
+    beta_g = beta_g,
+    beta = beta
+  )
 
   res2 <- (dat$y - mu)^2
   # Would it be faster to do these with matrix form instead of col sums?
@@ -155,26 +153,20 @@ m_step_sqr_gaussian <- function(dat, em_state, control) {
   stopifnot(!is.null(control$sigma_floor))
   sigma_g <- pmax(sigma_g, control$sigma_floor)
 
-  em_state[["beta_g"]] <- beta_g
-  em_state[["beta"]] <- beta
-  em_state[["eta"]] <- mu
-  em_state[["sigma_g"]] <- sigma_g
-  em_state
+  em_state$beta_g <- beta_g
+  em_state$beta <- beta
+  em_state$eta <- mu
+  em_state$sigma_g <- sigma_g
 }
 
 # Poisson M-step using inner IRWLS and structured QR
 
 m_step_sqr_poisson <- function(dat, em_state, control) {
-  em_state <- irwls_fmr(dat, em_state, control, family="poisson")
-  em_state
+  irwls_fmr(dat, em_state, control, family = "poisson")
 }
 
 # Binomial M-step using inner IRWLS and structured QR
 
 m_step_sqr_binomial <- function(dat, em_state, control) {
-  em_state <- irwls_fmr(dat, em_state, control, "binomial")
-  em_state
+  irwls_fmr(dat, em_state, control, "binomial")
 }
-
-
-

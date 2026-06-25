@@ -1,4 +1,3 @@
-
 irwls_fmr <- function(dat, em_state, control,
                       family = c("poisson", "binomial")) {
   family <- match.arg(family)
@@ -7,9 +6,9 @@ irwls_fmr <- function(dat, em_state, control,
   # stopifnot(!is.null(dat$B))
   y <- dat$y
 
-  tau <- em_state[["tau"]]
-  beta_g <- em_state[["beta_g"]]
-  beta <- em_state[["beta"]]
+  tau <- em_state$tau
+  beta_g <- em_state$beta_g
+  beta <- em_state$beta
 
   n <- nrow(A)
   G <- ncol(tau)
@@ -52,7 +51,6 @@ irwls_fmr <- function(dat, em_state, control,
   converged <- FALSE
 
   for (r in seq_len(maxit)) {
-
     beta_g_old <- beta_g
     beta_old <- beta
 
@@ -84,7 +82,6 @@ irwls_fmr <- function(dat, em_state, control,
 
       z <- eta_safe + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
       w <- tau * binomial_size * mu * (1 - mu)
-
     }
 
     w <- pmax(w, weight_floor)
@@ -107,10 +104,10 @@ irwls_fmr <- function(dat, em_state, control,
     }
   }
 
-  em_state[["beta_g"]] <- beta_g
-  em_state[["beta"]] <- beta
-  em_state[["eta"]] <- eta
-  em_state[["irwls_iterations"]] <- r
-  em_state[["irwls_converged"]] <- converged
+  em_state$beta_g <- beta_g
+  em_state$beta <- beta
+  em_state$eta <- eta
+  em_state$irwls_iterations <- r
+  em_state$irwls_converge <- converged
   em_state
 }

@@ -3,7 +3,7 @@
 # shared_fits : output of fit_across_G for the shared side (null for forward,
 #               alt for backward).
 # direction   : "forward" or "backward",determines which role shared_fits plays
-# candidate_prepared_data : prepared_data for the candidate side (already built
+# candidate_data : prepared_data for the candidate side (already built
 #                           by the caller for this specific predictor).
 
 west_procedure <- function(
@@ -40,14 +40,14 @@ west_procedure <- function(
     }
 
     k_null <- count_params_gmr(
-      ncol_het = ncol(fit_null$beta_g),
-      ncol_common = length(fit_null$beta),
+      ncol_het = ncol(fit_null$em_state$beta_g),
+      ncol_common = length(fit_null$em_state$beta),
       G = G,
       family = model$family
     )
     k_alt <- count_params_gmr(
-      ncol_het = ncol(fit_alt$beta_g),
-      ncol_common = length(fit_alt$beta),
+      ncol_het = ncol(fit_alt$em_state$beta_g),
+      ncol_common = length(fit_alt$em_state$beta),
       G = G,
       family = model$family
     )
@@ -85,8 +85,7 @@ west_procedure <- function(
 
   if (direction == "forward") {
     model_bic <- tab$bic_alt
-  }
-  else {
+  } else {
     model_bic <- tab$bic_null
   }
   valid <- is.finite(model_bic) & is.finite(tab$p_value)
