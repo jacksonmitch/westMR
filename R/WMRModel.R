@@ -1,3 +1,4 @@
+#' @importFrom R6 R6Class
 WMRModel <- R6::R6Class(
   "WMRModel",
   public = list(
