@@ -15,3 +15,11 @@ get_response <- function(formula) {
 get_predictors <- function(formula) {
   attr(stats::terms(formula), "term.labels")
 }
+
+format_formula <- function(x) {
+  if (is.null(x)) {
+    return("NULL")
+  }
+
+  paste(deparse(x), collapse = " ")
+}

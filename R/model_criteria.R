@@ -15,7 +15,6 @@ count_params_gmr <- function(ncol_het,
   k
 }
 
-
 compute_bic <- function(loglik, n, k) {
   -2 * loglik + k * log(n)
 }
@@ -42,16 +41,5 @@ select_best_G <- function(fits, criterion = c("bic", "loglik")) {
   }
 
   best_fit <- fits[[best_index]]
-
-  out <- list(
-    criterion = criterion,
-    values = values,
-    selected_G = best_fit$G,
-    selected_name = names(fits)[best_index],
-    best_fit = best_fit,
-    all_fits = fits
-  )
-
-  class(out) <- "G_selection"
-  out
+  best_fit
 }

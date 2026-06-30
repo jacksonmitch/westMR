@@ -68,3 +68,11 @@ row_max_base <- function(x) {
 
   out
 }
+
+format_none <- function(x) {
+  if (is.null(x) || length(x) == 0L) {
+    return("none")
+  }
+
+  paste(x, collapse = ", ")
+}

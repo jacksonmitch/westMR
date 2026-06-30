@@ -7,8 +7,8 @@
 steps_table(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{effect_determination} or
-\code{variable_selection}.}
+\item{x}{An object of class \code{determine_effects} or
+\code{select_variables}.}
 
 \item{...}{Currently unused.}
 }

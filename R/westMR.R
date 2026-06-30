@@ -30,7 +30,7 @@ westMR <- function(
   task = c("both", "variables", "effects"),
   control = build_control()
 ) {
-  family <- match.arg(family) # defaults to gaussian
+  family <- match.arg(family)
   task <- match.arg(task)
 
   collection <- checkmate::makeAssertCollection()
@@ -61,75 +61,57 @@ westMR <- function(
     formula <- coerced$formula
     data <- coerced$data
   }
+
+  G_values <- seq(2, G_max)
   # Create internal model
   model <- WMRModel$new(
     formula = formula,
     data = data,
-    G_values = seq(2, G_max),
+    G_values = G_values,
     family = family,
     control = control
   )
 
   variable_selection <- NULL
   effect_determination <- NULL
+  best_fit <- NULL
 
-  run_variables <- task %in% c("both", "variables")
-  run_effects <- task %in% c("both", "effects")
-
-  if (run_variables) {
+  if (task %in% c("both", "variables")) {
     variable_selection <- select_variables(
       model = model,
       direction = control$direction
     )
-
-    if (control$verbose) {
-      print(variable_selection)
-    }
+    if (control$verbose) print(variable_selection)
+    
+    best_fit <- variable_selection$best_fit
   }
-
-  if (run_effects) {
+  if (task %in% c("both", "effects")) {
     effect_predictors <- if (!is.null(variable_selection)) {
       variable_selection$selected
     } else {
       model$predictors
     }
-
     if (length(effect_predictors) > 0L) {
       effect_determination <- determine_effects(
         model = model,
         direction = control$direction,
         predictors = effect_predictors
       )
-
-      if (control$verbose) {
-        print(effect_determination)
-      }
+      if (control$verbose) print(effect_determination)
+      
+      best_fit <- effect_determination$best_fit
     }
   }
 
-  selected_G <- NULL
-  best_fit <- NULL
-  final_fits <- NULL
-
-  if (!is.null(effect_determination)) {
-    selected_G <- effect_determination$selected_G
-    best_fit <- effect_determination$best_fit
-    final_fits <- effect_determination$final_fits
-  } else if (!is.null(variable_selection)) {
-    selected_G <- variable_selection$selected_G
-    best_fit <- variable_selection$best_fit
-    final_fits <- variable_selection$final_fits
-  }
-
+  if(control$verbose) print(best_fit)
+  
   out <- list(
     call = match.call(),
     formula = formula,
     family = family,
     task = task,
-    G_values = 2:G_max,
-    selected_G = selected_G,
+    G_values = G_values,
     best_fit = best_fit,
-    final_fits = final_fits,
     variable_selection = variable_selection,
     effect_determination = effect_determination
   )
