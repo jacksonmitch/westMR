@@ -76,3 +76,39 @@ format_none <- function(x) {
 
   paste(x, collapse = ", ")
 }
+
+coerce_binomial_formula <- function(formula, data) {
+  # Just in case
+  if (".binom_size" %in% names(data)) {
+    stop("Column name '.binom_size' is reserved; please rename your column.")
+  }
+
+  resp <- formula[[2]]
+
+  if (is.call(resp) && identical(resp[[1]], as.name("cbind"))) {
+    success_expr <- resp[[2]]
+    failure_expr <- resp[[3]]
+
+    successes <- eval(success_expr, data)
+    failures <- eval(failure_expr, data)
+
+    if (any(successes < 0) || any(failures < 0)) {
+      stop("Successes and failures must be non-negative.")
+    }
+
+    data$.binom_size <- successes + failures
+    formula[[2]] <- success_expr # response becomes the success count only instead of am ugly cbind
+
+    return(list(formula = formula, data = data))
+  }
+
+  # Plain response: treat as 0/1 (Bernoulli, size = 1)
+  y <- eval(resp, data)
+
+  if (!all(y %in% c(0, 1))) {
+    stop("Binomial response must be cbind(successes, failures) or a 0/1 vector.")
+  }
+
+  data$.binom_size <- rep(1, length(y))
+  list(formula = formula, data = data)
+}
