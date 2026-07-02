@@ -4,7 +4,9 @@
 print.select_variables <- function(x, ...) {
   cat("Variable selection\n")
   cat("  Direction: ", x$direction,
-      "  |  Alpha: ", x$alpha, "\n", sep = "")
+    "  |  Alpha: ", x$alpha, "\n",
+    sep = ""
+  )
   cat("  Selected:      ", format_none(x$selected), "\n", sep = "")
   cat("  Final formula: ", format_formula(x$final_formula), "\n", sep = "")
   invisible(x)
@@ -16,7 +18,9 @@ print.select_variables <- function(x, ...) {
 print.determine_effects <- function(x, ...) {
   cat("Effect-type determination\n")
   cat("  Direction: ", x$direction,
-      "  |  Alpha: ", x$alpha, "\n", sep = "")
+    "  |  Alpha: ", x$alpha, "\n",
+    sep = ""
+  )
   cat("  Heterogeneous: ", format_none(x$heterogeneous), "\n", sep = "")
   cat("  Homogeneous:   ", format_none(x$homogeneous), "\n", sep = "")
   cat("  Final formula: ", format_formula(x$final_formula), "\n", sep = "")
@@ -36,10 +40,16 @@ steps_table <- function(x, ...) UseMethod("steps_table")
 #' @export
 steps_table.determine_effects <- function(x, ...) {
   label_state <- function(het, common) {
-    if (length(het) == 0) return("all homogeneous")
-    if (length(common) == 0) return("all heterogeneous")
-    paste0("het: ", paste(het, collapse = ", "),
-           "  |  homo: ", paste(common, collapse = ", "))
+    if (length(het) == 0) {
+      return("all homogeneous")
+    }
+    if (length(common) == 0) {
+      return("all heterogeneous")
+    }
+    paste0(
+      "het: ", paste(het, collapse = ", "),
+      "  |  homo: ", paste(common, collapse = ", ")
+    )
   }
   print_steps(x$steps, union(x$heterogeneous, x$homogeneous), x$direction, label_state)
   invisible(x)
@@ -48,10 +58,16 @@ steps_table.determine_effects <- function(x, ...) {
 #' @export
 steps_table.select_variables <- function(x, ...) {
   label_state <- function(included, excluded) {
-    if (length(included) == 0) return("none included")
-    if (length(excluded) == 0) return("all included")
-    paste0("included: ", paste(included, collapse = ", "),
-           "  |  excluded: ", paste(excluded, collapse = ", "))
+    if (length(included) == 0) {
+      return("none included")
+    }
+    if (length(excluded) == 0) {
+      return("all included")
+    }
+    paste0(
+      "included: ", paste(included, collapse = ", "),
+      "  |  excluded: ", paste(excluded, collapse = ", ")
+    )
   }
   print_steps(x$steps, x$all_predictors, x$direction, label_state)
   invisible(x)
@@ -118,8 +134,10 @@ print.fit_fmr <- function(x, ...) {
 #' @export
 print.westMR <- function(x, ...) {
   cat("westMR  |  family: ", x$family,
-      "  |  G: ", paste(x$G_values, collapse = ":"),
-      "  |  task: ", x$task, "\n\n", sep = "")
+    "  |  G: ", paste(x$G_values, collapse = ":"),
+    "  |  task: ", x$task, "\n\n",
+    sep = ""
+  )
 
   if (!is.null(x$variable_selection)) {
     print(x$variable_selection)
@@ -132,8 +150,8 @@ print.westMR <- function(x, ...) {
   }
 
   if (is.null(x$effect_determination) &&
-      !is.null(x$variable_selection) &&
-      length(x$variable_selection$selected) == 0L) {
+    !is.null(x$variable_selection) &&
+    length(x$variable_selection$selected) == 0L) {
     cat("Effect-type determination skipped: no predictors selected.\n\n")
   }
 
@@ -166,8 +184,10 @@ summary.westMR <- function(object, ...) {
 #' @export
 print.summary.westMR <- function(x, ...) {
   cat("westMR summary  |  family: ", x$family,
-      "  |  G: ", paste(x$G_values, collapse = ","),
-      "  |  task: ", x$task, "\n\n", sep = "")
+    "  |  G: ", paste(x$G_values, collapse = ","),
+    "  |  task: ", x$task, "\n\n",
+    sep = ""
+  )
 
   if (!is.null(x$variable_selection)) {
     print(x$variable_selection)
@@ -182,8 +202,8 @@ print.summary.westMR <- function(x, ...) {
   }
 
   if (is.null(x$effect_determination) &&
-      !is.null(x$variable_selection) &&
-      length(x$variable_selection$selected) == 0L) {
+    !is.null(x$variable_selection) &&
+    length(x$variable_selection$selected) == 0L) {
     cat("Effect-type determination skipped: no predictors selected.\n\n")
   }
 

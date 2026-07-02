@@ -39,24 +39,14 @@ west_procedure <- function(
       fit_alt <- shared_fits[[i]]
     }
 
-    k_null <- count_params_gmr(
-      ncol_het = ncol(fit_null$em_state$beta_g),
-      ncol_common = length(fit_null$em_state$beta),
-      G = G,
-      family = model$family
-    )
-    k_alt <- count_params_gmr(
-      ncol_het = ncol(fit_alt$em_state$beta_g),
-      ncol_common = length(fit_alt$em_state$beta),
-      G = G,
-      family = model$family
-    )
-
-    bic_null <- compute_bic(fit_null$loglik, n, k_null)
-    bic_alt <- compute_bic(fit_alt$loglik, n, k_alt)
+    k_null <- fit_null$num_parameters
+    k_alt <- fit_alt$num_parameters
 
     lrt <- -2 * (fit_null$loglik - fit_alt$loglik)
     df <- k_alt - k_null
+
+    bic_null <- fit_null$bic
+    bic_alt <- fit_alt$bic
 
     p_value <- if (is.finite(lrt) && is.finite(df) && df > 0) {
       stats::pchisq(lrt, df = df, lower.tail = FALSE)
@@ -70,8 +60,6 @@ west_procedure <- function(
       loglik_alt = fit_alt$loglik,
       bic_null = bic_null,
       bic_alt = bic_alt,
-      k_null = k_null,
-      k_alt = k_alt,
       lrt = lrt,
       df = df,
       p_value = p_value,
@@ -106,15 +94,15 @@ west_procedure <- function(
     reject <- is.finite(p0) && p0 < alpha
   }
 
-  tab$weight <- weights
+  tab$weights <- weights
 
   out <- list(
     p0 = p0,
     reject = reject,
     alpha = alpha,
     table = tab,
-    candidate_fits = candidate_fits,
-    G_values = G_values
+    shared_fits = shared_fits,
+    candidate_fits = candidate_fits
   )
 
   class(out) <- "west_procedure"

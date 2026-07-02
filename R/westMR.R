@@ -82,8 +82,8 @@ westMR <- function(
       direction = control$direction
     )
     if (control$verbose) print(variable_selection)
-    
-    best_fit <- variable_selection$best_fit
+
+    final_fits <- variable_selection$final_fits
   }
   if (task %in% c("both", "effects")) {
     effect_predictors <- if (!is.null(variable_selection)) {
@@ -98,13 +98,14 @@ westMR <- function(
         predictors = effect_predictors
       )
       if (control$verbose) print(effect_determination)
-      
-      best_fit <- effect_determination$best_fit
+
+      final_fits <- effect_determination$final_fits
     }
   }
 
-  if(control$verbose) print(best_fit)
-  
+  best_fit <- select_best_G(final_fits, criterion = "bic")
+  if (control$verbose) print(best_fit)
+
   out <- list(
     call = match.call(),
     formula = formula,

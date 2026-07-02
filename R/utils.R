@@ -112,3 +112,5 @@ coerce_binomial_formula <- function(formula, data) {
   data$.binom_size <- rep(1, length(y))
   list(formula = formula, data = data)
 }
+
+compact <- function(x) Filter(Negate(is.null), x)

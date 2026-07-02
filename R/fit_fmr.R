@@ -104,7 +104,7 @@ fit_fmr <- function(model,
     control = control
   )
 
-  k <- count_params_gmr(
+  k <- count_params_fmr(
     ncol_het = prepared_data$p_het,
     ncol_common = prepared_data$p_com,
     G = G,
@@ -113,10 +113,8 @@ fit_fmr <- function(model,
 
   bic <- compute_bic(loglik = best_fit$loglik, n = prepared_data$n, k = k)
 
-  add_parameter_labels(em_state, prepared_data)
-
-  out <- list(
-    em_state = em_state,
+  out <- compact(list(
+    parameter_values = em_state$to_list(prepared_data),
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace,
     iterations = best_fit$iterations,
@@ -125,13 +123,12 @@ fit_fmr <- function(model,
     irwls_converged = best_fit$irwls_converged,
     best_init_name = init_fit$best_name,
     best_init_loglik = init_fit$best_loglik,
-    n_valid_init = sum(is.finite(init_fit$logliks)),
     bic = bic,
-    k = k,
+    num_parameters = k,
     family = family,
     G = G,
     n_init = length(init_list),
-    logliks = init_fit$logliks,
+    n_valid_init = sum(is.finite(init_fit$logliks)),
     init = list(
       strategy = "multistart_tau_burnin",
       burnin = control$init_burnin,
@@ -140,47 +137,9 @@ fit_fmr <- function(model,
       burnin_logliks = init_fit$logliks,
       failed_starts = init_fit$failures
     ),
-    model = model,
-    call = match.call()
-  )
+    control = control
+  ))
 
   class(out) <- "fit_fmr"
   out
-}
-
-add_parameter_labels <- function(em_state, prepared_data) {
-  if (!is.null(em_state$beta_g)) {
-    bg <- em_state$beta_g
-    rownames(bg) <- paste0("g", seq_len(nrow(bg)))
-    if (!is.null(colnames(prepared_data$X_het))) {
-      colnames(bg) <- colnames(prepared_data$X_het)
-    }
-    em_state$beta_g <- bg
-  }
-
-  if (!is.null(em_state$beta) && length(em_state$beta) > 0L) {
-    b <- as.numeric(em_state$beta)
-    if (!is.null(colnames(prepared_data$X_com))) {
-      names(b) <- colnames(prepared_data$X_com)
-    }
-    em_state$beta <- b
-  }
-
-  if (!is.null(em_state$sigma_g)) {
-    sg <- em_state$sigma_g
-    names(sg) <- paste0("g", seq_along(sg))
-    em_state$sigma_g <- sg
-  }
-
-  if (!is.null(em_state$pi_g)) {
-    pg <- em_state$pi_g
-    names(pg) <- paste0("g", seq_along(pg))
-    em_state$pi_g <- pg
-  }
-
-  if (!is.null(em_state$tau)) {
-    tau <- em_state$tau
-    colnames(tau) <- paste0("g", seq_len(ncol(tau)))
-    em_state$tau <- tau
-  }
 }

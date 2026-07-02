@@ -1,6 +1,6 @@
 # Model selection helper functions
 
-count_params_gmr <- function(ncol_het,
+count_params_fmr <- function(ncol_het,
                              ncol_common,
                              G,
                              family = c("gaussian", "poisson", "binomial")) {

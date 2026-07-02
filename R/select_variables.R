@@ -24,19 +24,14 @@ select_variables <- function(
     direction = direction
   )
 
-  best_fit <- select_best_G(result$final_fits, criterion = "bic")
-
   out <- list(
     direction = direction,
     alpha = model$control$alpha,
-    G_values = model$G_values,
-    best_fit = best_fit,
-    all_predictors = predictors,
+    predictors = predictors,
     selected = result$included,
     steps = result$steps,
     final_fits = result$final_fits,
-    final_formula = make_formula(result$included, response = model$response),
-    call = match.call()
+    final_formula = make_formula(result$included, response = model$response)
   )
 
   class(out) <- "select_variables"

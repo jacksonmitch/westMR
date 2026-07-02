@@ -24,19 +24,14 @@ determine_effects <- function(
 
   homogeneous <- setdiff(predictors, result$heterogeneous)
 
-  best_fit <- select_best_G(result$final_fits, criterion = "bic")
-
   out <- list(
     direction = direction,
     alpha = model$control$alpha,
-    G_values = model$G_values,
-    best_fit = best_fit,
     heterogeneous = result$heterogeneous,
     homogeneous = homogeneous,
     steps = result$steps,
     final_fits = result$final_fits,
-    final_formula = model$formula,
-    call = match.call()
+    final_formula = model$formula
   )
 
   class(out) <- "determine_effects"
