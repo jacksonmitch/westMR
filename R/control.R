@@ -24,14 +24,35 @@
 #'  variance estimates to prevent numerical instabilities. Must be greater than
 #'  or equal to 0. If \code{NULL}, defaults to a percentage of the response's
 #'  variance.
-#' @param irwls_max_iter description
-#' @param irwls_tol description
-#' @param weight_floor description
-#' @param return_qr_parts description
-#' @param init_burnin description
-#' @param init_eps desc
-#' @param init_min_size desc
-#' @param use_mclust description
+#' @param irwls_max_iter An integer specifying the maximum number of inner
+#'  IRWLS iterations used in the Poisson/binomial M-step. Must be at least
+#'  1. Default is 50.
+#' @param irwls_tol A numeric value specifying the convergence tolerance for
+#'  the inner IRWLS loop used in the Poisson/binomial M-step; iteration
+#'  stops when the largest absolute change in coefficients falls below this
+#'  value. Must be greater than or equal to 0. Default is 1e-8.
+#' @param weight_floor A numeric value establishing a lower bound for the
+#'  working weights used in the IRWLS loop and the plain Poisson M-step, to
+#'  prevent numerical instabilities. Must be greater than or equal to 0.
+#'  Default is 1e-10.
+#' @param return_qr_parts A logical flag. If \code{TRUE}, the structured-QR
+#'  M-step retains its intermediate QR decomposition components in its
+#'  output instead of discarding them. Default is \code{FALSE}.
+#' @param init_burnin An integer specifying the number of EM iterations run
+#'  for each candidate initialization during the burn-in stage used to pick
+#'  the best starting point. Must be at least 1. Default is 10.
+#' @param init_eps A numeric value controlling how close an initial
+#'  responsibility matrix (\code{tau}) built from a cluster or quantile
+#'  partition is to a hard assignment: the assigned component gets
+#'  probability \code{1 - init_eps} and the rest share \code{init_eps}.
+#'  Must be between 0 and 0.5. Default is 1e-6.
+#' @param init_min_size An integer specifying a minimum group size to
+#'  enforce on initializations. Currently validated but not used by the
+#'  estimation code. Must be at least 1. Default is \code{NULL}.
+#' @param use_mclust A logical flag reserved for enabling model-based
+#'  (mclust) initialization. Currently validated but not used by the
+#'  estimation code, which uses k-means and quantile-based initializations
+#'  only. Default is \code{TRUE}.
 #'
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
