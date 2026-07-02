@@ -1,5 +1,12 @@
 # ---- select_variables -------------------------------------------------------
 
+#' Print a Variable Selection Result
+#'
+#' @param x An object of class \code{select_variables}, as returned by
+#'   \code{select_variables()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 print.select_variables <- function(x, ...) {
   cat("Variable selection\n")
@@ -12,6 +19,13 @@ print.select_variables <- function(x, ...) {
 
 # ---- determine_effects ------------------------------------------------------
 
+#' Print an Effect-Type Determination Result
+#'
+#' @param x An object of class \code{determine_effects}, as returned by
+#'   \code{determine_effects()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 print.determine_effects <- function(x, ...) {
   cat("Effect-type determination\n")
@@ -30,9 +44,18 @@ print.determine_effects <- function(x, ...) {
 #' @param x An object of class \code{determine_effects} or
 #'   \code{select_variables}.
 #' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 steps_table <- function(x, ...) UseMethod("steps_table")
 
+#' Print the Step-by-Step Effect-Type Determination Table
+#'
+#' @param x An object of class \code{determine_effects}, as returned by
+#'   \code{determine_effects()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 steps_table.determine_effects <- function(x, ...) {
   label_state <- function(het, common) {
@@ -45,6 +68,13 @@ steps_table.determine_effects <- function(x, ...) {
   invisible(x)
 }
 
+#' Print the Step-by-Step Variable Selection Table
+#'
+#' @param x An object of class \code{select_variables}, as returned by
+#'   \code{select_variables()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 steps_table.select_variables <- function(x, ...) {
   label_state <- function(included, excluded) {
@@ -86,6 +116,13 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 
 # ---- fit_fmr ----------------------------------------------------------------
 
+#' Print a Fitted Finite Mixture Regression Model
+#'
+#' @param x An object of class \code{fit_fmr}, as returned by
+#'   \code{fit_fmr()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 print.fit_fmr <- function(x, ...) {
   cat("Best fit (G: ", x$G, ")\n", sep = "")
@@ -115,6 +152,13 @@ print.fit_fmr <- function(x, ...) {
 
 # ---- westMR -----------------------------------------------------------------
 
+#' Print a westMR Result
+#'
+#' @param x An object of class \code{westMR}, as returned by
+#'   \code{\link{westMR}}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 print.westMR <- function(x, ...) {
   cat("westMR  |  family: ", x$family,
@@ -144,6 +188,16 @@ print.westMR <- function(x, ...) {
   invisible(x)
 }
 
+#' Summarize a westMR Result
+#'
+#' @param object An object of class \code{westMR}, as returned by
+#'   \code{\link{westMR}}.
+#' @param ... Currently unused.
+#'
+#' @return An object of class \code{summary.westMR}: a list containing the
+#'   call, formula, family, task, candidate \code{G} values, the best fit,
+#'   the variable-selection and effect-determination results (if run), and
+#'   their step-by-step tables.
 #' @export
 summary.westMR <- function(object, ...) {
   out <- list(
@@ -163,6 +217,13 @@ summary.westMR <- function(object, ...) {
   out
 }
 
+#' Print a westMR Summary
+#'
+#' @param x An object of class \code{summary.westMR}, as returned by
+#'   \code{summary.westMR()}.
+#' @param ... Currently unused.
+#'
+#' @return \code{x}, invisibly.
 #' @export
 print.summary.westMR <- function(x, ...) {
   cat("westMR summary  |  family: ", x$family,

@@ -76,6 +76,31 @@ add_extra_tau_start <- function(init_list,
 
 
 # Find the best fit given a specific G and a list of initializations
+#' Fit One Model Specification at a Given G
+#'
+#' Fits a finite mixture regression model for a fixed number of components
+#' \code{G} and a fixed design (heterogeneous/common predictor split). Burns
+#' in each initialization in \code{init_list} for a few EM iterations,
+#' selects the best-starting initialization by log-likelihood via
+#' \code{select_best_initialization()}, then runs \code{em_fmr()} to
+#' convergence from that state.
+#'
+#' @param model A \code{WMRModel} object.
+#' @param G An integer number of mixture components.
+#' @param init_list A named list of candidate \code{tau} initialization
+#'   matrices (n x G), as produced by \code{make_tau_list()}.
+#' @param prepared_data A \code{WMRData} object (from \code{prepare_data()})
+#'   for this model specification.
+#'
+#' @return A list of class \code{fit_fmr} with elements including
+#'   \code{em_state} (the final \code{EmState}), \code{loglik} and
+#'   \code{loglik_trace}, \code{iterations}, \code{converged},
+#'   \code{irwls_iterations}/\code{irwls_converged} (non-Gaussian families
+#'   only), initialization diagnostics (\code{best_init_name},
+#'   \code{best_init_loglik}, \code{n_valid_init}, \code{init}), \code{bic},
+#'   \code{k} (parameter count), \code{family}, \code{G}, \code{n_init},
+#'   \code{logliks}, \code{model}, and \code{call}.
+#' @noRd
 fit_fmr <- function(model,
                     G,
                     init_list,

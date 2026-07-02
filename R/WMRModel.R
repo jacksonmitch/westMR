@@ -1,4 +1,23 @@
+#' Container for One westMR Model Specification
+#'
+#' An R6 class holding the formula, data, candidate \code{G} values, family,
+#' and control settings for a \code{westMR} run. \code{predictors} and
+#' \code{response} are derived from \code{formula} via active bindings and
+#' cannot be set directly.
+#'
+#' @param formula A formula object specifying the model.
+#' @param data A data.frame containing the variables in \code{formula}.
+#' @param G_values An integer vector of candidate numbers of mixture
+#'   components.
+#' @param family A character string specifying the error distribution:
+#'   \code{"gaussian"}, \code{"poisson"}, or \code{"binomial"}.
+#' @param control A \code{WMRControl} object (from \code{build_control()}).
+#'   If \code{control$sigma_floor} is \code{NULL}, it is set here to
+#'   \code{0.05 * sd(response)}.
+#'
+#' @return A new \code{WMRModel} object.
 #' @importFrom R6 R6Class
+#' @noRd
 WMRModel <- R6::R6Class(
   "WMRModel",
   public = list(

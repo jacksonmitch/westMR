@@ -1,6 +1,23 @@
 # Validated data container for mixture regression fitting.
 # All structural checks happen once here so callers can trust the contents.
 
+#' Build a Validated Design-Matrix Container
+#'
+#' Constructs the heterogeneous and common design matrices for a given model
+#' specification from \code{model$formula}/\code{model$data}, and wraps them
+#' (with the response and, for binomial models, the binomial size) in a
+#' validated \code{WMRData} object.
+#'
+#' @param model A \code{WMRModel} object.
+#' @param included A character vector of predictor names to include in the
+#'   design. Defaults to all predictors in \code{model}.
+#' @param common A character vector of predictor names, a subset of
+#'   \code{included}, to treat as common/homogeneous (i.e. excluded from the
+#'   heterogeneous design matrix). Defaults to \code{NULL} (all included
+#'   predictors are heterogeneous).
+#'
+#' @return A \code{WMRData} object.
+#' @noRd
 prepare_data <- function(model, included = model$predictors, common = NULL) {
   mf <- stats::model.frame(model$formula, model$data, na.action = stats::na.fail)
   y <- as.numeric(stats::model.response(mf))
@@ -23,6 +40,23 @@ prepare_data <- function(model, included = model$predictors, common = NULL) {
   WMRData$new(y = y, X_het = X_het, X_com = X_com, binomial_size = binomial_size_vec)
 }
 
+#' Validated Design-Matrix Container
+#'
+#' An R6 class holding one validated design-matrix specification for
+#' mixture regression fitting: the response \code{y}, the heterogeneous
+#' design matrix \code{X_het}, the common design matrix \code{X_com}, and
+#' (for binomial models) \code{binomial_size}. All fields are read-only
+#' active bindings; structural checks (matching dimensions, no missing
+#' values, \code{n > ncol(X_het)}) run once in \code{initialize()}.
+#'
+#' @param y A numeric response vector.
+#' @param X_het A numeric matrix, the heterogeneous/component-specific
+#'   design matrix.
+#' @param X_com A numeric matrix, the common/homogeneous design matrix.
+#' @param binomial_size An optional numeric vector of binomial trial counts.
+#'
+#' @return A new \code{WMRData} object.
+#' @noRd
 WMRData <- R6::R6Class(
   "WMRData",
   private = list(

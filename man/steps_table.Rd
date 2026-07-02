@@ -12,6 +12,9 @@ steps_table(x, ...)
 
 \item{...}{Currently unused.}
 }
+\value{
+\code{x}, invisibly.
+}
 \description{
 Print the step-by-step selection table
 }
