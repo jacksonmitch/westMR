@@ -1,5 +1,26 @@
 # select_variables.R
 
+#' Stepwise Selection of Predictors
+#'
+#' Runs the WEST stepwise procedure to decide which predictors should be
+#' included in the model. At each step, remaining candidates are tested
+#' against a shared baseline fit via \code{test_predictors()}, and the most
+#' eligible candidate (if any) is added (forward) or removed (backward).
+#'
+#' @param model A \code{WMRModel} object.
+#' @param direction A character string, either \code{"forward"} or
+#'   \code{"backward"}, specifying the stepwise search direction.
+#' @param predictors A character vector of candidate predictor names to
+#'   consider for selection. Defaults to all predictors in \code{model}.
+#'
+#' @return A list of class \code{select_variables} with elements:
+#'   \code{direction}, \code{alpha}, \code{G_values}, \code{best_fit} (the
+#'   fit at the BIC-optimal \code{G} for the final selected model),
+#'   \code{all_predictors}, \code{selected} (the chosen predictor names),
+#'   \code{steps} (the step-by-step search log), \code{final_fits} (fits
+#'   across \code{G_values} for the final model), \code{final_formula}, and
+#'   \code{call}.
+#' @noRd
 select_variables <- function(
   model,
   direction = "forward",

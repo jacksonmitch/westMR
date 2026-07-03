@@ -31,7 +31,13 @@ Can include "variables", "effects", or both.}
 \code{\link{build_control}}.}
 }
 \value{
-TODO
+A list of class \code{westMR} containing the matched \code{call},
+the \code{formula} (coerced for binomial responses), \code{family},
+\code{task}, the candidate \code{G_values}, the \code{best_fit} (the fit
+at the BIC-optimal number of components for the final model), and,
+depending on \code{task}, the \code{variable_selection} and/or
+\code{effect_determination} results (each \code{NULL} if that task was
+not run).
 }
 \description{
 westMR implements the west procedure framework for finite mixtures of

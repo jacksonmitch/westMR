@@ -1,5 +1,34 @@
 # test_predictors.R
 
+#' Shared Stepwise Search Driver
+#'
+#' Drives the greedy forward/backward stepwise search shared by
+#' \code{select_variables()} and \code{determine_effects()}. At each step,
+#' it fits a baseline ("shared") model plus one candidate model per
+#' remaining predictor, compares each candidate to the shared fit via
+#' \code{west_procedure()}, and either adopts the most eligible candidate or
+#' stops.
+#'
+#' @param model A \code{WMRModel} object.
+#' @param predictors A character vector of all candidate predictor names
+#'   under consideration.
+#' @param included A character vector of predictor names currently included
+#'   in the model.
+#' @param heterogeneous A character vector of predictor names currently
+#'   treated as heterogeneous (component-specific).
+#' @param update_included A function of \code{(set, predictor)} used to
+#'   update the included-predictor set when a candidate is chosen (e.g.
+#'   \code{union}/\code{setdiff} for variable selection, or a no-op for
+#'   effect-type determination, where the included set never changes).
+#' @param direction A character string, either \code{"forward"} or
+#'   \code{"backward"}, specifying the stepwise search direction.
+#'
+#' @return A list with elements: \code{included} (final included predictor
+#'   names), \code{heterogeneous} (final heterogeneous predictor names),
+#'   \code{common} (\code{included} minus \code{heterogeneous}),
+#'   \code{steps} (the step-by-step search log), and \code{final_fits}
+#'   (fits across \code{G_values} for the final model).
+#' @noRd
 test_predictors <- function(
   model,
   predictors,

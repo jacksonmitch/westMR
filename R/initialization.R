@@ -126,7 +126,8 @@ make_initialization_features <- function(prepared_data,
 make_tau_list <- function(prepared_data,
                           G,
                           control,
-                          family = c("gaussian", "poisson", "binomial")) {
+                          family = c("gaussian", "poisson", "binomial"),
+                          features = NULL) {
   family <- match.arg(family)
 
   n <- prepared_data$n
@@ -137,10 +138,12 @@ make_tau_list <- function(prepared_data,
     return(list(single = tau))
   }
 
-  features <- make_initialization_features(
-    prepared_data = prepared_data,
-    family = family
-  )
+  if (is.null(features)) {
+    features <- make_initialization_features(
+      prepared_data = prepared_data,
+      family = family
+    )
+  }
 
   features_scaled <- scale(features)
   features_scaled[!is.finite(features_scaled)] <- 0

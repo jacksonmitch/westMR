@@ -6,6 +6,31 @@
 # candidate_data : prepared_data for the candidate side (already built
 #                           by the caller for this specific predictor).
 
+#' Compare a Candidate Predictor Against a Shared Baseline Fit
+#'
+#' For one candidate predictor, fits the candidate model across all values
+#' of \code{model$G_values} (warm-started from the shared fit's
+#' responsibilities) and compares it to the shared/baseline fit at each
+#' \code{G} via a likelihood ratio test. The per-\code{G} p-values are then
+#' combined into a single BIC-weighted p-value used for the stepwise
+#' eligibility decision.
+#'
+#' @param model A \code{WMRModel} object.
+#' @param direction A character string, either \code{"forward"} or
+#'   \code{"backward"}, determining whether \code{shared_fits} plays the
+#'   role of the null or the alternative model in the likelihood ratio test.
+#' @param shared_fits A list of \code{fit_fmr} objects (one per value in
+#'   \code{model$G_values}) for the shared/baseline model.
+#' @param candidate_data A \code{WMRData} object (from \code{prepare_data()})
+#'   for the candidate predictor's model specification.
+#'
+#' @return A list of class \code{west_procedure} with elements: \code{p0}
+#'   (the BIC-weighted p-value), \code{reject} (whether \code{p0 < alpha}),
+#'   \code{alpha}, \code{table} (a data frame of per-\code{G} log-likelihoods,
+#'   BIC values, LRT statistics, degrees of freedom, p-values, and BIC
+#'   weights), \code{candidate_fits} (fits across \code{G_values} for the
+#'   candidate model), and \code{G_values}.
+#' @noRd
 west_procedure <- function(
   model,
   direction,
@@ -18,7 +43,7 @@ west_procedure <- function(
 
   stopifnot(length(shared_fits) == length(G_values))
 
-  extra_tau_starts <- lapply(shared_fits, function(fit) fit$tau)
+  extra_tau_starts <- lapply(shared_fits, function(fit) fit$em_state$tau)
 
   candidate_fits <- fit_across_G(
     model = model,

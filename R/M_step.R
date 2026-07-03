@@ -102,7 +102,48 @@ m_step_poisson <- function(dat, em_state, control) {
 }
 
 m_step_binomial <- function(dat, em_state, control) {
-  stop("binomial not done yet")
+  tau <- em_state$tau
+  G <- em_state$G
+
+  X <- dat$X_het
+  y <- dat$y
+  p <- dat$p_het
+
+  binomial_size <- dat$binomial_size
+  if (is.null(binomial_size)) {
+    binomial_size <- rep(1, length(y))
+  }
+  binomial_size <- as.numeric(binomial_size)
+
+  y_bin <- cbind(y, binomial_size - y)
+
+  beta_g <- matrix(NA_real_, nrow = G, ncol = p)
+
+  for (g in seq_len(G)) {
+    wg <- pmax(tau[, g], control$weight_floor)
+
+    fit_g <- stats::glm.fit(
+      x = X,
+      y = y_bin,
+      weights = wg,
+      family = stats::binomial()
+    )
+
+    coef_g <- fit_g$coefficients
+    coef_g[is.na(coef_g)] <- 0
+
+    beta_g[g, ] <- coef_g
+  }
+
+  eta <- linear_predictor_matrix(
+    A = dat$X_het,
+    B = dat$X_com,
+    beta_g = beta_g,
+    beta = NULL
+  )
+
+  em_state$beta_g <- beta_g
+  em_state$eta <- eta
 }
 
 # Gaussian M-step using structured QR
