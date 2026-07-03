@@ -35,9 +35,10 @@ WMRModel <- R6::R6Class(
       self$G_values <- G_values
       self$family <- family
 
+      private$mf_ <- stats::model.frame(formula, data, na.action = stats::na.fail)
+
       if (is.null(control$sigma_floor)) {
-        mf <- stats::model.frame(formula, data, na.action = stats::na.fail)
-        resp <- as.numeric(stats::model.response(mf))
+        resp <- as.numeric(stats::model.response(private$mf_))
         control$sigma_floor <- 0.05 * stats::sd(resp)
       }
       self$control <- control
@@ -55,7 +56,8 @@ WMRModel <- R6::R6Class(
   private = list(
     formula_ = NULL,
     predictors_ = NULL,
-    response_ = NULL
+    response_ = NULL,
+    mf_ = NULL
   ),
   active = list(
     formula = function(value) {
@@ -76,6 +78,11 @@ WMRModel <- R6::R6Class(
       if (!missing(value)) stop("response is derived from formula;
                                 set formula instead.")
       private$response_
+    },
+    mf = function(value) {
+      if (!missing(value)) stop("mf is derived from formula/data;
+                                set formula/data instead.")
+      private$mf_
     }
   )
 )

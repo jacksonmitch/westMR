@@ -108,6 +108,6 @@ irwls_fmr <- function(dat, em_state, control,
   em_state$beta <- beta
   em_state$eta <- eta
   em_state$irwls_iterations <- r
-  em_state$irwls_converge <- converged
+  em_state$irwls_converged <- converged
   em_state
 }

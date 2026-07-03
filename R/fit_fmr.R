@@ -4,6 +4,11 @@
 fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
   G_values <- model$G_values
 
+  features <- make_initialization_features(
+    prepared_data = prepared_data,
+    family = model$family
+  )
+
   fits <- lapply(seq_along(G_values), function(i) {
     G <- G_values[[i]]
 
@@ -11,7 +16,8 @@ fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
       prepared_data = prepared_data,
       G = G,
       control = model$control,
-      family = model$family
+      family = model$family,
+      features = features
     )
 
     if (!is.null(extra_tau_starts)) {

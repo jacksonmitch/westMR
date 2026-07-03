@@ -43,7 +43,7 @@ west_procedure <- function(
 
   stopifnot(length(shared_fits) == length(G_values))
 
-  extra_tau_starts <- lapply(shared_fits, function(fit) fit$tau)
+  extra_tau_starts <- lapply(shared_fits, function(fit) fit$em_state$tau)
 
   candidate_fits <- fit_across_G(
     model = model,

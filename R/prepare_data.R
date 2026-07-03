@@ -19,13 +19,13 @@
 #' @return A \code{WMRData} object.
 #' @noRd
 prepare_data <- function(model, included = model$predictors, common = NULL) {
-  mf <- stats::model.frame(model$formula, model$data, na.action = stats::na.fail)
+  mf <- model$mf
   y <- as.numeric(stats::model.response(mf))
 
   binomial_size_vec <- NULL
   if (identical(model$family, "binomial")) {
     stopifnot(".binom_size" %in% names(model$data))
-    as.numeric(model$data$.binom_size)
+    binomial_size_vec <- as.numeric(model$data$.binom_size)
   }
 
   het_formula <- make_formula(setdiff(included, common), response = model$response)
