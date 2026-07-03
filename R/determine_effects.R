@@ -14,12 +14,10 @@
 #'   heterogeneity. Defaults to all predictors in \code{model}.
 #'
 #' @return A list of class \code{determine_effects} with elements:
-#'   \code{direction}, \code{alpha}, \code{G_values}, \code{best_fit} (the
-#'   fit at the BIC-optimal \code{G} for the final model),
-#'   \code{heterogeneous} and \code{homogeneous} predictor names,
-#'   \code{steps} (the step-by-step search log), \code{final_fits} (fits
-#'   across \code{G_values} for the final model), \code{final_formula}, and
-#'   \code{call}.
+#'   \code{direction}, \code{alpha}, \code{heterogeneous} and
+#'   \code{homogeneous} predictor names, \code{steps} (the step-by-step
+#'   search log), \code{final_fits} (fits across \code{model$G_values} for
+#'   the final model), and \code{final_formula}.
 #' @noRd
 determine_effects <- function(
   model,

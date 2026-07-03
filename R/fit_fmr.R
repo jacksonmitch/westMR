@@ -99,13 +99,16 @@ add_extra_tau_start <- function(init_list,
 #'   for this model specification.
 #'
 #' @return A list of class \code{fit_fmr} with elements including
-#'   \code{em_state} (the final \code{EmState}), \code{loglik} and
-#'   \code{loglik_trace}, \code{iterations}, \code{converged},
-#'   \code{irwls_iterations}/\code{irwls_converged} (non-Gaussian families
-#'   only), initialization diagnostics (\code{best_init_name},
-#'   \code{best_init_loglik}, \code{n_valid_init}, \code{init}), \code{bic},
-#'   \code{k} (parameter count), \code{family}, \code{G}, \code{n_init},
-#'   \code{logliks}, \code{model}, and \code{call}.
+#'   \code{parameter_values} (a labeled snapshot of the fitted EM state:
+#'   \code{tau}, \code{pi_g}, \code{beta_g}, \code{beta}, \code{sigma_g},
+#'   \code{eta}, \code{loglik}), \code{loglik}, \code{loglik_trace},
+#'   \code{iterations}, \code{converged}, \code{irwls_iterations}/
+#'   \code{irwls_converged} (non-Gaussian families only; dropped entirely
+#'   for Gaussian), initialization diagnostics (\code{best_init_name},
+#'   \code{best_init_loglik}, \code{n_valid_init}, \code{init}),
+#'   \code{bic}, \code{num_parameters}, \code{family}, \code{G},
+#'   \code{n_init}, and \code{control}. Any \code{NULL}-valued element is
+#'   dropped from the result via \code{compact()}.
 #' @noRd
 fit_fmr <- function(model,
                     G,

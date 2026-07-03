@@ -28,8 +28,9 @@
 #'   (the BIC-weighted p-value), \code{reject} (whether \code{p0 < alpha}),
 #'   \code{alpha}, \code{table} (a data frame of per-\code{G} log-likelihoods,
 #'   BIC values, LRT statistics, degrees of freedom, p-values, and BIC
-#'   weights), \code{candidate_fits} (fits across \code{G_values} for the
-#'   candidate model), and \code{G_values}.
+#'   \code{weights}), \code{shared_fits} (the baseline fits across
+#'   \code{model$G_values}), and \code{candidate_fits} (fits across
+#'   \code{model$G_values} for the candidate model).
 #' @noRd
 west_procedure <- function(
   model,
