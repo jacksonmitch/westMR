@@ -143,24 +143,24 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 print.fit_fmr <- function(x, ...) {
   cat("Best fit (G: ", x$G, ")\n", sep = "")
 
-  if (!is.null(x$em_state$pi_g)) {
+  if (!is.null(x$parameter_values$pi_g)) {
     cat("\nMixing proportions:\n")
-    print(round(x$em_state$pi_g, 4))
+    print(round(x$parameter_values$pi_g, 4))
   }
 
-  if (!is.null(x$em_state$sigma_g)) {
+  if (!is.null(x$parameter_values$sigma_g)) {
     cat("\nComponent standard deviations:\n")
-    print(round(x$em_state$sigma_g, 4))
+    print(round(x$parameter_values$sigma_g, 4))
   }
 
-  if (!is.null(x$em_state$beta_g)) {
+  if (!is.null(x$parameter_values$beta_g)) {
     cat("\nHeterogeneous coefficients:\n")
-    print(round(x$em_state$beta_g, 4))
+    print(round(x$parameter_values$beta_g, 4))
   }
 
-  if (!is.null(x$em_state$beta) && length(x$em_state$beta) > 0L) {
+  if (!is.null(x$parameter_values$beta) && length(x$em_state$beta) > 0L) {
     cat("\nHomogeneous coefficients:\n")
-    print(round(x$em_state$beta, 4))
+    print(round(x$parameter_values$beta, 4))
   }
 
   invisible(x)
