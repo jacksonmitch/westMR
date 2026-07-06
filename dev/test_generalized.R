@@ -1,4 +1,3 @@
-
 # Test Gaussian mixture regression
 
 set.seed(10)
@@ -165,7 +164,7 @@ y <- stats::rbinom(
 
 dat_bin_grouped <- data.frame(
   y = y,
-  binomial_size = binomial_size,
+  .binom_size = binomial_size,
   x1 = x1,
   x2 = x2,
   true_g = true_g
@@ -192,8 +191,7 @@ model_bin <- WMRModel$new(
 prepared_bin <- prepare_data(
   model = model_bin,
   included = model_bin$predictors,
-  common = "x2",
-  binomial_size = "binomial_size"
+  common = "x2"
 )
 
 prepared_bin$binomial_size[1:10]

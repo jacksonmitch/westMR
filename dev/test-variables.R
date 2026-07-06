@@ -6,6 +6,10 @@ test_data <- do.call(simulate_fmr,
                        c(scenarios$three_group_four_variables,
                          list(n = 500, seed = 1)))
 
+result <- westMR(formula(test_data), test_data)
+print(result)
+print(summary(result))
+
 model <- WMRModel$new(
   formula = formula(test_data),
   data = test_data,

@@ -1,4 +1,12 @@
-simulate_fmr <- function(n, betas, pi = NULL, sigma = 1, seed = NULL) {
+simulate_fmr <- function(n,
+                         betas,
+                         pi = NULL,
+                         sigma = 1,
+                         family = c("gaussian", "poisson", "binomial"),
+                         size = 1,
+                         seed = NULL) {
+  family <- match.arg(family)
+
   if (!is.null(seed)) set.seed(seed)
 
   betas <- as.matrix(betas)
@@ -17,11 +25,41 @@ simulate_fmr <- function(n, betas, pi = NULL, sigma = 1, seed = NULL) {
 
   Xfull <- cbind("x0" = 1, X)
 
-  mu <- rowSums(Xfull * betas[z, colnames(Xfull), drop = FALSE])
-  y <- rnorm(n, mu, sigma[z])
+  eta <- rowSums(Xfull * betas[z, colnames(Xfull), drop = FALSE])
 
-  cbind(data.frame(y = y), as.data.frame(X)) # data.frame(true_group = z)
+  y <- switch(family,
+    gaussian = rnorm(n, mean = eta, sd = sigma[z]),
+    poisson = rpois(n, lambda = exp(eta)),
+    binomial = rbinom(n, size = size, prob = stats::plogis(eta))
+  )
+
+  out <- cbind(data.frame(y = y), as.data.frame(X))
+
+  if (family == "binomial") {
+    out$size <- rep_len(size, n)
+  }
+
+  out
 }
+
+match_group_order <- function(fitted_betas, true_betas) {
+  fitted <- as.matrix(fitted_betas)
+  truth <- as.matrix(true_betas)
+
+  G <- nrow(truth)
+  stopifnot(nrow(fitted) == G, ncol(fitted) == ncol(truth))
+
+  perms <- expand.grid(rep(list(seq_len(G)), G))
+  valid <- apply(perms, 1, function(r) length(unique(r)) == G)
+  perms <- perms[valid, , drop = FALSE]
+
+  resid <- apply(perms, 1, function(perm) {
+    sum((fitted[perm, , drop = FALSE] - truth)^2)
+  })
+
+  as.integer(perms[which.min(resid), ])
+}
+
 
 scenarios <- list(
   two_group_effects = list(
@@ -83,5 +121,22 @@ scenarios <- list(
     ),
     pi = c(0.2, 0.3, 0.3, 0.2),
     sigma = c(0.5, 0.5, 0.5, 0.5)
+  ),
+  two_group_effects_poisson = list(
+    betas = rbind(
+      g1 = c("x0" = -0.5, x1 = -1.0, x2 = 0.3, x3 = 0.1),
+      g2 = c("x0" = 0.5, x1 = 1.0, x2 = 0.3, x3 = 0.1)
+    ),
+    pi = c(0.4, 0.6),
+    family = "poisson"
+  ),
+  two_group_effects_binomial = list(
+    betas = rbind(
+      g1 = c("x0" = -1.0, x1 = -1.5, x2 = 0.5, x3 = 0.2),
+      g2 = c("x0" = 1.0, x1 = 1.5, x2 = 0.5, x3 = 0.2)
+    ),
+    pi = c(0.5, 0.5),
+    family = "binomial",
+    size = 25
   )
 )
