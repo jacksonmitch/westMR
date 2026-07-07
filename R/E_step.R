@@ -1,13 +1,9 @@
 # E-step for Gaussian mixture regression
 
 e_step_fmr <- function(dat, em_state, family) {
-  A <- dat$X_het
-  B <- dat$X_com
   y <- dat$y
   n <- dat$n
 
-  beta_g <- em_state$beta_g
-  beta <- em_state$beta
   pi_g <- em_state$pi_g
   sigma_g <- em_state$sigma_g
   G <- em_state$G
@@ -18,7 +14,6 @@ e_step_fmr <- function(dat, em_state, family) {
   # Family specific E-step quantities
 
   if (family == "gaussian") {
-
     stopifnot(length(sigma_g) == G)
 
     for (g in seq_len(G)) {

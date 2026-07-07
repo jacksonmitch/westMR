@@ -25,8 +25,16 @@ format_formula <- function(x) {
 }
 
 make_effects_formula <- function(heterogeneous, homogeneous, response = NULL) {
-  common_part <- if (length(homogeneous) == 0) NULL else paste(homogeneous, collapse = " + ")
-  het_part <- if (length(heterogeneous) == 0) NULL else paste0("(", paste(heterogeneous, collapse = " + "), " | group)")
+  common_part <- if (length(homogeneous) == 0) {
+    NULL
+  } else {
+    paste(homogeneous, collapse = " + ")
+  }
+  het_part <- if (length(heterogeneous) == 0) {
+    NULL
+  } else {
+    paste0("(", paste(heterogeneous, collapse = " + "), " | group)")
+  }
 
   rhs_terms <- c(common_part, het_part)
 

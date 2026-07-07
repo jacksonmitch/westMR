@@ -147,7 +147,10 @@ EmState <- R6::R6Class("EmState",
 
       if (!is.null(prepared_data)) {
         if (!is.null(fields[["beta_g"]])) {
-          rownames(fields[["beta_g"]]) <- paste0("g", seq_len(nrow(fields[["beta_g"]])))
+          rownames(fields[["beta_g"]]) <- paste0(
+            "g",
+            seq_len(nrow(fields[["beta_g"]]))
+          )
           if (!is.null(colnames(prepared_data$X_het))) {
             colnames(fields[["beta_g"]]) <- colnames(prepared_data$X_het)
           }
@@ -159,13 +162,22 @@ EmState <- R6::R6Class("EmState",
           }
         }
         if (!is.null(fields[["sigma_g"]])) {
-          names(fields[["sigma_g"]]) <- paste0("g", seq_along(fields[["sigma_g"]]))
+          names(fields[["sigma_g"]]) <- paste0(
+            "g",
+            seq_along(fields[["sigma_g"]])
+          )
         }
         if (!is.null(fields[["pi_g"]])) {
-          names(fields[["pi_g"]]) <- paste0("g", seq_along(fields[["pi_g"]]))
+          names(fields[["pi_g"]]) <- paste0(
+            "g",
+            seq_along(fields[["pi_g"]])
+          )
         }
         if (!is.null(fields[["tau"]])) {
-          colnames(fields[["tau"]]) <- paste0("g", seq_len(ncol(fields[["tau"]])))
+          colnames(fields[["tau"]]) <- paste0(
+            "g",
+            seq_len(ncol(fields[["tau"]]))
+          )
         }
       }
 

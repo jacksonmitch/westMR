@@ -78,7 +78,6 @@ irwls_fmr <- function(dat, em_state, control,
 
       y_bar <- y / binomial_size
       y_bar_mat <- matrix(y_bar, nrow = n, ncol = G)
-      binomial_size_mat <- matrix(binomial_size, nrow = n, ncol = G)
 
       z <- eta_safe + (y_bar_mat - mu) / pmax(mu * (1 - mu), 1e-10)
       w <- tau * binomial_size * mu * (1 - mu)

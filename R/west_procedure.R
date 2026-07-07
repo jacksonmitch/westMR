@@ -40,7 +40,6 @@ west_procedure <- function(
 ) {
   G_values <- model$G_values
   alpha <- model$control$alpha
-  n <- candidate_data$n
 
   stopifnot(length(shared_fits) == length(G_values))
 

@@ -35,7 +35,10 @@ WMRModel <- R6::R6Class(
       self$G_values <- G_values
       self$family <- family
 
-      private$mf_ <- stats::model.frame(formula, data, na.action = stats::na.fail)
+      private$mf_ <- stats::model.frame(
+        formula, data,
+        na.action = stats::na.fail
+      )
 
       if (is.null(control$sigma_floor)) {
         resp <- as.numeric(stats::model.response(private$mf_))

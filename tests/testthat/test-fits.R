@@ -18,16 +18,21 @@ test_that("gaussian fits accurately", {
   expect_true(fit$converged)
 
   em_values <- fit$parameter_values
+  true_betas <- scenarios$two_group_effects$betas
 
-  het_truth <- unname(scenarios$two_group_effects$betas[, c("x0", "x1")])
+  het_truth <- unname(true_betas[, c("x0", "x1")])
   perm <- match_group_order(em_values$beta_g, het_truth)
 
   fitted_het <- unname(em_values$beta_g[perm, , drop = FALSE])
   fitted_common <- unname(em_values$beta)
-  common_truth <- unname(scenarios$two_group_effects$betas["g1", c("x2", "x3")])
+  common_truth <- unname(true_betas["g1", c("x2", "x3")])
 
-  expect_equal(round(fitted_het, 1), round(het_truth, 1), tolerance = 0.005)
-  expect_equal(round(fitted_common, 1), round(common_truth, 1), tolerance = 0.005)
+  expect_equal(round(fitted_het, 1), round(het_truth, 1),
+    tolerance = 0.005
+  )
+  expect_equal(round(fitted_common, 1), round(common_truth, 1),
+    tolerance = 0.005
+  )
 })
 
 test_that("poisson fits accurately", {
@@ -50,13 +55,14 @@ test_that("poisson fits accurately", {
   expect_true(fit$converged)
 
   em_values <- fit$parameter_values
+  true_betas <- scenarios$two_group_effects_poisson$betas
 
-  het_truth <- unname(scenarios$two_group_effects_poisson$betas[, c("x0", "x1")])
+  het_truth <- unname(true_betas[, c("x0", "x1")])
   perm <- match_group_order(em_values$beta_g, het_truth)
 
   fitted_het <- unname(em_values$beta_g[perm, , drop = FALSE])
   fitted_common <- unname(em_values$beta)
-  common_truth <- unname(scenarios$two_group_effects_poisson$betas["g1", c("x2", "x3")])
+  common_truth <- unname(true_betas["g1", c("x2", "x3")])
 
   expect_equal(fitted_het, het_truth, tolerance = 0.1)
   expect_equal(fitted_common, common_truth, tolerance = 0.1)
@@ -83,13 +89,14 @@ test_that("binomial fits accurately", {
   expect_true(fit$converged)
 
   em_values <- fit$parameter_values
+  true_betas <- scenarios$two_group_effects_binomial$betas
 
-  het_truth <- unname(scenarios$two_group_effects_binomial$betas[, c("x0", "x1")])
+  het_truth <- unname(true_betas[, c("x0", "x1")])
   perm <- match_group_order(em_values$beta_g, het_truth)
 
   fitted_het <- unname(em_values$beta_g[perm, , drop = FALSE])
   fitted_common <- unname(em_values$beta)
-  common_truth <- unname(scenarios$two_group_effects_binomial$betas["g1", c("x2", "x3")])
+  common_truth <- unname(true_betas["g1", c("x2", "x3")])
 
   expect_equal(fitted_het, het_truth, tolerance = 0.05)
   expect_equal(fitted_common, common_truth, tolerance = 0.05)
