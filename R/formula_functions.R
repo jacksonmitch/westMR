@@ -23,3 +23,20 @@ format_formula <- function(x) {
 
   paste(deparse(x), collapse = " ")
 }
+
+make_effects_formula <- function(heterogeneous, homogeneous, response = NULL) {
+  common_part <- if (length(homogeneous) == 0) NULL else paste(homogeneous, collapse = " + ")
+  het_part <- if (length(heterogeneous) == 0) NULL else paste0("(", paste(heterogeneous, collapse = " + "), " | group)")
+
+  rhs_terms <- c(common_part, het_part)
+
+  if (length(rhs_terms) == 0) rhs_terms <- "1"
+
+  rhs <- paste(rhs_terms, collapse = " + ")
+
+  if (!is.null(response)) {
+    stats::as.formula(paste(response, "~", rhs))
+  } else {
+    stats::as.formula(paste("~", rhs))
+  }
+}

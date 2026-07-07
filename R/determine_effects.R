@@ -41,16 +41,17 @@ determine_effects <- function(
     direction       = direction
   )
 
-  homogeneous <- setdiff(predictors, result$heterogeneous)
+  heterogeneous <- result$heterogeneous
+  homogeneous <- setdiff(predictors, heterogeneous)
 
   out <- list(
     direction = direction,
     alpha = model$control$alpha,
-    heterogeneous = result$heterogeneous,
+    heterogeneous = heterogeneous,
     homogeneous = homogeneous,
     steps = result$steps,
     final_fits = result$final_fits,
-    final_formula = model$formula
+    final_formula = make_effects_formula(heterogeneous, homogeneous, response = model$response)
   )
 
   class(out) <- "determine_effects"

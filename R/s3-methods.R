@@ -158,7 +158,7 @@ print.fit_fmr <- function(x, ...) {
     print(round(x$parameter_values$beta_g, 4))
   }
 
-  if (!is.null(x$parameter_values$beta) && length(x$em_state$beta) > 0L) {
+  if (!is.null(x$parameter_values$beta) && length(x$parameter_values$beta) > 0L) {
     cat("\nHomogeneous coefficients:\n")
     print(round(x$parameter_values$beta, 4))
   }
