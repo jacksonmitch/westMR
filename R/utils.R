@@ -1,16 +1,3 @@
-row_logsumexp <- function(log_mat) {
-  log_mat <- as.matrix(log_mat)
-  row_max <- row_max_base(log_mat)
-  row_max + log(rowSums(exp(log_mat - row_max)))
-}
-
-row_softmax <- function(log_mat) {
-  log_mat <- as.matrix(log_mat)
-  row_max <- row_max_base(log_mat)
-  w <- exp(log_mat - row_max)
-  w / rowSums(w)
-}
-
 common_eta <- function(B, beta = numeric(0)) {
   B <- as.matrix(B)
   beta <- as.numeric(beta)
@@ -49,24 +36,6 @@ linear_predictor_matrix <- function(A, B, beta_g, beta) {
   storage.mode(eta) <- "double"
 
   eta
-}
-
-row_max_base <- function(x) {
-  x <- as.matrix(x)
-
-  if (ncol(x) == 0L) {
-    stop("x must have at least one column.")
-  }
-
-  out <- x[, 1]
-
-  if (ncol(x) > 1L) {
-    for (j in 2:ncol(x)) {
-      out <- pmax(out, x[, j])
-    }
-  }
-
-  out
 }
 
 format_none <- function(x) {

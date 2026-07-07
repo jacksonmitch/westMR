@@ -13,8 +13,7 @@ e_step_fmr <- function(dat, em_state, family) {
   G <- em_state$G
   eta <- em_state$eta
 
-  log_pi <- log(pmax(pi_g, 1e-16))
-  log_w <- matrix(NA_real_, nrow = n, ncol = G)
+  weights <- matrix(NA_real_, nrow = n, ncol = G)
 
   # Family specific E-step quantities
 
@@ -23,21 +22,21 @@ e_step_fmr <- function(dat, em_state, family) {
     stopifnot(length(sigma_g) == G)
 
     for (g in seq_len(G)) {
-      log_w[, g] <- log_pi[g] + stats::dnorm(
+      weights[, g] <- pi_g[g] * stats::dnorm(
         x = y,
         mean = eta[, g],
         sd = pmax(sigma_g[g], 1e-16),
-        log = TRUE
+        log = FALSE
       )
     }
   } else if (family == "poisson") {
     mu <- exp(eta)
 
     for (g in seq_len(G)) {
-      log_w[, g] <- log_pi[g] + stats::dpois(
+      weights[, g] <- pi_g[g] * stats::dpois(
         x = y,
         lambda = mu[, g],
-        log = TRUE
+        log = FALSE
       )
     }
   } else if (family == "binomial") {
@@ -47,19 +46,18 @@ e_step_fmr <- function(dat, em_state, family) {
     mu <- pmin(pmax(mu, 1e-8), 1 - 1e-8)
 
     for (g in seq_len(G)) {
-      log_w[, g] <- log_pi[g] + stats::dbinom(
+      weights[, g] <- pi_g[g] * stats::dbinom(
         x = y,
         size = binomial_size,
         prob = mu[, g],
-        log = TRUE
+        log = FALSE
       )
     }
   }
 
-  log_denom <- row_logsumexp(log_w)
-
-  loglik <- sum(log_denom)
-  tau <- exp(log_w - log_denom)
+  sum_weights <- rowSums(weights)
+  loglik <- sum(log(sum_weights))
+  tau <- weights / sum_weights
 
   pi_new <- colMeans(tau)
   pi_new <- pmax(pi_new, 1e-16)
