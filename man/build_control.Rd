@@ -8,6 +8,7 @@ build_control(
   alpha = 0.05,
   max_iter = 300,
   n_init = 10,
+  n_best_init = 2,
   direction = "forward",
   verbose = FALSE,
   tol = 1e-06,
@@ -31,8 +32,11 @@ level. Default is 0.05.}
 \item{max_iter}{An integer specifying the maximum number of iterations
 allowed for the algorithm. Must be at least 1. Default is 300.}
 
-\item{n_init}{An integer specifying the total number of random
-initializations to use Must be at least 1. Default is 10.}
+\item{n_init}{An integer specifying the total number of initializations
+to use. Must be at least 1. Default is 10.}
+
+\item{n_best_init}{An integer specifying the total number of initializations
+to carry into full convergence. Must be at least 1. Default is 1.}
 
 \item{direction}{A character string specifying the testing direction.
 Defaults to 'forward'.}

@@ -7,8 +7,10 @@
 #'  level. Default is 0.05.
 #' @param max_iter An integer specifying the maximum number of iterations
 #'  allowed for the algorithm. Must be at least 1. Default is 300.
-#' @param n_init An integer specifying the total number of random
-#'  initializations to use Must be at least 1. Default is 10.
+#' @param n_init An integer specifying the total number of initializations
+#'  to use. Must be at least 1. Default is 10.
+#' @param n_best_init An integer specifying the total number of initializations
+#'  to carry into full convergence. Must be at least 1. Default is 1.
 #' @param direction A character string specifying the testing direction.
 #'   Defaults to 'forward'.
 #' @param verbose A logical flag. If \code{TRUE}, detailed execution logs are
@@ -69,6 +71,7 @@ build_control <- function(
   alpha = 0.05,
   max_iter = 300,
   n_init = 10,
+  n_best_init = 2,
   direction = "forward",
   verbose = FALSE,
   tol = 1e-6,
@@ -91,6 +94,13 @@ build_control <- function(
   checkmate::assert_number(alpha, lower = 0, upper = 1, add = collection)
   checkmate::assert_int(max_iter, lower = 1, add = collection)
   checkmate::assert_int(n_init, lower = 1, add = collection)
+  checkmate::assert_int(n_best_init, lower = 1, add = collection)
+  if (n_best_init > n_init) {
+    collection$push(sprintf(
+      "n_best_init (number of initializations carried into full EM) cannot
+      exceed n_init. (received %s and %s)", n_best_init, n_init
+    ))
+  }
   checkmate::assert_choice(direction,
     choices = c("forward", "backward"),
     add = collection
@@ -122,6 +132,7 @@ build_control <- function(
 
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)
+  n_best_init <- as.integer(n_best_init)
   n_kmeans_init <- as.integer(n_kmeans_init)
   kmeans_starts <- as.integer(kmeans_starts)
   irwls_max_iter <- as.integer(irwls_max_iter)

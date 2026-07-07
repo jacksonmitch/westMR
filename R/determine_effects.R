@@ -51,7 +51,10 @@ determine_effects <- function(
     homogeneous = homogeneous,
     steps = result$steps,
     final_fits = result$final_fits,
-    final_formula = make_effects_formula(heterogeneous, homogeneous, response = model$response)
+    final_formula = make_effects_formula(
+      heterogeneous, homogeneous,
+      response = model$response
+    )
   )
 
   class(out) <- "determine_effects"

@@ -1,7 +1,7 @@
 # Fit a single model specification across all G values.
 # Returns a list of fit_fmr objects, one per G.
 
-fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
+fit_across_G <- function(model, prepared_data, extra_inits = NULL) {
   G_values <- model$G_values
 
   features <- make_initialization_features(
@@ -12,7 +12,7 @@ fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
   fits <- lapply(seq_along(G_values), function(i) {
     G <- G_values[[i]]
 
-    init_list <- make_tau_list(
+    state_list <- make_state_list(
       prepared_data = prepared_data,
       G = G,
       control = model$control,
@@ -20,22 +20,14 @@ fit_across_G <- function(model, prepared_data, extra_tau_starts = NULL) {
       features = features
     )
 
-    if (!is.null(extra_tau_starts)) {
-      extra_tau <- extra_tau_starts[[i]]
-
-      init_list <- add_extra_tau_start(
-        init_list = init_list,
-        tau = extra_tau,
-        n = prepared_data$n,
-        G = G,
-        name = "from_shared_fit"
-      )
+    if (!is.null(extra_inits)) {
+      state_list[["from_shared_fit"]] <- extra_inits[[i]]
     }
 
     fit_fmr(
       model = model,
       G = G,
-      init_list = init_list,
+      em_state_list = state_list,
       prepared_data = prepared_data
     )
   })
@@ -112,7 +104,7 @@ add_extra_tau_start <- function(init_list,
 #' @noRd
 fit_fmr <- function(model,
                     G,
-                    init_list,
+                    em_state_list,
                     prepared_data) {
   control <- model$control
   family <- model$family
@@ -120,23 +112,29 @@ fit_fmr <- function(model,
   # Short burn-in stage
   # run a small number of EM iterations from each tau start,
   # then choose the start with the largest burn-in log-likelihood
-  init_fit <- select_best_initialization(
-    tau_list = init_list,
+  initial_states <- select_best_initialization(
+    em_state_list = em_state_list,
     prepared_data = prepared_data,
     G = G,
     family = family,
     control = control
   )
 
-  em_state <- init_fit$best_fit$em_state
+  converged_fits <- lapply(initial_states$best_states, function(em_state) {
+    em_fmr(
+      prepared_data = prepared_data,
+      G = G,
+      em_state = em_state,
+      family = family,
+      control = control
+    )
+  })
+  names(converged_fits) <- names(initial_states$best_states)
 
-  best_fit <- em_fmr(
-    prepared_data = prepared_data,
-    G = G,
-    em_state = em_state,
-    family = family,
-    control = control
-  )
+  final_logliks <- vapply(converged_fits, function(f) f$loglik, numeric(1))
+  winner_name <- names(final_logliks)[which.max(final_logliks)]
+  best_fit <- converged_fits[[winner_name]]
+  em_state <- best_fit$em_state
 
   k <- count_params_fmr(
     ncol_het = prepared_data$p_het,
@@ -149,27 +147,29 @@ fit_fmr <- function(model,
 
   out <- compact(list(
     parameter_values = em_state$to_list(prepared_data),
+    em_state = em_state,
     loglik = best_fit$loglik,
-    loglik_trace = best_fit$loglik_trace,
-    iterations = best_fit$iterations,
+    loglik_trace = best_fit$loglik_trace, # here we lose the burnin trace
+    iterations = best_fit$iterations + control$init_burnin,
     converged = best_fit$converged,
     irwls_iterations = best_fit$irwls_iterations,
     irwls_converged = best_fit$irwls_converged,
-    best_init_name = init_fit$best_name,
-    best_init_loglik = init_fit$best_loglik,
+    best_init_name = winner_name,
     bic = bic,
     num_parameters = k,
     family = family,
     G = G,
-    n_init = length(init_list),
-    n_valid_init = sum(is.finite(init_fit$logliks)),
-    init = list(
-      strategy = "multistart_tau_burnin",
+    initialization = list(
+      n_init = length(em_state_list),
+      n_valid_init = sum(is.finite(initial_states$logliks)),
       burnin = control$init_burnin,
-      n_starts = length(init_list),
-      best_start = init_fit$best_name,
-      burnin_logliks = init_fit$logliks,
-      failed_starts = init_fit$failures
+      n_starts = length(em_state_list),
+      n_kept = length(initial_states$best_states),
+      best_init_names = names(initial_states$best_states),
+      best_init_loglik = initial_states$best_logliks,
+      initial_logliks = initial_states$logliks,
+      final_logliks = final_logliks,
+      failed_starts = initial_states$failures
     ),
     control = control
   ))

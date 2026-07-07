@@ -23,7 +23,9 @@
 #'   \code{irwls_iterations}/\code{irwls_converged} (per-iteration IRWLS
 #'   diagnostics; \code{NULL} for the Gaussian family).
 #' @noRd
-em_fmr <- function(prepared_data, G, em_state, family, control) {
+em_fmr <- function(em_state, prepared_data, G, family, control) {
+  stopifnot(inherits(em_state, "EmState"))
+
   loglik_trace <- numeric(control$max_iter)
   irwls_iterations <- integer(control$max_iter)
   irwls_converged <- logical(control$max_iter)

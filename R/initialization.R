@@ -123,11 +123,11 @@ make_initialization_features <- function(prepared_data,
   }
 }
 
-make_tau_list <- function(prepared_data,
-                          G,
-                          control,
-                          family = c("gaussian", "poisson", "binomial"),
-                          features = NULL) {
+make_state_list <- function(prepared_data,
+                            G,
+                            control,
+                            family = c("gaussian", "poisson", "binomial"),
+                            features = NULL) {
   family <- match.arg(family)
 
   n <- prepared_data$n
@@ -235,61 +235,62 @@ make_tau_list <- function(prepared_data,
     stop("No valid initialization starts were created.")
   }
 
-  tau_list
+  tau_list <- lapply(tau_list, function(tau) {
+    EmState$new(tau = tau)
+  })
 }
 
-select_best_initialization <- function(tau_list,
+select_best_initialization <- function(em_state_list,
                                        prepared_data,
                                        G,
                                        family,
                                        control) {
-  best_fit <- NULL
-  best_loglik <- -Inf
-  best_name <- NA_character_
+  n_candidates <- length(em_state_list)
+  logliks <- rep(NA_real_, n_candidates)
+  names(logliks) <- names(em_state_list)
 
-  logliks <- rep(NA_real_, length(tau_list))
-  names(logliks) <- names(tau_list)
+  fitted_states <- vector("list", n_candidates)
+  names(fitted_states) <- names(em_state_list)
 
-  failures <- character(0)
+  failures <- list()
+  burn_control <- control
+  burn_control$tol <- 0
+  burn_control$max_iter <- control$init_burnin
 
-  control$tol <- 0
-  control$max_iter <- control$init_burnin
-
-  for (s in seq_along(tau_list)) {
-    em_state <- EmState$new(tau = tau_list[[s]])
-    fit_s <- try(
-      em_fmr(
-        prepared_data = prepared_data,
-        G = G,
-        em_state = em_state,
-        family = family,
-        control = control
-      ),
-      silent = TRUE
+  for (s in seq_len(n_candidates)) {
+    tryCatch(
+      {
+        em_state <- em_state_list[[s]]
+        state_s <- em_fmr(
+          em_state = em_state,
+          prepared_data = prepared_data,
+          G = G,
+          family = family,
+          control = burn_control
+        )
+        logliks[s] <- state_s$loglik
+        fitted_states[[s]] <- state_s$em_state
+      },
+      error = function(e) {
+        current_name <- names(em_state_list)[s]
+        failures[[current_name]] <<- conditionMessage(e)
+      }
     )
-
-    if (inherits(fit_s, "try-error")) {
-      failures <- c(failures, names(tau_list)[s])
-      next
-    }
-
-    logliks[s] <- fit_s$loglik
-
-    if (is.finite(fit_s$loglik) && fit_s$loglik > best_loglik) {
-      best_fit <- fit_s
-      best_loglik <- fit_s$loglik
-      best_name <- names(tau_list)[s]
-    }
   }
 
-  if (is.null(best_fit)) {
-    stop("All initialization attempts failed.")
+  valid <- is.finite(logliks)
+  if (!any(valid)) {
+    failure_details <- paste0("  - ", names(failures), ": ", unlist(failures), collapse = "\n")
+    stop("All initialization attempts failed.\n\nCaptured Errors:\n", failure_details)
   }
+
+  n_keep <- min(control$n_best_init, sum(valid))
+  order <- order(logliks[valid], decreasing = TRUE)
+  keep_names <- names(logliks)[valid][order][seq_len(n_keep)]
 
   list(
-    best_fit = best_fit,
-    best_loglik = best_loglik,
-    best_name = best_name,
+    best_states = fitted_states[keep_names],
+    best_logliks = logliks[keep_names],
     logliks = logliks,
     failures = failures
   )
