@@ -10,19 +10,8 @@ e_step_fmr <- function(dat, em_state, family) {
   beta <- em_state$beta
   pi_g <- em_state$pi_g
   sigma_g <- em_state$sigma_g
-
-  G <- nrow(beta_g)
-
-  eta <- linear_predictor_matrix(
-    A = A,
-    B = B,
-    beta_g = beta_g,
-    beta = beta
-  )
-
-  eta <- as.matrix(eta)
-  storage.mode(eta) <- "double"
-
+  G <- em_state$G
+  eta <- em_state$eta
 
   log_pi <- log(pmax(pi_g, 1e-16))
   log_w <- matrix(NA_real_, nrow = n, ncol = G)
@@ -30,11 +19,8 @@ e_step_fmr <- function(dat, em_state, family) {
   # Family specific E-step quantities
 
   if (family == "gaussian") {
-    sigma_g <- as.numeric(sigma_g)
 
-    if (length(sigma_g) != G) {
-      stop("length(sigma_g) must equal nrow(beta_g).")
-    }
+    stopifnot(length(sigma_g) == G)
 
     for (g in seq_len(G)) {
       log_w[, g] <- log_pi[g] + stats::dnorm(
