@@ -4,16 +4,13 @@
 
 test_data <- do.call(
   simulate_fmr,
-  c(
-    scenarios$two_group_effects,
-    list(n = 300, seed = 1)
-  )
+  c(scenarios$two_group_effects, list(n = 300, seed = 1))
 )
 
 model <- WMRModel$new(
   formula = formula(test_data),
   data = test_data,
-  G_values = 1:3,
+  G_values = 2:3,
   family = "gaussian",
   control = build_control(n_init = 1)
 )
