@@ -26,8 +26,8 @@ test_that("gaussian fits accurately", {
   fitted_common <- unname(em_values$beta)
   common_truth <- unname(scenarios$two_group_effects$betas["g1", c("x2", "x3")])
 
-  expect_equal(round(fitted_het, 1), round(het_truth, 1), tolerance = 0.05)
-  expect_equal(round(fitted_common, 1), round(common_truth, 1), tolerance = 0.05)
+  expect_equal(round(fitted_het, 1), round(het_truth, 1), tolerance = 0.005)
+  expect_equal(round(fitted_common, 1), round(common_truth, 1), tolerance = 0.005)
 })
 
 test_that("poisson fits accurately", {
