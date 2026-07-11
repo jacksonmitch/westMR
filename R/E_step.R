@@ -49,6 +49,7 @@ e_step_fmr <- function(dat, em_state, family) {
       )
     }
   }
+  stopifnot(all(weights >= 0))
 
   sum_weights <- rowSums(weights)
   loglik <- sum(log(sum_weights))

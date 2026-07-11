@@ -247,6 +247,8 @@ select_best_initialization <- function(em_state_list,
                                        control) {
   n_candidates <- length(em_state_list)
   logliks <- rep(NA_real_, n_candidates)
+
+  stopifnot(!is.null(names(em_state_list)), all(names(em_state_list) != ""))
   names(logliks) <- names(em_state_list)
 
   fitted_states <- vector("list", n_candidates)
