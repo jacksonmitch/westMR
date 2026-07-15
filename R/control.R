@@ -55,7 +55,12 @@
 #'  (mclust) initialization. Currently validated but not used by the
 #'  estimation code, which uses k-means and quantile-based initializations
 #'  only. Default is \code{TRUE}.
-#'
+#' @param parallel A logical flag for enabling user-friendly parallel 
+#'  computation. If \code{TRUE}, a general \code{future::multisession} plan overrides
+#'  the current one, which is restored on exit. A \code{future} can be 
+#'  specified manually while setting this flag as \code{FALSE} for
+#'  hardware-specific customization. Default is \code{FALSE}
+#'  
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
 #'
@@ -85,7 +90,8 @@ build_control <- function(
   init_eps = 1e-6,
   init_min_size = NULL,
   use_mclust = TRUE,
-  return_qr_parts = FALSE
+  return_qr_parts = FALSE,
+  parallel = FALSE
 ) {
   # User Input checks
 
@@ -129,7 +135,8 @@ build_control <- function(
     null.ok = TRUE
   )
   checkmate::assert_flag(use_mclust, add = collection)
-
+  checkmate::assert_flag(parallel, add = collection)
+  
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)
   n_best_init <- as.integer(n_best_init)

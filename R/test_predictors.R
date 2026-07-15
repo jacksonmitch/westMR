@@ -68,23 +68,24 @@ test_predictors <- function(
   shared_fits <- fit_across_G(model, shared_data)
 
   while (length(remaining_predictors) > 0) {
-    tests <- lapply(remaining_predictors, function(predictor) {
-      cand_included <- update_included(included, predictor)
-      cand_heterogeneous <- update_heterogeneous(heterogeneous, predictor)
-      cand_common <- setdiff(cand_included, cand_heterogeneous)
+    tests <- future.apply::future_lapply(remaining_predictors,
+      function(predictor) {
+        cand_included <- update_included(included, predictor)
+        cand_heterogeneous <- update_heterogeneous(heterogeneous, predictor)
+        cand_common <- setdiff(cand_included, cand_heterogeneous)
 
-      candidate_data <- prepare_data(model,
-        included = cand_included,
-        common   = cand_common
-      )
+        candidate_data <- prepare_data(model,
+          included = cand_included,
+          common = cand_common
+        )
 
-      west_procedure(
-        model = model,
-        direction = direction,
-        shared_fits = shared_fits,
-        candidate_data = candidate_data
-      )
-    })
+        west_procedure(
+          model = model,
+          direction = direction,
+          shared_fits = shared_fits,
+          candidate_data = candidate_data
+        )
+      }, future.seed = TRUE)
     names(tests) <- remaining_predictors
 
     p0 <- vapply(tests, function(t) t$p0, numeric(1))

@@ -62,6 +62,11 @@ westMR <- function(
     stop("(westMR) Error with arguments: \n", err_messages, call. = FALSE)
   }
 
+  if (isTRUE(control$parallel)) {
+    old_plan <- future::plan(future::multisession)
+    on.exit({future::plan(old_plan)}, add = TRUE)
+  }
+
   if (family == "binomial") {
     coerced <- coerce_binomial_formula(formula, data)
     formula <- coerced$formula
