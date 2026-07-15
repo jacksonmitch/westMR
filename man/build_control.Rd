@@ -22,7 +22,8 @@ build_control(
   init_eps = 1e-06,
   init_min_size = NULL,
   use_mclust = TRUE,
-  return_qr_parts = FALSE
+  return_qr_parts = FALSE,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -97,6 +98,12 @@ only. Default is \code{TRUE}.}
 \item{return_qr_parts}{A logical flag. If \code{TRUE}, the structured-QR
 M-step retains its intermediate QR decomposition components in its
 output instead of discarding them. Default is \code{FALSE}.}
+
+\item{parallel}{A logical flag for enabling user-friendly parallel
+computation. If \code{TRUE}, a general \code{future::multisession} plan overrides
+the current one, which is restored on exit. A \code{future} can be
+specified manually while setting this flag as \code{FALSE} for
+hardware-specific customization. Default is \code{FALSE}}
 }
 \value{
 A structured list of class \code{"WMRControl"} containing all
