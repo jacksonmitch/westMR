@@ -16,5 +16,29 @@
 \code{x}, invisibly.
 }
 \description{
-Print the Step-by-Step Effect-Type Determination Table
+For each step of the search, prints the current heterogeneous/homogeneous
+state, every candidate's weighted p-value, and which candidate (if any)
+was chosen.
+}
+\examples{
+set.seed(1)
+n <- 500
+pi <- c(0.2, 0.3, 0.5)
+z <- sample(1:3, n, replace = TRUE, prob = pi)
+x1 <- rnorm(n)
+x2 <- rnorm(n)
+x3 <- rnorm(n)
+sigma <- c(1, 0.5, 2)
+beta <- rbind(
+  g1 = c(intercept = -4, x1 = -3, x2 = 1.5, x3 = 2),
+  g2 = c(intercept = 0, x1 = 1, x2 = 1.5, x3 = -1),
+  g3 = c(intercept = 4, x1 = 3, x2 = 1.5, x3 = 0.5)
+)
+eta <- beta[z, "intercept"] + beta[z, "x1"] * x1 + beta[z, "x2"] * x2 +
+  beta[z, "x3"] * x3
+y <- rnorm(n, mean = eta, sd = sigma[z])
+dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
+
+fit <- westMR(y ~ x1 + x2 + x3, data = dat, G_max = 3, task = "effects")
+steps_table(fit$effect_determination)
 }
