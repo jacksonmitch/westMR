@@ -16,5 +16,30 @@
 \code{x}, invisibly.
 }
 \description{
-Print an Effect-Type Determination Result
+Prints a short summary of a stepwise effect-type determination run: the
+search direction, significance level, which predictors ended up
+heterogeneous vs. homogeneous, and the resulting formula.
+}
+\examples{
+set.seed(1)
+n <- 500
+pi <- c(0.2, 0.3, 0.5)
+z <- sample(1:3, n, replace = TRUE, prob = pi)
+x1 <- rnorm(n)
+x2 <- rnorm(n)
+x3 <- rnorm(n)
+sigma <- c(1, 0.5, 2)
+beta <- rbind(
+  g1 = c(intercept = -4, x1 = -3, x2 = 1.5, x3 = 2),
+  g2 = c(intercept = 0, x1 = 1, x2 = 1.5, x3 = -1),
+  g3 = c(intercept = 4, x1 = 3, x2 = 1.5, x3 = 0.5)
+)
+eta <- beta[z, "intercept"] + beta[z, "x1"] * x1 + beta[z, "x2"] * x2 +
+  beta[z, "x3"] * x3
+y <- rnorm(n, mean = eta, sd = sigma[z])
+dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
+
+# x1 and x3's effects differ by group (heterogeneous); x2's does not
+fit <- westMR(y ~ x1 + x2 + x3, data = dat, G_max = 3, task = "effects")
+print(fit$effect_determination)
 }
