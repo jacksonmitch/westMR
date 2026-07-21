@@ -4,7 +4,7 @@ devtools::load_all()
 
 test_data <- do.call(simulate_fmr,
                      c(scenarios$two_group_effects,
-                       list(n = 400, seed = 123)))
+                       list(n = 400, seed = 123)))$data
 
 
 model <- WMRModel$new(
