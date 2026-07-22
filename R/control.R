@@ -1,7 +1,10 @@
 #' Create a Control Object for westMR Models
 #'
-#' This function structures and validates tuning parameters, initialization
-#' settings, and convergence criteria for the estimation algorithm.
+#' Creates and validates a control object of tuning parameters for
+#' \code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
+#' \code{max_iter}/\code{tol} (EM convergence). The remaining parameters goveren
+#' initialization strategies, inner IRWLS loops, and numerical safeguards. They
+#' are available for tuning but the defaults are reasonable for most fits.
 #'
 #' @param alpha A numeric value between 0 and 1 specifying the significance
 #'  level. Default is 0.05.
@@ -55,12 +58,12 @@
 #'  (mclust) initialization. Currently validated but not used by the
 #'  estimation code, which uses k-means and quantile-based initializations
 #'  only. Default is \code{TRUE}.
-#' @param parallel A logical flag for enabling user-friendly parallel 
+#' @param parallel A logical flag for enabling user-friendly parallel
 #'  computation. If \code{TRUE}, a general \code{future::multisession} plan overrides
-#'  the current one, which is restored on exit. A \code{future} can be 
+#'  the current one, which is restored on exit. A \code{future} can be
 #'  specified manually while setting this flag as \code{FALSE} for
 #'  hardware-specific customization. Default is \code{FALSE}
-#'  
+#'
 #' @return A structured list of class \code{"WMRControl"} containing all
 #'   validated control arguments.
 #'
@@ -136,7 +139,7 @@ build_control <- function(
   )
   checkmate::assert_flag(use_mclust, add = collection)
   checkmate::assert_flag(parallel, add = collection)
-  
+
   max_iter <- as.integer(max_iter)
   n_init <- as.integer(n_init)
   n_best_init <- as.integer(n_best_init)

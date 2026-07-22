@@ -22,6 +22,8 @@ fit_across_G <- function(model, prepared_data, extra_inits = NULL) {
 
     if (!is.null(extra_inits)) {
       state_list[["from_shared_fit"]] <- extra_inits[[i]]
+      state_list[["from_shared_fit_tau"]] <-
+        EmState$new(tau = extra_inits[[i]]$tau)
     }
 
     fit_fmr(

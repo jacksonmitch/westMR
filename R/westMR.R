@@ -1,7 +1,11 @@
-#' westMR
+#' Fit a Finite Mixture Regression via the Stepwise WEST Procedure
 #'
-#' westMR implements the west procedure framework for finite mixtures of
-#' regression models. Parameter estimation is performed using the EM algorithm.
+#' Fits a finite mixture regrssion model to \code{data} using the WEST procedure
+#' to decide which predictors in \code{formula} belong in the model, and
+#' whether each included predictors effect is homogeneous or heterogeneous.
+#' Supports Gaussian, Poisson and binomial responses. Estimation is performed
+#' via an EM algorithm, with weighted least squares (or IRWLS for non-Gaussian
+#' families) in the M-step.
 #'
 #'
 #' @param formula A formula object (e.g., y ~ x) specifying the model.
@@ -27,24 +31,31 @@
 #'
 #' @examples
 #' set.seed(1)
+#'
+#' # Simulate data
 #' n <- 500
-#' pi <- c(0.2, 0.3, 0.5)
 #' z <- sample(1:3, n, replace = TRUE, prob = pi)
 #' x1 <- rnorm(n)
 #' x2 <- rnorm(n)
 #' x3 <- rnorm(n)
 #' x4 <- rnorm(n)
-#' sigma <- c(1, 0.5, 2)
+#'
+#' # True parameters for 3 group mixture model
 #' beta <- rbind(
 #'   g1 = c(intercept = -4, x1 = -3, x2 = 1.5, x3 = 2, x4 = 0),
 #'   g2 = c(intercept = 0, x1 = 1, x2 = 1.5, x3 = -1, x4 = 0),
 #'   g3 = c(intercept = 4, x1 = 3, x2 = 1.5, x3 = 0.5, x4 = 0)
 #' )
+#' sigma <- c(1, 0.5, 2)
+#' pi <- c(0.2, 0.3, 0.5)
+#'
+#' # Generate linear predictor and corresponding response y
 #' eta <- beta[z, "intercept"] + beta[z, "x1"] * x1 + beta[z, "x2"] * x2 +
 #'   beta[z, "x3"] * x3 + beta[z, "x4"] * x4
 #' y <- rnorm(n, mean = eta, sd = sigma[z])
 #' dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3, x4 = x4)
 #'
+#' # Perform sequential stepwise procedure
 #' westMR(formula = y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3)
 #'
 westMR <- function(
