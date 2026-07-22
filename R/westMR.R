@@ -1,11 +1,11 @@
 #' Fit a Finite Mixture Regression via the Stepwise WEST Procedure
 #'
-#' Fits a finite mixture regrssion model to \code{data} using the WEST procedure
-#' to decide which predictors in \code{formula} belong in the model, and
-#' whether each included predictors effect is homogeneous or heterogeneous.
-#' Supports Gaussian, Poisson and binomial responses. Estimation is performed
-#' via an EM algorithm, with weighted least squares (or IRWLS for non-Gaussian
-#' families) in the M-step.
+#' Fits a finite mixture regression model to \code{data} using the WEST
+#' procedure to decide which predictors in \code{formula} belong in the
+#' model, and whether each included predictor's effect is homogeneous or
+#' heterogeneous. Supports Gaussian, Poisson and binomial responses.
+#' Estimation is performed via an EM algorithm, with weighted least squares
+#' (or IRWLS for non-Gaussian families) in the M-step.
 #'
 #'
 #' @param formula A formula object (e.g., y ~ x) specifying the model.
@@ -34,6 +34,7 @@
 #'
 #' # Simulate data
 #' n <- 500
+#' pi <- c(0.2, 0.3, 0.5)
 #' z <- sample(1:3, n, replace = TRUE, prob = pi)
 #' x1 <- rnorm(n)
 #' x2 <- rnorm(n)
@@ -47,7 +48,6 @@
 #'   g3 = c(intercept = 4, x1 = 3, x2 = 1.5, x3 = 0.5, x4 = 0)
 #' )
 #' sigma <- c(1, 0.5, 2)
-#' pi <- c(0.2, 0.3, 0.5)
 #'
 #' # Generate linear predictor and corresponding response y
 #' eta <- beta[z, "intercept"] + beta[z, "x1"] * x1 + beta[z, "x2"] * x2 +

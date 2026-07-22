@@ -110,8 +110,11 @@ A structured list of class \code{"WMRControl"} containing all
 validated control arguments.
 }
 \description{
-This function structures and validates tuning parameters, initialization
-settings, and convergence criteria for the estimation algorithm.
+Creates and validates a control object of tuning parameters for
+\code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
+\code{max_iter}/\code{tol} (EM convergence). The remaining parameters goveren
+initialization strategies, inner IRWLS loops, and numerical safeguards. They
+are available for tuning but the defaults are reasonable for most fits.
 }
 \examples{
 # Generate default control options
