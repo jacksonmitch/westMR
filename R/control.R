@@ -2,7 +2,7 @@
 #'
 #' Creates and validates a control object of tuning parameters for
 #' \code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
-#' \code{max_iter}/\code{tol} (EM convergence). The remaining parameters goveren
+#' \code{max_iter}/\code{tol} (EM convergence). The remaining parameters govern
 #' initialization strategies, inner IRWLS loops, and numerical safeguards. They
 #' are available for tuning but the defaults are reasonable for most fits.
 #'
@@ -54,10 +54,6 @@
 #' @param init_min_size An integer specifying a minimum group size to
 #'  enforce on initializations. Currently validated but not used by the
 #'  estimation code. Must be at least 1. Default is \code{NULL}.
-#' @param use_mclust A logical flag reserved for enabling model-based
-#'  (mclust) initialization. Currently validated but not used by the
-#'  estimation code, which uses k-means and quantile-based initializations
-#'  only. Default is \code{TRUE}.
 #' @param parallel A logical flag for enabling user-friendly parallel
 #'  computation. If \code{TRUE}, a general \code{future::multisession} plan overrides
 #'  the current one, which is restored on exit. A \code{future} can be
@@ -92,7 +88,6 @@ build_control <- function(
   init_burnin = 10,
   init_eps = 1e-6,
   init_min_size = NULL,
-  use_mclust = TRUE,
   return_qr_parts = FALSE,
   parallel = FALSE
 ) {
@@ -137,7 +132,6 @@ build_control <- function(
     lower = 1, add = collection,
     null.ok = TRUE
   )
-  checkmate::assert_flag(use_mclust, add = collection)
   checkmate::assert_flag(parallel, add = collection)
 
   max_iter <- as.integer(max_iter)

@@ -21,7 +21,6 @@ build_control(
   init_burnin = 10,
   init_eps = 1e-06,
   init_min_size = NULL,
-  use_mclust = TRUE,
   return_qr_parts = FALSE,
   parallel = FALSE
 )
@@ -90,11 +89,6 @@ Must be between 0 and 0.5. Default is 1e-6.}
 enforce on initializations. Currently validated but not used by the
 estimation code. Must be at least 1. Default is \code{NULL}.}
 
-\item{use_mclust}{A logical flag reserved for enabling model-based
-(mclust) initialization. Currently validated but not used by the
-estimation code, which uses k-means and quantile-based initializations
-only. Default is \code{TRUE}.}
-
 \item{return_qr_parts}{A logical flag. If \code{TRUE}, the structured-QR
 M-step retains its intermediate QR decomposition components in its
 output instead of discarding them. Default is \code{FALSE}.}
@@ -112,7 +106,7 @@ validated control arguments.
 \description{
 Creates and validates a control object of tuning parameters for
 \code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
-\code{max_iter}/\code{tol} (EM convergence). The remaining parameters goveren
+\code{max_iter}/\code{tol} (EM convergence). The remaining parameters govern
 initialization strategies, inner IRWLS loops, and numerical safeguards. They
 are available for tuning but the defaults are reasonable for most fits.
 }
