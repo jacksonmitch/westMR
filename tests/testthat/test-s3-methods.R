@@ -5,7 +5,7 @@
 test_data <- do.call(
   simulate_fmr,
   c(scenarios$two_group_effects, list(n = 300, seed = 1))
-)
+)$data
 
 model <- WMRModel$new(
   formula = formula(test_data),

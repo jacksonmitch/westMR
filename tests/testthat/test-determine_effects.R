@@ -5,7 +5,7 @@ test_that("determine_effects", {
       scenarios$two_group_effects,
       list(n = 400, seed = 123)
     )
-  )
+  )$data
 
   model <- WMRModel$new(
     formula = formula(test_data),
