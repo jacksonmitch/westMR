@@ -34,6 +34,29 @@ is \code{"both"}.}
 }
 \value{
 A list of class \code{westMR} containing:
+\tabular{ll}{
+\code{call} \tab The matched call. \cr
+\code{formula} \tab The model formula (coerced to \code{cbind(success,
+    failure)} form for binomial responses). \cr
+\code{family} \tab The response family used, one of \code{"gaussian"},
+\code{"poisson"}, or \code{"binomial"}. \cr
+\code{task} \tab Which task(s) were run: \code{"variables"},
+\code{"effects"}, or \code{"both"}. \cr
+\code{G_values} \tab The candidate numbers of mixture components
+searched (\code{2:G_max}). \cr
+\code{best_fit} \tab The fit (an object of class \code{fit_fmr}) at
+the BIC-optimal number of components for the final model. \cr
+\code{variable_selection} \tab An object of class
+\code{select_variables} recording which predictors were included,
+or \code{NULL} if \code{task} did not include \code{"variables"}.
+Pass this to \code{\link{steps_table.select_variables}} to see the
+step-by-step search log. \cr
+\code{effect_determination} \tab An object of class
+\code{determine_effects} recording which predictors were
+heterogeneous vs. homogeneous, or \code{NULL} if \code{task} did
+not include \code{"effects"}. Pass this to
+\code{\link{steps_table.determine_effects}} to see the step-by-step
+search log. \cr
 \describe{
 \item{call}{The matched call.}
 \item{formula}{The model formula (coerced to \code{cbind(success,
