@@ -10,7 +10,7 @@
 \item{x}{An object of class \code{fit_fmr}. This is produced internally
 while fitting each candidate number of components, and surfaces to
 users as the \code{best_fit} component of the list returned by
-\code{\link{westMR}} (always present, regardless of \code{task}; see
+\code{\link{westMR}} (always present, regardless of \code{procedure}; see
 \code{westMR}'s \strong{Value} section).}
 
 \item{...}{Currently unused.}
@@ -44,7 +44,7 @@ y <- rnorm(n, mean = eta, sd = sigma[z])
 dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3, x4 = x4)
 
 fit <- westMR(
-  y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
+  y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, procedure = "variables"
 )
 # fit$best_fit is always populated, at the BIC-optimal G
 print(fit$best_fit)

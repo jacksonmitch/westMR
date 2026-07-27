@@ -14,12 +14,12 @@
 }
 \value{
 An object of class \code{summary.westMR}: a list containing the
-call, formula, family, task, candidate \code{G} values, the best fit,
+call, formula, family, procedure, candidate \code{G} values, the best fit,
 the variable-selection and effect-determination results (if run), and
 their step-by-step tables.
 }
 \description{
-Collects the call, formula, family, task, candidate \code{G} values, best
+Collects the call, formula, family, procedure, candidate \code{G} values, best
 fit, and (if run) the variable-selection and effect-determination results
 and their step-by-step tables into a single \code{summary.westMR} object
 for printing.

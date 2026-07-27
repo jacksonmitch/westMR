@@ -8,8 +8,8 @@ westMR(
   formula,
   data,
   G_max = 4,
-  family = c("gaussian", "poisson", "binomial"),
-  task = c("both", "variables", "effects"),
+  family = "gaussian",
+  procedure = "complete",
   control = build_control()
 )
 }
@@ -25,7 +25,7 @@ groups/components. Default is 4.}
 \code{"poisson"}, or \code{"binomial"}, specifying the error
 distribution. Default is \code{"gaussian"}.}
 
-\item{task}{A character vector specifying which tasks to perform. Can
+\item{procedure}{A character vector specifying which procedures to perform. Can
 include \code{"variables"}, \code{"effects"}, or \code{"both"}. Default
 is \code{"both"}.}
 
@@ -39,7 +39,7 @@ A list of class \code{westMR} containing:
 \code{cbind(success, failure)} form for binomial responses).}
 \item{family}{The response family used, one of
 \code{"gaussian"}, \code{"poisson"}, or \code{"binomial"}.}
-\item{task}{Which task(s) were run: \code{"variables"},
+\item{procedure}{Which procedure(s) were run: \code{"variables"},
 \code{"effects"}, or \code{"both"}.}
 \item{G_values}{The candidate numbers of mixture components
 searched (\code{2:G_max}).}
@@ -47,12 +47,12 @@ searched (\code{2:G_max}).}
 at the BIC-optimal number of components for the final model.}
 \item{variable_selection}{An object of class
 \code{select_variables} recording which predictors were included,
-or \code{NULL} if \code{task} did not include \code{"variables"}.
+or \code{NULL} if \code{procedure} did not include \code{"variables"}.
 Pass this to \code{\link{steps_table.select_variables}} to see
 the step-by-step search log.}
 \item{effect_determination}{An object of class
 \code{determine_effects} recording which predictors were
-heterogeneous vs. homogeneous, or \code{NULL} if \code{task} did
+heterogeneous vs. homogeneous, or \code{NULL} if \code{procedure} did
 not include \code{"effects"}. Pass this to
 \code{\link{steps_table.determine_effects}} to see the
 step-by-step search log.}

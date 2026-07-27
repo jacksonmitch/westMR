@@ -10,7 +10,7 @@ steps_table(x, ...)
 \item{x}{An object of class \code{determine_effects} or
 \code{select_variables}. These are exactly the \code{effect_determination}
 and \code{variable_selection} components of the list returned by
-\code{\link{westMR}} (present only when \code{task} included
+\code{\link{westMR}} (present only when \code{procedure} included
 \code{"effects"} or \code{"variables"}, respectively).}
 
 \item{...}{Currently unused.}
@@ -44,9 +44,9 @@ y <- rnorm(n, mean = eta, sd = sigma[z])
 dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3, x4 = x4)
 
 fit <- westMR(
-  y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
+  y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, procedure = "variables"
 )
-# task = "variables" is what populates fit$variable_selection below
+# procedure = "variables" is what populates fit$variable_selection below
 steps_table(fit$variable_selection)
 }
 \seealso{

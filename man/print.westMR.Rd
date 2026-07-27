@@ -17,7 +17,7 @@
 }
 \description{
 Prints a top-level summary of a \code{\link{westMR}} fit: the family, the
-candidate \code{G} values, and which task(s) were run, followed by the
+candidate \code{G} values, and which procedure(s) were run, followed by the
 variable-selection result (if run), the effect-determination result (if
 run), and the best fit.
 }
