@@ -1,4 +1,4 @@
-# Wrapper function for M-Steps accross families and method
+# Wrapper function for M-Steps across families and method
 m_step <- function(dat, em_state, family, control) {
   if (dat$p_com > 0) {
     em_state <- switch(family,
