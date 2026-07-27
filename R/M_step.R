@@ -200,13 +200,13 @@ m_step_sqr_gaussian <- function(dat, em_state, control) {
   em_state$sigma_g <- sigma_g
 }
 
-# Poisson M-step using inner IRWLS and structured QR
+# Poisson M-step using IRWLS and structured QR
 
 m_step_sqr_poisson <- function(dat, em_state, control) {
   irwls_fmr(dat, em_state, control, family = "poisson")
 }
 
-# Binomial M-step using inner IRWLS and structured QR
+# Binomial M-step using IRWLS and structured QR
 
 m_step_sqr_binomial <- function(dat, em_state, control) {
   irwls_fmr(dat, em_state, control, "binomial")

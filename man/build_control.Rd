@@ -20,7 +20,6 @@ build_control(
   weight_floor = 1e-10,
   init_burnin = 10,
   init_eps = 1e-06,
-  init_min_size = NULL,
   return_qr_parts = FALSE,
   parallel = FALSE
 )
@@ -60,17 +59,17 @@ lower bound for variance estimates to prevent numerical instabilities.
 If \code{NULL}, defaults to a percentage of the response's variance.}
 
 \item{irwls_max_iter}{A positive integer specifying the maximum number of
-inner IRWLS iterations used in the Poisson/binomial M-step. Default is
-50.}
+IRWLS iterations used for the Poisson and binomial distribution
+families. Default is 50.}
 
 \item{irwls_tol}{A non-negative numeric value specifying the convergence
-tolerance for the inner IRWLS loop used in the Poisson/binomial M-step;
-iteration stops when the largest absolute change in coefficients falls
-below this value. Default is 1e-8.}
+tolerance for the IRWLS iterations used for the Poisson and binomial
+distribution families; iteration stops when the largest absolute
+change in coefficients falls below this value. Default is 1e-8.}
 
 \item{weight_floor}{A non-negative numeric value establishing a lower
-bound for the working weights used in the IRWLS loop and the plain
-Poisson M-step, to prevent numerical instabilities. Default is 1e-10.}
+bound for the working weights used in the IRWLS loop, to prevent
+numerical instabilities. Default is 1e-10.}
 
 \item{init_burnin}{A positive integer specifying the number of EM
 iterations run for each candidate initialization during the burn-in
@@ -81,10 +80,6 @@ an initial responsibility matrix (\code{tau}) built from a cluster or
 quantile partition is to a hard assignment: the assigned component gets
 probability \code{1 - init_eps} and the rest share \code{init_eps}.
 Default is 1e-6.}
-
-\item{init_min_size}{An optional positive integer specifying a minimum
-group size to enforce on initializations. Currently validated but not
-used by the estimation code. Default is \code{NULL}.}
 
 \item{return_qr_parts}{A logical flag. If \code{TRUE}, the structured-QR
 M-step retains its intermediate QR decomposition components in its
@@ -104,7 +99,7 @@ validated control arguments.
 Creates and validates a control object of tuning parameters for
 \code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
 \code{max_iter}/\code{tol} (EM convergence). The remaining parameters govern
-initialization strategies, inner IRWLS loops, and numerical safeguards. They
+initialization strategies, IRWLS loops, and numerical safeguards. They
 are available for tuning but the defaults are reasonable for most fits.
 }
 \examples{

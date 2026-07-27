@@ -3,7 +3,7 @@
 #' Creates and validates a control object of tuning parameters for
 #' \code{westMR()}. Most users only need \code{alpha}, \code{direction}, and
 #' \code{max_iter}/\code{tol} (EM convergence). The remaining parameters govern
-#' initialization strategies, inner IRWLS loops, and numerical safeguards. They
+#' initialization strategies, IRWLS loops, and numerical safeguards. They
 #' are available for tuning but the defaults are reasonable for most fits.
 #'
 #' @param alpha A numeric value between 0 and 1 specifying the significance
@@ -30,15 +30,15 @@
 #'  lower bound for variance estimates to prevent numerical instabilities.
 #'  If \code{NULL}, defaults to a percentage of the response's variance.
 #' @param irwls_max_iter A positive integer specifying the maximum number of
-#'  inner IRWLS iterations used in the Poisson/binomial M-step. Default is
-#'  50.
+#'  IRWLS iterations used for the Poisson and binomial distribution
+#'  families. Default is 50.
 #' @param irwls_tol A non-negative numeric value specifying the convergence
-#'  tolerance for the inner IRWLS loop used in the Poisson/binomial M-step;
-#'  iteration stops when the largest absolute change in coefficients falls
-#'  below this value. Default is 1e-8.
+#'  tolerance for the IRWLS iterations used for the Poisson and binomial
+#'  distribution families; iteration stops when the largest absolute
+#'  change in coefficients falls below this value. Default is 1e-8.
 #' @param weight_floor A non-negative numeric value establishing a lower
-#'  bound for the working weights used in the IRWLS loop and the plain
-#'  Poisson M-step, to prevent numerical instabilities. Default is 1e-10.
+#'  bound for the working weights used in the IRWLS loop, to prevent
+#'  numerical instabilities. Default is 1e-10.
 #' @param return_qr_parts A logical flag. If \code{TRUE}, the structured-QR
 #'  M-step retains its intermediate QR decomposition components in its
 #'  output instead of discarding them. Default is \code{FALSE}.
@@ -50,9 +50,6 @@
 #'  quantile partition is to a hard assignment: the assigned component gets
 #'  probability \code{1 - init_eps} and the rest share \code{init_eps}.
 #'  Default is 1e-6.
-#' @param init_min_size An optional positive integer specifying a minimum
-#'  group size to enforce on initializations. Currently validated but not
-#'  used by the estimation code. Default is \code{NULL}.
 #' @param parallel A logical flag for enabling user-friendly parallel
 #'  computation. If \code{TRUE}, a general \code{future::multisession} plan overrides
 #'  the current one, which is restored on exit. A \code{future} can be
@@ -86,7 +83,6 @@ build_control <- function(
   weight_floor = 1e-10,
   init_burnin = 10,
   init_eps = 1e-6,
-  init_min_size = NULL,
   return_qr_parts = FALSE,
   parallel = FALSE
 ) {
@@ -127,10 +123,6 @@ build_control <- function(
   checkmate::assert_number(weight_floor, lower = 0, add = collection)
   checkmate::assert_int(init_burnin, lower = 1, add = collection)
   checkmate::assert_number(init_eps, lower = 0, upper = 0.5, add = collection)
-  checkmate::assert_int(init_min_size,
-    lower = 1, add = collection,
-    null.ok = TRUE
-  )
   checkmate::assert_flag(parallel, add = collection)
 
   max_iter <- as.integer(max_iter)
