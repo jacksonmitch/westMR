@@ -1,7 +1,3 @@
-# test_that("determine_effects class name and print method work as expected", {
-#   # 1. Mock your object exactly how your package generates it
-#   # (Replace this with a minimal dummy version or a saved test object)
-
 test_data <- do.call(
   simulate_fmr,
   c(scenarios$two_group_effects, list(n = 300, seed = 1))
