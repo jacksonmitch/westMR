@@ -35,9 +35,17 @@ WMRModel <- R6::R6Class(
       self$G_values <- G_values
       self$family <- family
 
-      private$mf_ <- stats::model.frame(
-        formula, data,
-        na.action = stats::na.fail
+      private$mf_ <- tryCatch(stats::model.frame(
+          formula, data,
+          na.action = stats::na.fail
+        ),
+        error = function(e) {
+          stop(
+            "Error while creating data frame with given formula/data: ", 
+            e$message, 
+            call. = FALSE
+          )
+        }
       )
 
       if (is.null(control$sigma_floor)) {

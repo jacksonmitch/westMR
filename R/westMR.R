@@ -79,34 +79,33 @@ westMR <- function(
   formula,
   data,
   G_max = 4,
-  family = c("gaussian", "poisson", "binomial"),
-  task = c("both", "variables", "effects"),
+  family = "gaussian",
+  procedure = "complete",
   control = build_control()
 ) {
-  family <- match.arg(family)
-  task <- match.arg(task)
 
   collection <- checkmate::makeAssertCollection()
   # User Input Checks
   checkmate::assert_formula(formula, add = collection)
   checkmate::assert_data_frame(data, add = collection)
   if (!isTRUE(checkmate::check_int(G_max, lower = 2))) {
-    collection$push(sprintf("Maximum number of Components/Groups (G_max)
-                            must be >= 2 (received: %s).", G_max))
+    collection$push(sprintf(
+      "Maximum number of Components/Groups (G_max) must be >= 2 (received: %s)."
+      , G_max))
   }
   checkmate::assert_choice(family,
     choices = c("gaussian", "poisson", "binomial"),
     add = collection
   )
-  checkmate::assert_subset(task,
-    choices = c("both", "variables", "effects"),
+  checkmate::assert_choice(procedure,
+    choices = c("complete", "variables", "effects"),
     add = collection
   )
   checkmate::assert_class(control, "WMRControl", add = collection)
 
   if (!collection$isEmpty()) {
     err_messages <- paste0("- ", collection$getMessages(), collapse = "\n")
-    stop("(westMR) Error with arguments: \n", err_messages, call. = FALSE)
+    stop(err_messages, call. = FALSE)
   }
 
   if (isTRUE(control$parallel)) {
@@ -134,7 +133,7 @@ westMR <- function(
   effect_determination <- NULL
   best_fit <- NULL
 
-  if (task %in% c("both", "variables")) {
+  if (procedure %in% c("complete", "variables")) {
     variable_selection <- select_variables(
       model = model,
       direction = control$direction
@@ -143,7 +142,7 @@ westMR <- function(
 
     final_fits <- variable_selection$final_fits
   }
-  if (task %in% c("both", "effects")) {
+  if (procedure %in% c("complete", "effects")) {
     effect_predictors <- if (!is.null(variable_selection)) {
       variable_selection$selected
     } else {
@@ -168,7 +167,7 @@ westMR <- function(
     call = match.call(),
     formula = formula,
     family = family,
-    task = task,
+    procedure = procedure,
     G_values = G_values,
     best_fit = best_fit,
     variable_selection = variable_selection,
