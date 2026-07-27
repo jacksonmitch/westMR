@@ -7,8 +7,11 @@
 \method{steps_table}{determine_effects}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{determine_effects}, as returned by
-\code{determine_effects()}.}
+\item{x}{An object of class \code{determine_effects}. This is produced
+internally by \code{determine_effects()}, and surfaces to users as the
+\code{effect_determination} component of the list returned by
+\code{\link{westMR}} whenever \code{task} includes \code{"effects"}
+(see \code{westMR}'s \strong{Value} section).}
 
 \item{...}{Currently unused.}
 }
@@ -40,5 +43,9 @@ y <- rnorm(n, mean = eta, sd = sigma[z])
 dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
 
 fit <- westMR(y ~ x1 + x2 + x3, data = dat, G_max = 3, task = "effects")
+# task = "effects" is what populates fit$effect_determination below
 steps_table(fit$effect_determination)
+}
+\seealso{
+\code{\link{westMR}}
 }

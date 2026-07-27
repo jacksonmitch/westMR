@@ -107,10 +107,16 @@ print.determine_effects <- function(x, ...) {
 #' \code{x} (\code{select_variables} or \code{determine_effects}).
 #'
 #' @param x An object of class \code{determine_effects} or
-#'   \code{select_variables}.
+#'   \code{select_variables}. These are exactly the \code{effect_determination}
+#'   and \code{variable_selection} components of the list returned by
+#'   \code{\link{westMR}} (present only when \code{task} included
+#'   \code{"effects"} or \code{"variables"}, respectively).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}, whose \strong{Value} section documents
+#'   where \code{variable_selection} and \code{effect_determination} come
+#'   from.
 #' @export
 #'
 #' @examples
@@ -136,6 +142,7 @@ print.determine_effects <- function(x, ...) {
 #' fit <- westMR(
 #'   y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
 #' )
+#' # task = "variables" is what populates fit$variable_selection below
 #' steps_table(fit$variable_selection)
 steps_table <- function(x, ...) UseMethod("steps_table")
 
@@ -145,11 +152,15 @@ steps_table <- function(x, ...) UseMethod("steps_table")
 #' state, every candidate's weighted p-value, and which candidate (if any)
 #' was chosen.
 #'
-#' @param x An object of class \code{determine_effects}, as returned by
-#'   \code{determine_effects()}.
+#' @param x An object of class \code{determine_effects}. This is produced
+#'   internally by \code{determine_effects()}, and surfaces to users as the
+#'   \code{effect_determination} component of the list returned by
+#'   \code{\link{westMR}} whenever \code{task} includes \code{"effects"}
+#'   (see \code{westMR}'s \strong{Value} section).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}
 #' @export
 #'
 #' @examples
@@ -172,6 +183,7 @@ steps_table <- function(x, ...) UseMethod("steps_table")
 #' dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
 #'
 #' fit <- westMR(y ~ x1 + x2 + x3, data = dat, G_max = 3, task = "effects")
+#' # task = "effects" is what populates fit$effect_determination below
 #' steps_table(fit$effect_determination)
 steps_table.determine_effects <- function(x, ...) {
   label_state <- function(het, common) {
@@ -198,11 +210,15 @@ steps_table.determine_effects <- function(x, ...) {
 #' every candidate predictor's weighted p-value, and which candidate (if
 #' any) was chosen.
 #'
-#' @param x An object of class \code{select_variables}, as returned by
-#'   \code{select_variables()}.
+#' @param x An object of class \code{select_variables}. This is produced
+#'   internally by \code{select_variables()}, and surfaces to users as the
+#'   \code{variable_selection} component of the list returned by
+#'   \code{\link{westMR}} whenever \code{task} includes \code{"variables"}
+#'   (see \code{westMR}'s \strong{Value} section).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}
 #' @export
 #'
 #' @examples
@@ -228,6 +244,7 @@ steps_table.determine_effects <- function(x, ...) {
 #' fit <- westMR(
 #'   y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
 #' )
+#' # task = "variables" is what populates fit$variable_selection below
 #' steps_table(fit$variable_selection)
 steps_table.select_variables <- function(x, ...) {
   label_state <- function(included, excluded) {
