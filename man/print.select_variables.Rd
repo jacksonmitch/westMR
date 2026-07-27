@@ -7,8 +7,11 @@
 \method{print}{select_variables}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{select_variables}, as returned by
-\code{select_variables()}.}
+\item{x}{An object of class \code{select_variables}. This is produced
+internally by \code{select_variables()}, and surfaces to users as the
+\code{variable_selection} component of the list returned by
+\code{\link{westMR}} whenever \code{task} includes \code{"variables"}
+(see \code{westMR}'s \strong{Value} section).}
 
 \item{...}{Currently unused.}
 }
@@ -44,5 +47,9 @@ dat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3, x4 = x4)
 fit <- westMR(
   y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
 )
+# task = "variables" is what populates fit$variable_selection below
 print(fit$variable_selection)
+}
+\seealso{
+\code{\link{westMR}}, \code{\link{steps_table.select_variables}}
 }
