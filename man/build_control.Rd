@@ -29,65 +29,62 @@ build_control(
 \item{alpha}{A numeric value between 0 and 1 specifying the significance
 level. Default is 0.05.}
 
-\item{max_iter}{An integer specifying the maximum number of iterations
-allowed for the algorithm. Must be at least 1. Default is 300.}
+\item{max_iter}{A positive integer specifying the maximum number of
+iterations allowed for the algorithm. Default is 300.}
 
-\item{n_init}{An integer specifying the total number of initializations
-to use. Must be at least 1. Default is 10.}
+\item{n_init}{A positive integer specifying the total number of
+initializations to use. Default is 10.}
 
-\item{n_best_init}{An integer specifying the total number of initializations
-to carry into full convergence. Must be at least 1. Default is 1.}
+\item{n_best_init}{A positive integer specifying the total number of
+initializations to carry into full convergence. Default is 2.}
 
-\item{direction}{A character string specifying the testing direction.
-Defaults to 'forward'.}
+\item{direction}{A character string, one of \code{"forward"} or
+\code{"backward"}, specifying the testing direction. Default is
+\code{"forward"}.}
 
 \item{verbose}{A logical flag. If \code{TRUE}, detailed execution logs are
 printed to the console during execution Default is \code{FALSE}.}
 
-\item{tol}{A numeric value specifying the iteration tolerance threshold.
-Must be greater than or equal to 0. Default is 1e-6.}
+\item{tol}{A non-negative numeric value specifying the iteration
+tolerance threshold. Default is 1e-6.}
 
-\item{n_kmeans_init}{An integer specifying how many of the total
-initializations (\code{n_init}) should be seeded using K-means clustering.
-Cannot exceed \code{n_init}. Default is 2.}
+\item{n_kmeans_init}{A non-negative integer, no larger than
+\code{n_init}, specifying how many of the total initializations
+(\code{n_init}) should be seeded using K-means clustering. Default is 2.}
 
-\item{kmeans_starts}{An integer specifying the number of random starts to use
-within the K-means algorithm itself. Must be at least 1. Default is 20.}
+\item{kmeans_starts}{A positive integer specifying the number of random
+starts to use within the K-means algorithm itself. Default is 20.}
 
-\item{sigma_floor}{An optional numeric value establishing a lower bound for
-variance estimates to prevent numerical instabilities. Must be greater than
-or equal to 0. If \code{NULL}, defaults to a percentage of the response's
-variance.}
+\item{sigma_floor}{An optional non-negative numeric value establishing a
+lower bound for variance estimates to prevent numerical instabilities.
+If \code{NULL}, defaults to a percentage of the response's variance.}
 
-\item{irwls_max_iter}{An integer specifying the maximum number of inner
-IRWLS iterations used in the Poisson/binomial M-step. Must be at least
-\enumerate{
-\item Default is 50.
-}}
+\item{irwls_max_iter}{A positive integer specifying the maximum number of
+inner IRWLS iterations used in the Poisson/binomial M-step. Default is
+50.}
 
-\item{irwls_tol}{A numeric value specifying the convergence tolerance for
-the inner IRWLS loop used in the Poisson/binomial M-step; iteration
-stops when the largest absolute change in coefficients falls below this
-value. Must be greater than or equal to 0. Default is 1e-8.}
+\item{irwls_tol}{A non-negative numeric value specifying the convergence
+tolerance for the inner IRWLS loop used in the Poisson/binomial M-step;
+iteration stops when the largest absolute change in coefficients falls
+below this value. Default is 1e-8.}
 
-\item{weight_floor}{A numeric value establishing a lower bound for the
-working weights used in the IRWLS loop and the plain Poisson M-step, to
-prevent numerical instabilities. Must be greater than or equal to 0.
-Default is 1e-10.}
+\item{weight_floor}{A non-negative numeric value establishing a lower
+bound for the working weights used in the IRWLS loop and the plain
+Poisson M-step, to prevent numerical instabilities. Default is 1e-10.}
 
-\item{init_burnin}{An integer specifying the number of EM iterations run
-for each candidate initialization during the burn-in stage used to pick
-the best starting point. Must be at least 1. Default is 10.}
+\item{init_burnin}{A positive integer specifying the number of EM
+iterations run for each candidate initialization during the burn-in
+stage used to pick the best starting point. Default is 10.}
 
-\item{init_eps}{A numeric value controlling how close an initial
-responsibility matrix (\code{tau}) built from a cluster or quantile
-partition is to a hard assignment: the assigned component gets
+\item{init_eps}{A numeric value between 0 and 0.5 controlling how close
+an initial responsibility matrix (\code{tau}) built from a cluster or
+quantile partition is to a hard assignment: the assigned component gets
 probability \code{1 - init_eps} and the rest share \code{init_eps}.
-Must be between 0 and 0.5. Default is 1e-6.}
+Default is 1e-6.}
 
-\item{init_min_size}{An integer specifying a minimum group size to
-enforce on initializations. Currently validated but not used by the
-estimation code. Must be at least 1. Default is \code{NULL}.}
+\item{init_min_size}{An optional positive integer specifying a minimum
+group size to enforce on initializations. Currently validated but not
+used by the estimation code. Default is \code{NULL}.}
 
 \item{return_qr_parts}{A logical flag. If \code{TRUE}, the structured-QR
 M-step retains its intermediate QR decomposition components in its
