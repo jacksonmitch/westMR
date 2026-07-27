@@ -50,7 +50,7 @@ tolerance threshold. Default is 1e-6.}
 
 \item{n_kmeans_init}{A non-negative integer, no larger than
 \code{n_init}, specifying how many of the total initializations
-(\code{n_init}) should be seeded using K-means clustering. Default is 2.}
+(\code{n_init}) should be seeded using K-means clustering. Default is 3.}
 
 \item{kmeans_starts}{A positive integer specifying the number of random
 starts to use within the K-means algorithm itself. Default is 20.}

@@ -6,11 +6,15 @@
 #' direction, significance level, the final set of selected predictors, and
 #' the resulting formula.
 #'
-#' @param x An object of class \code{select_variables}, as returned by
-#'   \code{select_variables()}.
+#' @param x An object of class \code{select_variables}. This is produced
+#'   internally by \code{select_variables()}, and surfaces to users as the
+#'   \code{variable_selection} component of the list returned by
+#'   \code{\link{westMR}} whenever \code{task} includes \code{"variables"}
+#'   (see \code{westMR}'s \strong{Value} section).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}, \code{\link{steps_table.select_variables}}
 #' @export
 #'
 #' @examples
@@ -37,6 +41,7 @@
 #' fit <- westMR(
 #'   y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
 #' )
+#' # task = "variables" is what populates fit$variable_selection below
 #' print(fit$variable_selection)
 print.select_variables <- function(x, ...) {
   cat("Variable selection\n")
@@ -57,11 +62,15 @@ print.select_variables <- function(x, ...) {
 #' search direction, significance level, which predictors ended up
 #' heterogeneous vs. homogeneous, and the resulting formula.
 #'
-#' @param x An object of class \code{determine_effects}, as returned by
-#'   \code{determine_effects()}.
+#' @param x An object of class \code{determine_effects}. This is produced
+#'   internally by \code{determine_effects()}, and surfaces to users as the
+#'   \code{effect_determination} component of the list returned by
+#'   \code{\link{westMR}} whenever \code{task} includes \code{"effects"}
+#'   (see \code{westMR}'s \strong{Value} section).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}, \code{\link{steps_table.determine_effects}}
 #' @export
 #'
 #' @examples
@@ -85,6 +94,7 @@ print.select_variables <- function(x, ...) {
 #'
 #' # x1 and x3's effects differ by group (heterogeneous); x2's does not
 #' fit <- westMR(y ~ x1 + x2 + x3, data = dat, G_max = 3, task = "effects")
+#' # task = "effects" is what populates fit$effect_determination below
 #' print(fit$effect_determination)
 print.determine_effects <- function(x, ...) {
   cat("Effect-type determination\n")
@@ -302,11 +312,15 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 #' present on the fit, the estimated mixing proportions, component standard
 #' deviations, heterogeneous coefficients, and homogeneous coefficients.
 #'
-#' @param x An object of class \code{fit_fmr}, as returned by
-#'   \code{fit_fmr()}.
+#' @param x An object of class \code{fit_fmr}. This is produced internally
+#'   while fitting each candidate number of components, and surfaces to
+#'   users as the \code{best_fit} component of the list returned by
+#'   \code{\link{westMR}} (always present, regardless of \code{task}; see
+#'   \code{westMR}'s \strong{Value} section).
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.
+#' @seealso \code{\link{westMR}}
 #' @export
 #'
 #' @examples
@@ -332,6 +346,7 @@ print_steps <- function(steps, all_predictors, direction, label_state) {
 #' fit <- westMR(
 #'   y ~ x1 + x2 + x3 + x4, data = dat, G_max = 3, task = "variables"
 #' )
+#' # fit$best_fit is always populated, at the BIC-optimal G
 #' print(fit$best_fit)
 print.fit_fmr <- function(x, ...) {
   cat("Best fit (G: ", x$G, ")\n", sep = "")
@@ -488,12 +503,12 @@ summary.westMR <- function(object, ...) {
 
 #' Print a westMR Summary
 #'
-#' Prints the top-level summary produced by \code{summary.westMR()},
+#' Prints the top-level summary produced by \code{\link{summary.westMR}},
 #' including the step-by-step tables for the variable-selection and
 #' effect-determination searches (if run), and the best fit.
 #'
 #' @param x An object of class \code{summary.westMR}, as returned by
-#'   \code{summary.westMR()}.
+#'   \code{\link{summary.westMR}}.
 #' @param ... Currently unused.
 #'
 #' @return \code{x}, invisibly.

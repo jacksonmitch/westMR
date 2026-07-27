@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{x}{An object of class \code{summary.westMR}, as returned by
-\code{summary.westMR()}.}
+\code{\link{summary.westMR}}.}
 
 \item{...}{Currently unused.}
 }
@@ -16,7 +16,7 @@
 \code{x}, invisibly.
 }
 \description{
-Prints the top-level summary produced by \code{summary.westMR()},
+Prints the top-level summary produced by \code{\link{summary.westMR}},
 including the step-by-step tables for the variable-selection and
 effect-determination searches (if run), and the best fit.
 }
