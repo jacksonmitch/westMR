@@ -43,13 +43,8 @@ west_procedure <- function(
 
   stopifnot(length(shared_fits) == length(G_values))
 
-  extra_inits <- lapply(shared_fits, function(fit) fit$em_state$clone())
-
-  candidate_fits <- fit_across_G(
-    model = model,
-    prepared_data = candidate_data,
-    extra_inits = extra_inits
-  )
+  candidate_fits <- fit_across_G(model, candidate_data,
+     init_lists = make_warm_init_lists(shared_fits, "previous_fit"))
 
   rows <- vector("list", length(G_values))
 

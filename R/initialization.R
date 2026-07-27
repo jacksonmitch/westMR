@@ -262,9 +262,8 @@ select_best_initialization <- function(em_state_list,
   for (s in seq_len(n_candidates)) {
     tryCatch(
       {
-        em_state <- em_state_list[[s]]
         state_s <- em_fmr(
-          em_state = em_state,
+          em_state = em_state_list[[s]],
           prepared_data = prepared_data,
           G = G,
           family = family,
@@ -296,4 +295,28 @@ select_best_initialization <- function(em_state_list,
     logliks = logliks,
     failures = failures
   )
+}
+
+make_warm_init_lists <- function(previous_fits, name) {
+  lapply(previous_fits, function(fit) {
+    tau <- as.matrix(fit$parameter_values$tau)
+    structure(list(EmState$new(tau = tau)), names = name)
+  })
+}
+
+make_init_lists <- function(prepared_data, G_values, control, family) {
+  features <- make_initialization_features(
+    prepared_data = prepared_data,
+    family = family
+  )
+
+  lapply(G_values, function(G) {
+    make_state_list(
+      prepared_data = prepared_data,
+      G = G,
+      control = control,
+      family = family,
+      features = features
+    )
+  })
 }

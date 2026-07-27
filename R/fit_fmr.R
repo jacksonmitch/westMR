@@ -1,92 +1,40 @@
 # Fit a single model specification across all G values.
 # Returns a list of fit_fmr objects, one per G.
 
-fit_across_G <- function(model, prepared_data, extra_inits = NULL) {
+fit_across_G <- function(model, prepared_data, init_lists = NULL) {
   G_values <- model$G_values
+  control <- model$control
 
-  features <- make_initialization_features(
-    prepared_data = prepared_data,
-    family = model$family
-  )
+  if (is.null(init_lists)){
+    init_lists <- make_init_lists(
+      prepared_data,
+      G_values, 
+      control, 
+      model$family)
+  }
 
-  fits <- lapply(seq_along(G_values), function(i) {
-    G <- G_values[[i]]
-
-    state_list <- make_state_list(
-      prepared_data = prepared_data,
-      G = G,
-      control = model$control,
-      family = model$family,
-      features = features
-    )
-
-    if (!is.null(extra_inits)) {
-      state_list[["from_shared_fit"]] <- extra_inits[[i]]
-      state_list[["from_shared_fit_tau"]] <-
-        EmState$new(tau = extra_inits[[i]]$tau)
-    }
-
+  Map(function(G, init_list) {
     fit_fmr(
       model = model,
       G = G,
-      em_state_list = state_list,
+      init_em_state_list = init_list,
       prepared_data = prepared_data
     )
-  })
-
-  names(fits) <- paste0("G", G_values)
-
-  fits
+  }, G_values, init_lists)
 }
-
-# allows shared fit to be passed as initialization
-
-add_extra_tau_start <- function(init_list,
-                                tau,
-                                n,
-                                G,
-                                name = "extra_tau") {
-  if (is.null(tau)) {
-    return(init_list)
-  }
-
-  tau <- as.matrix(tau)
-
-  if (!identical(dim(tau), c(n, G))) {
-    return(init_list)
-  }
-
-  if (any(!is.finite(tau)) || any(tau < 0)) {
-    return(init_list)
-  }
-
-  rs <- rowSums(tau)
-
-  if (any(!is.finite(rs)) || any(rs <= 0)) {
-    return(init_list)
-  }
-
-  tau <- tau / rs
-  colnames(tau) <- paste0("g", seq_len(G))
-
-  init_list[[name]] <- tau
-
-  init_list
-}
-
 
 # Find the best fit given a specific G and a list of initializations
 #' Fit One Model Specification at a Given G
 #'
 #' Fits a finite mixture regression model for a fixed number of components
-#' \code{G} and a fixed design (heterogeneous/common predictor split). Burns
+#' \code{G} and a fixed designd (heterogeneous/common predictor split). Burns
 #' in each initialization in \code{init_list} for a few EM iterations,
 #' selects the best-starting initialization by log-likelihood via
 #' \code{select_best_initialization()}, then runs \code{em_fmr()} to
 #' convergence from that state.
 #'
 #' @param model A \code{WMRModel} object.
-#' @param G An integer number of mixture components.
+#' @param G A list of the integer number of mixture components.
 #' @param init_list A named list of candidate \code{tau} initialization
 #'   matrices (n x G), as produced by \code{make_tau_list()}.
 #' @param prepared_data A \code{WMRData} object (from \code{prepare_data()})
@@ -106,7 +54,7 @@ add_extra_tau_start <- function(init_list,
 #' @noRd
 fit_fmr <- function(model,
                     G,
-                    em_state_list,
+                    init_em_state_list,
                     prepared_data) {
   control <- model$control
   family <- model$family
@@ -115,7 +63,7 @@ fit_fmr <- function(model,
   # run a small number of EM iterations from each tau start,
   # then choose the start with the largest burn-in log-likelihood
   initial_states <- select_best_initialization(
-    em_state_list = em_state_list,
+    em_state_list = init_em_state_list,
     prepared_data = prepared_data,
     G = G,
     family = family,
@@ -149,7 +97,6 @@ fit_fmr <- function(model,
 
   out <- compact(list(
     parameter_values = em_state$to_list(prepared_data),
-    em_state = em_state,
     loglik = best_fit$loglik,
     loglik_trace = best_fit$loglik_trace, # here we lose the burnin trace
     iterations = best_fit$iterations + control$init_burnin,
@@ -162,10 +109,10 @@ fit_fmr <- function(model,
     family = family,
     G = G,
     initialization = list(
-      n_init = length(em_state_list),
+      n_init = length(init_em_state_list),
       n_valid_init = sum(is.finite(initial_states$logliks)),
       burnin = control$init_burnin,
-      n_starts = length(em_state_list),
+      n_starts = length(init_em_state_list),
       n_kept = length(initial_states$best_states),
       best_init_names = names(initial_states$best_states),
       best_init_loglik = initial_states$best_logliks,
