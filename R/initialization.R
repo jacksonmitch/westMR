@@ -297,11 +297,29 @@ select_best_initialization <- function(em_state_list,
   )
 }
 
-make_warm_init_lists <- function(previous_fits, name) {
-  lapply(previous_fits, function(fit) {
-    tau <- as.matrix(fit$parameter_values$tau)
-    structure(list(EmState$new(tau = tau)), names = name)
-  })
+make_warm_init_lists <- function(previous_fits, name, model, prepared_data) {
+  G_values <- model$G_values
+  family <- model$family
+  control <- model$control
+  control$n_init <- control$n_kmeans_init
+
+  features <- make_initialization_features(
+    prepared_data = prepared_data,
+    family = family
+  )
+
+  Map(function(G, prev_fit) {
+    cold_list <- make_state_list(
+      prepared_data = prepared_data,
+      G = G,
+      control = control,
+      family = family,
+      features = features
+    )
+    tau <- as.matrix(prev_fit$parameter_values$tau)
+    warm_list <- stats::setNames(list(EmState$new(tau = tau)), name)
+    c(cold_list, warm_list)
+  }, G_values, previous_fits)
 }
 
 make_init_lists <- function(prepared_data, G_values, control, family) {

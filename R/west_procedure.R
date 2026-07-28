@@ -44,7 +44,8 @@ west_procedure <- function(
   stopifnot(length(shared_fits) == length(G_values))
 
   candidate_fits <- fit_across_G(model, candidate_data,
-     init_lists = make_warm_init_lists(shared_fits, "previous_fit"))
+     init_lists = make_warm_init_lists(
+      shared_fits, "previous_fit", model, candidate_data))
 
   rows <- vector("list", length(G_values))
 
