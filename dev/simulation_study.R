@@ -164,16 +164,22 @@ true_null <- c("null1", "null2", "null3", "null4")
 
 G_max <- 7
 seed <- 123
-n_reps <- 1
+n_reps <- 200
 params <- scenarios$four_group_twelve_variables
 true_g <- length(params$pi)
 
 NoSleepR::with_nosleep({
-  sim_results_500 <- run_replications(params, 500, build_control(parallel = TRUE))
+  sim_results_500 <- run_replications(params, 500)
   sim_results_500
   summarize_results(sim_results_500)
-  sim_results_1000 <- run_replications(params, 1000, build_control(parallel = TRUE))
+  sim_results_1000 <- run_replications(params, 1000)
   sim_results_1000
   summarize_results(sim_results_1000)
+  sim_results_500_parallel <- run_replications(params, 500, build_control(parallel = TRUE))
+  sim_results_500_parallel
+  summarize_results(sim_results_500_parallel)
+  sim_results_1000_parallel <- run_replications(params, 1000, build_control(parallel = TRUE))
+  sim_results_1000_parallel
+  summarize_results(sim_results_1000_parallel)
 })
 
