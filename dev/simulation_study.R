@@ -164,7 +164,7 @@ true_null <- c("null1", "null2", "null3", "null4")
 
 G_max <- 7
 seed <- 123
-n_reps <- 200
+n_reps <- 100
 params <- scenarios$four_group_twelve_variables
 true_g <- length(params$pi)
 
