@@ -26,13 +26,12 @@ match_groups <- function(tau, true_group) {
   match_fitted
 }
 
-run_replications <- function(params, control = build_control(), verbose = TRUE) {
+run_replications <- function(params, n, control = build_control(), verbose = TRUE) {
   results <- vector("list", n_reps)
-  
-  sim_data <- do.call(simulate_fmr, c(params, list(n = n, seed = seed)))
 
   for (i in seq_len(n_reps)) {
     if (verbose) cat(sprintf("Replication %d / %d...\n", i, n_reps))
+    sim_data <- do.call(simulate_fmr, c(params, list(n = n, seed = seed)))
     results[[i]] <- run_one_replication(
       rep_id = i, sim_data = sim_data, params = params, G_max = G_max, 
       control = control
@@ -50,7 +49,6 @@ run_one_replication <- function(rep_id, sim_data, params, G_max, control = build
       data = sim_data$data,
       G_max = G_max,
       family = "gaussian",
-      task = "both",
       control = control
     ),
     error = function(e) e
@@ -78,7 +76,6 @@ run_one_replication <- function(rep_id, sim_data, params, G_max, control = build
  
   true_G <- length(params$pi)
  
-  ari <- NA_real_
   rmse_het <- NA_real_
   rmse_hom <- NA_real_
   
@@ -88,31 +85,8 @@ run_one_replication <- function(rep_id, sim_data, params, G_max, control = build
 
   G_hat <- fit$best_fit$G
   tau <- fit$best_fit$parameter_values$tau
-  predicted_group <- apply(tau, 1, which.max)
-
-  # Tau metrics
-  entropy <- -rowSums(tau * log(pmax(tau, 1e-12)))
-  normalized_entropy <- mean(entropy) / log(G_hat)
-  entropy_R2 <- 1 - normalized_entropy   # closer to 1 = cleaner, more decisive separation
-  mean_max_tau <- mean(apply(tau, 1, max))
-  
-  metrics <- aricode::compare_clustering(predicted_group, sim_data$true_group, AMI = TRUE)
-  ari <- metrics$ARI
-  ami <- metrics$AMI
 
   match <- match_groups(tau, sim_data$true_group)
-  naive_accuracy <- mean(predicted_group == match[sim_data$true_group])
-
-  indicator <- matrix(0, nrow = nrow(tau), ncol = true_G)
-  indicator[cbind(seq_len(nrow(tau)), sim_data$true_group)] <- 1
-
-  tau_aligned <- matrix(0, nrow = nrow(tau), ncol = true_G)
-  for (t in seq_len(true_G)) {
-    if (!is.na(match[t])) {
-      tau_aligned[, t] <- tau[, match[t]]
-    }
-  }
-  brier <- mean(rowSums((tau_aligned - indicator)^2))
 
   # RMSE's
   errors <- list()
@@ -153,9 +127,7 @@ run_one_replication <- function(rep_id, sim_data, params, G_max, control = build
     rep = rep_id, runtime = runtime, error = FALSE, error_message = NA,
     correct_selection = correct_selection, correct_het = correct_het,
     correct_hom = correct_hom, correct_outcome = correct_outcome,
-    G_hat = G_hat, entropy_R2 = entropy_R2, naive_accuracy = naive_accuracy,
-    ari = ari, ami = ami, brier = brier,
-    rmse_het = rmse_het, rmse_hom = rmse_hom
+    G_hat = G_hat, rmse_het = rmse_het, rmse_hom = rmse_hom
   )
 }
 
@@ -178,34 +150,10 @@ summarize_results <- function(results) {
     100 * mean(ok$G_hat == true_g, na.rm = TRUE)
   ))
 
-  cat("--- Clustering quality (soft & hard, ground-truth-based) ---\n")
-  cat("ARI      : chance-corrected agreement between fitted & true groups (1 = perfect, 0 = chance level)\n")
-  cat("AMI      : like ARI, but normalized for cluster-size/entropy differences instead of chance alone\n")
-  cat("Accuracy : naive proportion correctly labeled (no chance correction)\n")
-  cat("Brier    : soft-assignment error, mean squared distance between tau and the true indicator\n")
-  cat("         (0 = perfect confident agreement; penalizes uncertain/wrong tau more than hard accuracy would)\n")
-  cat(sprintf("  Mean ARI:      %.4f\n", mean(ok$ari, na.rm = TRUE)))
-  cat(sprintf("  Mean AMI:      %.4f\n", mean(ok$ami, na.rm = TRUE)))
-  cat(sprintf("  Mean Accuracy: %.4f\n", mean(ok$naive_accuracy, na.rm = TRUE)))
-  cat(sprintf("  Mean Brier:    %.4f\n\n", mean(ok$brier, na.rm = TRUE)))
-
-  cat("--- Assignment confidence (truth-free) ---\n")
-  cat("Entropy R^2: how confidently the algorithm assigns observations to a group\n")
-  cat("             (1 = every observation is confidently assigned to one group; 0 = uniform/uninformative)\n")
-  cat(sprintf("  Mean entropy R^2: %.4f\n\n", mean(ok$entropy_R2, na.rm = TRUE)))
-
   cat("--- Coefficient recovery (RMSE) ---\n")
   cat("Misclassifications and estimates compared against the true values\n")
   cat(sprintf("  RMSE heterogeneous coefficients: %.4f\n", mean(ok$rmse_het, na.rm = TRUE)))
   cat(sprintf("  RMSE homogeneous coefficients:   %.4f\n", mean(ok$rmse_hom, na.rm = TRUE)))
-
-  cat("\n--- Split by G recovery ---\n")
-  for (metric in c("ari", "ami", "naive_accuracy", "brier", "entropy_R2")) {
-    by_g <- tapply(ok[[metric]], ok$G_hat == true_g, mean, na.rm = TRUE)
-    cat(sprintf("  %-15s  G correct: %.4f  |  G wrong: %.4f\n",
-      metric, by_g["TRUE"], by_g["FALSE"]
-    ))
-  }
   
   invisible(ok)
 }
@@ -214,15 +162,18 @@ true_het <- c("het1", "het2", "het3", "het4", "het5")
 true_hom <- c("hom1", "hom2", "hom3")
 true_null <- c("null1", "null2", "null3", "null4")
 
-g_max <- 7
+G_max <- 7
 seed <- 123
-n_reps <- 20
-n <- 500
+n_reps <- 1
 params <- scenarios$four_group_twelve_variables
 true_g <- length(params$pi)
 
-sim_results <- rbind(sim_results,
-   run_replications(params, build_control(parallel = TRUE)))
-sim_results
-summarize_results(sim_results)
+NoSleepR::with_nosleep({
+  sim_results_500 <- run_replications(params, 500, build_control(parallel = TRUE))
+  sim_results_500
+  summarize_results(sim_results_500)
+  sim_results_1000 <- run_replications(params, 1000, build_control(parallel = TRUE))
+  sim_results_1000
+  summarize_results(sim_results_1000)
+})
 
