@@ -60,7 +60,7 @@ run_one_replication <- function(rep_id, sim_data, params, G_max, control = build
       rep = rep_id, runtime = runtime, error = TRUE,
       error_message = conditionMessage(fit),
       correct_selection = NA, correct_het = NA, correct_hom = NA,
-      correct_outcome = NA, G_hat = NA, misclassification_rate = NA,
+      correct_outcome = NA, G_hat = NA,
       rmse_het = NA, rmse_hom = NA
     ))
   }
@@ -163,10 +163,11 @@ true_hom <- c("hom1", "hom2", "hom3")
 true_null <- c("null1", "null2", "null3", "null4")
 
 G_max <- 7
-n_reps <- 2
-params <- scenarios$four_group_twelve_variables
+n_reps <- 100
+params <- scenarios$four_group_twelve_variables_doubled
 true_g <- length(params$pi)
 
+# Remember to devtools::install() to reflect changes in parallel
 NoSleepR::with_nosleep({
   # sim_results_500 <- run_replications(params, 500, verbose = FALSE)
   # cat("500 sequential\n")
