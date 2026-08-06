@@ -416,7 +416,7 @@ print.fit_fmr <- function(x, ...) {
 #' print(fit)
 print.westMR <- function(x, ...) {
   cat("westMR  |  family: ", x$family,
-    "  |  G: ", paste(x$G_values, collapse = ":"),
+    "  |  G: ", paste(x$G_values, collapse = ","),
     "  |  procedure: ", x$procedure, "\n\n",
     sep = ""
   )
