@@ -178,6 +178,7 @@ make_state_list <- function(prepared_data,
       stats::kmeans(
         x = features_scaled,
         centers = G,
+        iter.max = 20,
         nstart = control$kmeans_starts
       ),
       silent = TRUE
@@ -316,8 +317,8 @@ make_warm_init_lists <- function(previous_fits, name, model, prepared_data) {
       family = family,
       features = features
     )
-    tau <- as.matrix(prev_fit$parameter_values$tau)
-    warm_list <- stats::setNames(list(EmState$new(tau = tau)), name)
+    prev_tau <- as.matrix(prev_fit$parameter_values$tau)
+    warm_list <- stats::setNames(list(EmState$new(tau = prev_tau)), name)
     c(cold_list, warm_list)
   }, G_values, previous_fits)
 }
