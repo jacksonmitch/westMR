@@ -149,5 +149,35 @@ scenarios <- list(
     ),
     pi = c(0.2, 0.3, 0.25, 0.25),
     sigma = c(0.6, 0.5, 0.4, 0.6)
+  ),
+  four_group_twelve_variables_doubled = list(
+    betas = rbind(
+      g1 = c(
+        "Intercept" = -4, het1 = 0.8, het2 = 0.4,
+        het3 = -1, het4 = -2.2, het5 = 2,
+        hom1 = 1.2, hom2 = -0.6, hom3 = 0.4,
+        null1 = 0, null2 = 0, null3 = 0, null4 = 0
+      ),
+      g2 = c(
+        "Intercept" = 0, het1 = 1.6, het2 = 1, 
+        het3 = 0, het4 = -1, het5 = 2.8,
+        hom1 = 1.2, hom2 = -0.6, hom3 = 0.4,
+        null1 = 0, null2 = 0, null3 = 0, null4 = 0
+      ),
+      g3 = c(
+        "Intercept" = 4, het1 = 2.2, het2 = 1.2, 
+        het3 = 0.8, het4 = 0.2, het5 = 3.6,
+        hom1 = 1.2, hom2 = -0.6, hom3 = 0.4,
+        null1 = 0, null2 = 0, null3 = 0, null4 = 0
+      ),
+      g4 = c(
+        "Intercept" = 2, het1 = 1.8, het2 = 0.6, 
+        het3 = 1.4, het4 = -0.6, het5 = -3.2,
+        hom1 = 1.2, hom2 = -0.6, hom3 = 0.4,
+        null1 = 0, null2 = 0, null3 = 0, null4 = 0
+      )
+    ),
+    pi = c(0.2, 0.3, 0.25, 0.25),
+    sigma = c(0.6, 0.5, 0.4, 0.6)
   )
 )
