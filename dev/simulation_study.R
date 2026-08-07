@@ -169,19 +169,19 @@ true_g <- length(params$pi)
 
 # Remember to devtools::install() to reflect changes in parallel
 NoSleepR::with_nosleep({
-  # sim_results_500 <- run_replications(params, 500, verbose = FALSE)
-  # cat("500 sequential\n")
-  # summarize_results(sim_results_500)
-  # sim_results_1000 <- run_replications( params, 1000, verbose = FALSE)
-  # cat("1000 sequential\n")
-  # summarize_results(sim_results_1000)
+  sim_results_500 <- run_replications(params, 500, verbose = FALSE)
+  cat("500 sequential\n")
+  summarize_results(sim_results_500)
+  sim_results_1000 <- run_replications( params, 1000, verbose = FALSE)
+  cat("1000 sequential\n")
+  summarize_results(sim_results_1000)
   sim_results_500_parallel <- run_replications(params, 
     500, build_control(parallel = TRUE), verbose = FALSE)
   cat("500 parallel\n")
   summarize_results(sim_results_500_parallel)
-  # sim_results_1000_parallel <- run_replications(params,
-  #    1000, build_control(parallel = TRUE), verbose = FALSE)
-  # cat("1000 parallel\n")
-  # summarize_results(sim_results_1000_parallel)
+  sim_results_1000_parallel <- run_replications(params,
+     1000, build_control(parallel = TRUE), verbose = FALSE)
+  cat("1000 parallel\n")
+  summarize_results(sim_results_1000_parallel)
 })
 
